@@ -1,0 +1,29 @@
+"use client";
+
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+
+export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isLogin = pathname === "/login";
+
+  if (isLogin) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      <Sidebar
+        mobileOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      />
+      <div className="lg:pl-64">
+        <Header onMenuToggle={() => setMobileOpen(true)} />
+        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+      </div>
+    </>
+  );
+}

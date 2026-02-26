@@ -1,0 +1,4 @@
+{"sessionId":"2f7679","location":"page.tsx:16","message":"DashboardPage mounted (client)","data":{},"timestamp":1772037648631,"hypothesisId":"C"}
+{"sessionId":"2f7679","location":"middleware.ts:9","message":"Middleware processing request","data":{"pathname":"/api/projects","hasPassword":false,"hasCookie":false},"timestamp":1772037648891,"hypothesisId":"D"}
+{"sessionId":"2f7679","location":"api/projects/route.ts:8","message":"GET /api/projects called","data":{},"timestamp":1772037827772,"hypothesisId":"D"}
+{"sessionId":"2f7679","location":"api/projects/route.ts:12","message":"GET /api/projects success","data":{"count":0},"timestamp":1772037827812,"hypothesisId":"D"}
