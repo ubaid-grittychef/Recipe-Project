@@ -98,12 +98,16 @@ export async function runGenerationForProject(projectId: string): Promise<{
           project.prompt_overrides
         );
 
+        // BUG 10 FIX: include variations in word count
         const wordCount =
           generated.intro_content.split(/\s+/).length +
           generated.description.split(/\s+/).length +
           generated.instructions.join(" ").split(/\s+/).length +
           generated.tips.join(" ").split(/\s+/).length +
-          generated.faqs.reduce((n, f) => n + f.answer.split(/\s+/).length, 0);
+          generated.faqs.reduce((n, f) => n + f.answer.split(/\s+/).length, 0) +
+          generated.variations.join(" ").split(/\s+/).length;
+
+        const publishedAt = new Date().toISOString();
 
         const recipe: Recipe = {
           id: generateId(),
@@ -140,6 +144,23 @@ export async function runGenerationForProject(projectId: string): Promise<{
 
         await createRecipe(recipe);
         log.info("Recipe created as draft", { title: recipe.title, slug: recipe.slug });
+
+        // BUG 3 FIX: auto-publish to site Supabase if credentials are configured.
+        // Runs after the factory DB write so a site publish failure never loses the draft.
+        if (project.site_supabase_url && project.site_supabase_service_key) {
+          try {
+            await publishRecipeToSite(projectId, {
+              ...recipe,
+              status: "published",
+              published_at: publishedAt,
+            });
+            log.info("Recipe auto-published to site", { title: recipe.title });
+          } catch (pubErr) {
+            log.warn("Auto-publish to site failed — recipe saved as draft in factory DB", {
+              title: recipe.title,
+            }, pubErr);
+          }
+        }
 
         await markKeywordDone(
           project.sheet_url,
@@ -203,8 +224,9 @@ export async function runGenerationForProject(projectId: string): Promise<{
     const freshProject = await getProject(projectId);
     const currentFailed = freshProject?.keywords_failed ?? project.keywords_failed;
 
-    // keywords_remaining = total pending in sheet MINUS the batch we just processed
-    const remainingInSheet = Math.max(0, totalPending - succeeded);
+    // BUG 4 FIX: subtract the full batch (keywords.length), not just succeeded.
+    // Both succeeded AND failed keywords are removed from "pending" in the sheet.
+    const remainingInSheet = Math.max(0, totalPending - keywords.length);
 
     await updateProject(projectId, {
       keywords_remaining: remainingInSheet,

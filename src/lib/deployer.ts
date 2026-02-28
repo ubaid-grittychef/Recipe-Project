@@ -93,6 +93,21 @@ export async function setVercelEnvVars(
     count: Object.keys(envVars).length,
   });
 
+  // BUG 5 FIX: upsert env vars — delete existing ones first to avoid 409 Conflict on redeploy
+  const existing = (await vercelApi(
+    `/v10/projects/${project.vercel_project_id}/env`
+  )) as { envs?: Array<{ id: string; key: string }> };
+
+  const keysToSet = new Set(Object.keys(envVars));
+  for (const env of existing.envs ?? []) {
+    if (keysToSet.has(env.key)) {
+      await vercelApi(
+        `/v10/projects/${project.vercel_project_id}/env/${env.id}`,
+        "DELETE"
+      );
+    }
+  }
+
   const envList = Object.entries(envVars).map(([key, value]) => ({
     key,
     value,
