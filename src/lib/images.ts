@@ -1,4 +1,5 @@
 import { createLogger } from "./logger";
+import { withRetry } from "./utils";
 
 const log = createLogger("Images");
 
@@ -34,16 +35,17 @@ export async function fetchRecipeImage(
 
   try {
     const query = encodeURIComponent(searchTerm);
-    const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${query}&per_page=5&orientation=landscape`,
-      { headers: { Authorization: apiKey } }
+
+    // BUG 7 FIX: wrap primary and fallback fetches with retry
+    const res = await withRetry(() =>
+      fetch(
+        `https://api.pexels.com/v1/search?query=${query}&per_page=5&orientation=landscape`,
+        { headers: { Authorization: apiKey } }
+      )
     );
 
     if (!res.ok) {
-      log.error("Pexels API error", {
-        status: res.status,
-        searchTerm,
-      });
+      log.error("Pexels API error", { status: res.status, searchTerm });
       return null;
     }
 
@@ -54,9 +56,11 @@ export async function fetchRecipeImage(
       const fallbackQuery = encodeURIComponent(
         searchTerm.split(" ").slice(0, 3).join(" ") + " food"
       );
-      const fallbackRes = await fetch(
-        `https://api.pexels.com/v1/search?query=${fallbackQuery}&per_page=3&orientation=landscape`,
-        { headers: { Authorization: apiKey } }
+      const fallbackRes = await withRetry(() =>
+        fetch(
+          `https://api.pexels.com/v1/search?query=${fallbackQuery}&per_page=3&orientation=landscape`,
+          { headers: { Authorization: apiKey } }
+        )
       );
 
       if (fallbackRes.ok) {

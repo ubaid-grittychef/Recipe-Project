@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { ContentTone, Ingredient, NutritionInfo, FAQ, Project } from "./types";
 import { createLogger } from "./logger";
+import { withRetry } from "./utils";
 
 const log = createLogger("OpenAI");
 
@@ -159,12 +160,14 @@ CRITICAL REQUIREMENTS:
 
   const startTime = Date.now();
 
-  const response = await getClient().chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.7,
-    max_completion_tokens: 4000,
-  });
+  const response = await withRetry(() =>
+    getClient().chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_completion_tokens: 4000,
+    })
+  );
 
   const elapsed = Date.now() - startTime;
   const usage = response.usage;

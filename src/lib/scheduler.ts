@@ -110,4 +110,63 @@ export function stopScheduler() {
   log.info("Stopped all jobs");
 }
 
+// BUG 2 FIX: HTTP-callable function for Vercel Cron Jobs.
+// Checks all active projects and triggers generation for any whose
+// generation_time falls within the current 5-minute window.
+export async function runDueProjects(): Promise<{
+  triggered: string[];
+  skipped: string[];
+}> {
+  const projects = await getProjects();
+  const triggered: string[] = [];
+  const skipped: string[] = [];
+  const now = new Date();
+
+  for (const project of projects) {
+    if (project.status !== "active") {
+      skipped.push(project.id);
+      continue;
+    }
+
+    const [hours, minutes] = project.generation_time.split(":").map(Number);
+    const scheduledToday = new Date(now);
+    scheduledToday.setHours(hours, minutes, 0, 0);
+
+    // Fire if we're within a 5-minute window of the scheduled time
+    const diffMs = now.getTime() - scheduledToday.getTime();
+    const isDue = diffMs >= 0 && diffMs < 5 * 60 * 1000;
+
+    // Also fire if next_scheduled_at is in the past (missed run)
+    const missedRun =
+      project.next_scheduled_at != null &&
+      new Date(project.next_scheduled_at) <= now;
+
+    if (isDue || missedRun) {
+      triggered.push(project.id);
+      log.info("Triggering due project via HTTP cron", {
+        project: project.name,
+        generation_time: project.generation_time,
+        missed: missedRun && !isDue,
+      });
+      // Fire-and-forget — don't block the cron response
+      void (async () => {
+        try {
+          await updateProject(project.id, {
+            next_scheduled_at: nextRunAt(project.generation_time),
+          });
+          const { runGenerationForProject } = await import("./generator");
+          await runGenerationForProject(project.id);
+          log.info("HTTP cron generation completed", { project: project.name });
+        } catch (err) {
+          log.error("HTTP cron generation failed", { project: project.name }, err);
+        }
+      })();
+    } else {
+      skipped.push(project.id);
+    }
+  }
+
+  return { triggered, skipped };
+}
+
 export { getSchedulerStatus } from "./scheduler-status";

@@ -32,3 +32,23 @@ export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
   return str.slice(0, length) + "...";
 }
+
+// BUG 7 FIX: shared retry helper with exponential backoff
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 1000
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === maxAttempts) throw err;
+      await new Promise((r) =>
+        setTimeout(r, baseDelayMs * Math.pow(2, attempt - 1))
+      );
+    }
+  }
+  throw new Error("unreachable");
+}
+
