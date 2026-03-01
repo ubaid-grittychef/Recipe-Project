@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { getKeywordLogs } from "@/lib/store";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("API:Keywords");
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
     const logs = await getKeywordLogs(id);
     return NextResponse.json(logs);
   } catch (error) {
-    console.error("Failed to fetch keyword logs:", error);
+    log.error("Failed to fetch keyword logs", { projectId: id }, error);
     return NextResponse.json(
       { error: "Failed to fetch keyword logs" },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { validateSheet } from "@/lib/sheets";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("API:Sheets");
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +25,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Sheet validation failed:", error);
+    log.error("Sheet validation error", {}, error);
     return NextResponse.json(
       {
         valid: false,

@@ -16,7 +16,31 @@ import { createLogger } from "./logger";
 
 const log = createLogger("Generator");
 
+// In-process guard against concurrent runs on the same project.
+// Works for persistent Node.js servers and dev mode.
+// On stateless serverless, each invocation is isolated — guard is best-effort.
+const activeGenerations = new Set<string>();
+
 export async function runGenerationForProject(projectId: string): Promise<{
+  processed: number;
+  succeeded: number;
+  failed: number;
+}> {
+  // Concurrent generation guard
+  if (activeGenerations.has(projectId)) {
+    log.warn("Generation already running for project — skipping duplicate run", { projectId });
+    return { processed: 0, succeeded: 0, failed: 0 };
+  }
+  activeGenerations.add(projectId);
+
+  try {
+    return await _runGeneration(projectId);
+  } finally {
+    activeGenerations.delete(projectId);
+  }
+}
+
+async function _runGeneration(projectId: string): Promise<{
   processed: number;
   succeeded: number;
   failed: number;
@@ -47,6 +71,7 @@ export async function runGenerationForProject(projectId: string): Promise<{
 
   let succeeded = 0;
   let failed = 0;
+  let autoPublished = 0;
 
   try {
     const { keywords, totalPending } = await fetchPendingKeywords(
@@ -109,13 +134,15 @@ export async function runGenerationForProject(projectId: string): Promise<{
 
         const publishedAt = new Date().toISOString();
 
-        const recipe: Recipe = {
+        // Build a unique slug — append short ID suffix if title is duplicated
+        let slug = slugify(generated.title);
+        let recipe: Recipe = {
           id: generateId(),
           project_id: projectId,
           keyword: kw.keyword,
           restaurant_name: kw.restaurant || null,
           title: generated.title,
-          slug: slugify(generated.title),
+          slug,
           description: generated.description,
           intro_content: generated.intro_content,
           ingredients: generated.ingredients,
@@ -142,7 +169,24 @@ export async function runGenerationForProject(projectId: string): Promise<{
           published_at: null,
         };
 
-        await createRecipe(recipe);
+        // Slug collision fix: if unique constraint fires (code 23505), retry with a suffix
+        try {
+          await createRecipe(recipe);
+        } catch (insertErr) {
+          const isUniqueViolation =
+            insertErr instanceof Error &&
+            (insertErr.message.includes("23505") ||
+              insertErr.message.toLowerCase().includes("unique"));
+          if (isUniqueViolation) {
+            slug = `${slug}-${recipe.id.slice(0, 6)}`;
+            recipe = { ...recipe, slug };
+            await createRecipe(recipe);
+            log.warn("Slug collision resolved with suffix", { title: recipe.title, slug });
+          } else {
+            throw insertErr;
+          }
+        }
+
         log.info("Recipe created as draft", { title: recipe.title, slug: recipe.slug });
 
         // BUG 3 FIX: auto-publish to site Supabase if credentials are configured.
@@ -154,6 +198,7 @@ export async function runGenerationForProject(projectId: string): Promise<{
               status: "published",
               published_at: publishedAt,
             });
+            autoPublished++;
             log.info("Recipe auto-published to site", { title: recipe.title });
           } catch (pubErr) {
             log.warn("Auto-publish to site failed — recipe saved as draft in factory DB", {
@@ -223,6 +268,7 @@ export async function runGenerationForProject(projectId: string): Promise<{
 
     const freshProject = await getProject(projectId);
     const currentFailed = freshProject?.keywords_failed ?? project.keywords_failed;
+    const currentPublished = freshProject?.recipes_published ?? project.recipes_published;
 
     // BUG 4 FIX: subtract the full batch (keywords.length), not just succeeded.
     // Both succeeded AND failed keywords are removed from "pending" in the sheet.
@@ -231,6 +277,8 @@ export async function runGenerationForProject(projectId: string): Promise<{
     await updateProject(projectId, {
       keywords_remaining: remainingInSheet,
       keywords_failed: currentFailed + failed,
+      // recipes_published counter: increment by how many were auto-published to site
+      recipes_published: currentPublished + autoPublished,
       last_generation_at: new Date().toISOString(),
     });
 
@@ -247,6 +295,7 @@ export async function runGenerationForProject(projectId: string): Promise<{
       processed: totalProcessed,
       succeeded,
       failed,
+      autoPublished,
     });
 
     return { processed: totalProcessed, succeeded, failed };
