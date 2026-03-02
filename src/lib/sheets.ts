@@ -149,6 +149,58 @@ export async function markKeywordDone(
   });
 }
 
+/**
+ * Reset specific sheet rows back to pending status so they can be re-tried.
+ * @param rows  1-based row numbers to reset (from KeywordLog.row — not available
+ *              in the factory DB, so we re-scan the sheet and match by keyword text)
+ * @param keywords  The keyword strings to match and reset
+ */
+export async function resetKeywordsToPending(
+  sheetUrl: string,
+  keywordCol: string,
+  statusCol: string,
+  keywords: string[]
+): Promise<{ reset: number }> {
+  if (keywords.length === 0) return { reset: 0 };
+
+  const client = getSheetsClient();
+  const spreadsheetId = extractSheetId(sheetUrl);
+
+  const minIdx = Math.min(columnToIndex(keywordCol), columnToIndex(statusCol));
+  const maxIdx = Math.max(columnToIndex(keywordCol), columnToIndex(statusCol));
+  const range = `${indexToColumn(minIdx)}:${indexToColumn(maxIdx)}`;
+
+  const res = await client.spreadsheets.values.get({ spreadsheetId, range });
+  const rows = res.data.values ?? [];
+  const kOffset = columnToIndex(keywordCol) - minIdx;
+  const sOffset = columnToIndex(statusCol) - minIdx;
+
+  const keywordSet = new Set(keywords.map((k) => k.trim().toLowerCase()));
+  const updates: Array<Promise<unknown>> = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const kw = (row[kOffset] ?? "").toString().trim().toLowerCase();
+    const status = (row[sOffset] ?? "").toString().toLowerCase().trim();
+    // Only reset rows that are currently failed
+    if (keywordSet.has(kw) && status.startsWith("failed")) {
+      const rowNumber = i + 1;
+      updates.push(
+        client.spreadsheets.values.update({
+          spreadsheetId,
+          range: `${statusCol}${rowNumber}`,
+          valueInputOption: "RAW",
+          requestBody: { values: [[""]] },
+        })
+      );
+    }
+  }
+
+  await Promise.all(updates);
+  log.info("Reset keywords to pending in sheet", { count: updates.length });
+  return { reset: updates.length };
+}
+
 export async function validateSheet(
   sheetUrl: string,
   keywordCol: string,

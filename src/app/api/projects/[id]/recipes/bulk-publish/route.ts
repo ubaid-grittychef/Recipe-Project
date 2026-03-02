@@ -7,22 +7,42 @@ import {
 } from "@/lib/store";
 import { publishRecipeToSite } from "@/lib/site-publisher";
 import { createLogger } from "@/lib/logger";
+import { BulkPublishSchema } from "@/lib/validation";
 
 const log = createLogger("API:BulkPublish");
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: projectId } = await params;
+
+    // Parse optional body — empty body (Content-Length: 0) is fine
+    let recipeIds: string[] | undefined;
+    const contentType = request.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const raw = await request.json().catch(() => ({}));
+      const parsed = BulkPublishSchema.safeParse(raw);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+      recipeIds = parsed.data.recipeIds;
+    }
+
     const project = await getProject(projectId);
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const recipes = await getRecipesByProject(projectId);
-    const drafts = recipes.filter((r) => r.status === "draft");
+    const all = await getRecipesByProject(projectId);
+    // If specific IDs were provided, only publish those that are still drafts
+    const drafts = recipeIds
+      ? all.filter((r) => recipeIds!.includes(r.id) && r.status === "draft")
+      : all.filter((r) => r.status === "draft");
 
     if (drafts.length === 0) {
       return NextResponse.json({ published: 0, message: "No draft recipes to publish" });

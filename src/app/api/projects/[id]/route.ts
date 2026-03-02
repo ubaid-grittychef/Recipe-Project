@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProject, updateProject, deleteProject } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { UpdateProjectSchema } from "@/lib/validation";
 
 const log = createLogger("API:Project");
 
@@ -30,17 +31,17 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-
-    if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    const raw = await request.json();
+    const parsed = UpdateProjectSchema.safeParse(raw);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Request body must be a JSON object" },
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    log.info("Updating project", { id, fields: Object.keys(body) });
-    const project = await updateProject(id, body);
+    log.info("Updating project", { id, fields: Object.keys(parsed.data) });
+    const project = await updateProject(id, parsed.data);
     if (!project) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }

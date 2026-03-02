@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import { ContentTone, Ingredient, NutritionInfo, FAQ, Project } from "./types";
+import { z } from "zod";
+import { ContentTone, Project } from "./types";
 import { createLogger } from "./logger";
 import { withRetry } from "./utils";
 
@@ -19,28 +20,61 @@ function getClient(): OpenAI {
   return _openai;
 }
 
-export interface GeneratedRecipe {
-  title: string;
-  description: string;
-  intro_content: string;
-  ingredients: Ingredient[];
-  instructions: string[];
-  prep_time: string;
-  cook_time: string;
-  total_time: string;
-  servings: number;
-  difficulty: string;
-  nutrition: NutritionInfo;
-  tips: string[];
-  variations: string[];
-  faqs: FAQ[];
-  rating: number;
-  seo_title: string;
-  seo_description: string;
-  focus_keywords: string[];
-  image_search_term: string;
-  category: string;
-}
+// ── Zod schema for OpenAI response validation ─────────────────────────────────
+// Validates the structure AND coerces types (e.g. servings as string → number)
+// before the recipe is stored. Fields not in the schema are stripped.
+
+const IngredientSchema = z.object({
+  name: z.string().min(1),
+  quantity: z.union([z.string(), z.number()]).transform(String),
+  unit: z.union([z.string(), z.number()]).transform(String),
+});
+
+const NutritionSchema = z.object({
+  calories: z.union([z.number(), z.string()]).transform((v) => Number(v) || 0),
+  protein: z.union([z.string(), z.number()]).transform(String),
+  carbs: z.union([z.string(), z.number()]).transform(String),
+  fat: z.union([z.string(), z.number()]).transform(String),
+  fiber: z.union([z.string(), z.number()]).transform(String),
+  sodium: z.union([z.string(), z.number()]).transform(String),
+});
+
+const FAQSchema = z.object({
+  question: z.string().min(1),
+  answer: z.string().min(1),
+});
+
+const GeneratedRecipeSchema = z.object({
+  title: z.string().min(1).max(300),
+  description: z.string().min(1),
+  intro_content: z.string().optional().default(""),
+  category: z.string().optional().default(""),
+  ingredients: z.array(IngredientSchema).min(1),
+  instructions: z.array(z.string()).min(1),
+  prep_time: z.string().default(""),
+  cook_time: z.string().default(""),
+  total_time: z.string().default(""),
+  // OpenAI sometimes returns servings as a string like "4 servings"
+  servings: z.union([z.number(), z.string()]).transform((v) => {
+    const n = parseInt(String(v), 10);
+    return isNaN(n) || n < 1 ? 4 : n;
+  }),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]).default("Medium"),
+  nutrition: NutritionSchema.default({
+    calories: 0, protein: "", carbs: "", fat: "", fiber: "", sodium: "",
+  }),
+  tips: z.array(z.string()).default([]),
+  variations: z.array(z.string()).default([]),
+  faqs: z.array(FAQSchema).default([]),
+  // Clamp rating to valid range
+  rating: z.number().min(1).max(5).default(4.8),
+  seo_title: z.string().default(""),
+  seo_description: z.string().default(""),
+  focus_keywords: z.array(z.string()).default([]),
+  image_search_term: z.string().default(""),
+});
+
+export type GeneratedRecipe = z.infer<typeof GeneratedRecipeSchema>;
 
 type PromptOverrides = NonNullable<Project["prompt_overrides"]>;
 
@@ -172,9 +206,19 @@ CRITICAL REQUIREMENTS:
   const elapsed = Date.now() - startTime;
   const usage = response.usage;
 
+  // Warn if the response was cut off due to token limit
+  const finishReason = response.choices[0]?.finish_reason;
+  if (finishReason === "length") {
+    log.warn("OpenAI response truncated by max_completion_tokens — output may be incomplete", {
+      keyword,
+      completion_tokens: usage?.completion_tokens,
+    });
+  }
+
   log.info("OpenAI response received", {
     keyword,
     elapsed_ms: elapsed,
+    finish_reason: finishReason,
     prompt_tokens: usage?.prompt_tokens,
     completion_tokens: usage?.completion_tokens,
     total_tokens: usage?.total_tokens,
@@ -182,10 +226,7 @@ CRITICAL REQUIREMENTS:
 
   const content = response.choices[0]?.message?.content;
   if (!content) {
-    log.error("Empty response from OpenAI", {
-      keyword,
-      finish_reason: response.choices[0]?.finish_reason,
-    });
+    log.error("Empty response from OpenAI", { keyword, finish_reason: finishReason });
     throw new Error("Empty response from OpenAI");
   }
 
@@ -194,9 +235,9 @@ CRITICAL REQUIREMENTS:
     .replace(/```\n?/g, "")
     .trim();
 
-  let parsed: GeneratedRecipe;
+  let rawParsed: unknown;
   try {
-    parsed = JSON.parse(cleaned) as GeneratedRecipe;
+    rawParsed = JSON.parse(cleaned);
   } catch (parseErr) {
     log.error(
       "Failed to parse OpenAI JSON response",
@@ -206,25 +247,23 @@ CRITICAL REQUIREMENTS:
     throw new Error(`Failed to parse recipe JSON for "${keyword}"`);
   }
 
-  if (!parsed.title || !parsed.ingredients || !parsed.instructions) {
-    log.error("Invalid recipe structure from OpenAI", {
+  // Validate and coerce with Zod schema
+  const validated = GeneratedRecipeSchema.safeParse(rawParsed);
+  if (!validated.success) {
+    log.error("OpenAI response failed schema validation", {
       keyword,
-      hasTitle: !!parsed.title,
-      hasIngredients: !!parsed.ingredients,
-      hasInstructions: !!parsed.instructions,
+      errors: validated.error.flatten().fieldErrors,
     });
     throw new Error(
-      `Invalid recipe structure returned from OpenAI for "${keyword}"`
+      `Invalid recipe structure returned from OpenAI for "${keyword}": ${validated.error.message}`
     );
   }
 
-  parsed.intro_content = parsed.intro_content || parsed.description;
-  parsed.tips = parsed.tips || [];
-  parsed.variations = parsed.variations || [];
-  parsed.faqs = parsed.faqs || [];
-  parsed.total_time = parsed.total_time || parsed.cook_time;
-  parsed.rating = parsed.rating || 4.8;
-  parsed.category = parsed.category || "";
+  const parsed = validated.data;
+
+  // Apply fallbacks for fields OpenAI sometimes omits
+  if (!parsed.intro_content) parsed.intro_content = parsed.description;
+  if (!parsed.total_time) parsed.total_time = parsed.cook_time;
 
   log.info("Recipe generated successfully", {
     keyword,

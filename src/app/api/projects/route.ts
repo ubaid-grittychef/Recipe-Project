@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProjects, createProject } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { CreateProjectSchema } from "@/lib/validation";
 
 const log = createLogger("API:Projects");
 
@@ -19,17 +20,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-
-    if (!body.name || typeof body.name !== "string" || body.name.trim().length === 0) {
+    const raw = await request.json();
+    const parsed = CreateProjectSchema.safeParse(raw);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Project name is required" },
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    log.info("Creating project", { name: body.name });
-    const project = await createProject(body);
+    log.info("Creating project", { name: parsed.data.name });
+    const project = await createProject(parsed.data);
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     log.error("POST /api/projects failed", {}, error);

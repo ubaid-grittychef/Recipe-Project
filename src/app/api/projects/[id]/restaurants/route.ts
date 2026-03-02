@@ -6,7 +6,9 @@ import {
 } from "@/lib/store";
 import { Restaurant } from "@/lib/types";
 import { generateId, slugify } from "@/lib/utils";
+// Restaurant type used in return value
 import { createLogger } from "@/lib/logger";
+import { CreateRestaurantSchema } from "@/lib/validation";
 
 const log = createLogger("API:Restaurants");
 
@@ -39,20 +41,25 @@ export async function POST(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const body = await request.json() as Partial<Restaurant>;
-
-    if (!body.name?.trim()) {
-      return NextResponse.json({ error: "name is required" }, { status: 400 });
+    const raw = await request.json();
+    const parsed = CreateRestaurantSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
     }
+
+    const { name, slug, description, logo_url, website_url } = parsed.data;
 
     const restaurant: Restaurant = {
       id: generateId(),
       project_id: id,
-      name: body.name.trim(),
-      slug: body.slug?.trim() || slugify(body.name.trim()),
-      description: body.description?.trim() || null,
-      logo_url: body.logo_url?.trim() || null,
-      website_url: body.website_url?.trim() || null,
+      name: name.trim(),
+      slug: slug?.trim() || slugify(name.trim()),
+      description: description?.trim() || null,
+      logo_url: logo_url?.trim() || null,
+      website_url: website_url?.trim() || null,
       created_at: new Date().toISOString(),
     };
 
