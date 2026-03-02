@@ -37,9 +37,11 @@ function getDevStore(): DevStore {
 }
 
 function hasSupabase(): boolean {
+  // Require service role key for production — factory DB uses service_role RLS policy.
+  // Anon key alone cannot read/write any factory tables.
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 }
 
@@ -390,6 +392,7 @@ export async function updateGenerationLog(id: string, data: Partial<GenerationLo
     const { error } = await supabase.from("generation_logs").update(data).eq("id", id);
     if (error) {
       log.error("Supabase updateGenerationLog failed", { id }, error);
+      throw error;
     }
     return;
   }
@@ -446,6 +449,7 @@ export async function updateDeployment(id: string, data: Partial<Deployment>): P
     const { error } = await supabase.from("deployments").update(data).eq("id", id);
     if (error) {
       log.error("Supabase updateDeployment failed", { id }, error);
+      throw error;
     }
     return;
   }

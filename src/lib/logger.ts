@@ -70,7 +70,7 @@ export function createLogger(context: string) {
   return {
     debug: (msg: string, data?: Record<string, unknown>) => log("debug", msg, data),
     info: (msg: string, data?: Record<string, unknown>) => log("info", msg, data),
-    warn: (msg: string, data?: Record<string, unknown>) => log("warn", msg, data),
+    warn: (msg: string, data?: Record<string, unknown>, err?: unknown) => log("warn", msg, data, err),
     error: (msg: string, data?: Record<string, unknown>, err?: unknown) => log("error", msg, data, err),
   };
 }

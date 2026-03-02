@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import * as crypto from "crypto";
 
 const PUBLIC_PATHS = ["/login", "/api/auth/login"];
 const SESSION_COOKIE = "factory_session";
@@ -24,6 +25,16 @@ export function middleware(request: NextRequest) {
   const session = request.cookies.get(SESSION_COOKIE);
 
   if (!session?.value) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const expectedToken = crypto
+    .createHash("sha256")
+    .update(factoryPassword)
+    .digest("hex");
+
+  if (session.value !== expectedToken) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const token = hashToken(factoryPassword + Date.now().toString());
+  const token = hashToken(factoryPassword);
 
   const response = NextResponse.json({ success: true });
   response.cookies.set(SESSION_COOKIE, token, {

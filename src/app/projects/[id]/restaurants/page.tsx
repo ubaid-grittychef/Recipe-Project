@@ -6,6 +6,7 @@ import { Restaurant } from "@/lib/types";
 import { api } from "@/lib/api-client";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ConfirmModal";
 import {
   ArrowLeft,
   Plus,
@@ -39,6 +40,7 @@ export default function RestaurantsPage({ params }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirm, ConfirmDialog] = useConfirm();
 
   useEffect(() => {
     api
@@ -128,7 +130,13 @@ export default function RestaurantsPage({ params }: Props) {
   }
 
   async function handleDelete(restaurantId: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: `Delete "${name}"?`,
+      description: "This cannot be undone.",
+      confirmLabel: "Delete",
+      danger: true,
+    });
+    if (!ok) return;
     setDeletingId(restaurantId);
     try {
       await api.delete(`/api/projects/${id}/restaurants/${restaurantId}`);
@@ -143,6 +151,7 @@ export default function RestaurantsPage({ params }: Props) {
 
   return (
     <div>
+      {ConfirmDialog}
       <Link
         href={`/projects/${id}`}
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"

@@ -28,6 +28,7 @@ import {
   ExternalLink,
   ChefHat,
 } from "lucide-react";
+import GenerationProgressCard from "@/components/GenerationProgressCard";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -249,6 +250,17 @@ export default function ProjectDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+
+      {/* Live generation progress */}
+      <GenerationProgressCard
+        projectId={id}
+        onComplete={() => {
+          // Refresh project stats when a run finishes
+          api.get<Project>(`/api/projects/${id}`)
+            .then(setProject)
+            .catch(() => {});
+        }}
+      />
 
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard icon={BookOpen} label="Recipes Published" value={project.recipes_published} color="text-brand-500" />

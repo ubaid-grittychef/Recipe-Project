@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { Recipe } from "@/lib/types";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ConfirmModal";
 import {
   ArrowLeft,
   Save,
@@ -24,15 +25,35 @@ export default function RecipeEditorPage({ params }: Props) {
   const { id, recipeId } = use(params);
   const router = useRouter();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [savedRecipe, setSavedRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirm, ConfirmDialog] = useConfirm();
+  // Track whether there are unsaved changes
+  const isDirty = recipe !== null && savedRecipe !== null &&
+    JSON.stringify(recipe) !== JSON.stringify(savedRecipe);
+  // Block browser-level navigation (refresh / close tab) when dirty
+  const isDirtyRef = useRef(false);
+  isDirtyRef.current = isDirty;
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (isDirtyRef.current) {
+        e.preventDefault();
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   useEffect(() => {
     api
       .get<Recipe>(`/api/projects/${id}/recipes/${recipeId}`)
-      .then(setRecipe)
-      .catch((err) => {
-        console.error("[RecipeEditor] fetch failed:", err);
+      .then((data) => {
+        setRecipe(data);
+        setSavedRecipe(data);
+      })
+      .catch(() => {
         toast.error("Failed to load recipe");
       })
       .finally(() => setLoading(false));
@@ -58,25 +79,42 @@ export default function RecipeEditorPage({ params }: Props) {
         payload
       );
       setRecipe(updated);
-      toast.success(
-        publish ? "Recipe published!" : "Recipe saved"
-      );
-    } catch (err) {
-      console.error("[RecipeEditor] save failed:", err);
+      setSavedRecipe(updated);
+      toast.success(publish ? "Recipe published!" : "Recipe saved");
+    } catch {
       toast.error("Failed to save recipe");
     } finally {
       setSaving(false);
     }
   }
 
+  async function handleNavigateBack() {
+    if (isDirty) {
+      const ok = await confirm({
+        title: "Unsaved changes",
+        description: "You have unsaved changes that will be lost. Leave anyway?",
+        confirmLabel: "Leave without saving",
+        cancelLabel: "Stay and save",
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    router.push(`/projects/${id}/recipes`);
+  }
+
   async function handleDelete() {
-    if (!confirm("Delete this recipe permanently? This cannot be undone.")) return;
+    const ok = await confirm({
+      title: "Delete recipe permanently?",
+      description: "This action cannot be undone. The recipe will be removed from both the factory and your live site.",
+      confirmLabel: "Delete",
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api.delete(`/api/projects/${id}/recipes/${recipeId}`);
       toast.success("Recipe deleted");
       router.push(`/projects/${id}/recipes`);
-    } catch (err) {
-      console.error("[RecipeEditor] delete failed:", err);
+    } catch {
       toast.error("Failed to delete recipe");
     }
   }
@@ -105,13 +143,14 @@ export default function RecipeEditorPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <Link
-        href={`/projects/${id}/recipes`}
+      {ConfirmDialog}
+      <button
+        onClick={handleNavigateBack}
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Recipes
-      </Link>
+      </button>
 
       {/* Header with save actions */}
       <div className="mb-6 flex items-center justify-between">
@@ -128,6 +167,11 @@ export default function RecipeEditorPage({ params }: Props) {
             >
               {recipe.status}
             </span>
+            {isDirty && (
+              <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                Unsaved changes
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">

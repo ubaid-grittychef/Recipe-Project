@@ -292,12 +292,16 @@ export default async function RecipePage({ params }: Props) {
 
         {/* Meta bar: rating, times, author, date */}
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500">
-          <span className="flex items-center gap-1">
+          <span
+            className="flex items-center gap-1"
+            role="img"
+            aria-label={`Rating: ${rating} out of 5 stars (${ratingCount} reviews)`}
+          >
             {renderStars(rating)}
-            <span className="ml-1 font-medium text-slate-700">
+            <span className="ml-1 font-medium text-slate-700" aria-hidden="true">
               {rating}
             </span>
-            <span className="text-slate-400">
+            <span className="text-slate-400" aria-hidden="true">
               ({ratingCount} reviews)
             </span>
           </span>

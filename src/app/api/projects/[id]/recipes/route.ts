@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getRecipesByProject } from "@/lib/store";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("API:Recipes");
 
 const DEFAULT_LIMIT = 50;
 
@@ -7,8 +10,8 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
     const { searchParams } = new URL(request.url);
 
     const limit = Math.min(
@@ -41,7 +44,7 @@ export async function GET(
       hasMore: offset + limit < total,
     });
   } catch (error) {
-    console.error("Failed to fetch recipes:", error);
+    log.error("Failed to fetch recipes", { projectId: id }, error);
     return NextResponse.json(
       { error: "Failed to fetch recipes" },
       { status: 500 }

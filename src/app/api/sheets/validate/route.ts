@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
 import { validateSheet } from "@/lib/sheets";
+import { createLogger } from "@/lib/logger";
+import { ValidateSheetSchema } from "@/lib/validation";
+
+const log = createLogger("API:Sheets");
 
 export async function POST(request: Request) {
   try {
-    const { sheet_url, keyword_col, restaurant_col, status_col } =
-      await request.json();
-
-    if (!sheet_url) {
+    const raw = await request.json();
+    const parsed = ValidateSheetSchema.safeParse(raw);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Sheet URL is required" },
+        {
+          valid: false,
+          preview: [],
+          error:
+            parsed.error.flatten().fieldErrors.sheet_url?.[0] ??
+            "Validation failed",
+        },
         { status: 400 }
       );
     }
+
+    const { sheet_url, keyword_col, restaurant_col, status_col } = parsed.data;
 
     const result = await validateSheet(
       sheet_url,
@@ -22,7 +33,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Sheet validation failed:", error);
+    log.error("Sheet validation error", {}, error);
     return NextResponse.json(
       {
         valid: false,

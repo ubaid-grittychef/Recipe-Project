@@ -2,6 +2,13 @@ import type { MetadataRoute } from "next";
 import { getRecipeSlugsWithDates, getCategories } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
 
+/**
+ * Google requires a maximum of 50,000 URLs per sitemap file.
+ * This limit ensures we never exceed it. If the site grows beyond it,
+ * implement a sitemap index (sitemap/[page]/route.ts) to serve chunks.
+ */
+const SITEMAP_MAX_URLS = 49_900;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url.replace(/\/$/, "");
 
@@ -62,7 +69,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const recipePages: MetadataRoute.Sitemap = recipes.map((r) => ({
+  // Cap recipe pages to stay within the Google 50k sitemap URL limit
+  const usedSlots = staticPages.length + categoryPages.length;
+  const recipeSlice = recipes.slice(0, Math.max(0, SITEMAP_MAX_URLS - usedSlots));
+
+  const recipePages: MetadataRoute.Sitemap = recipeSlice.map((r) => ({
     url: `${baseUrl}/recipe/${r.slug}`,
     lastModified: r.published_at ? new Date(r.published_at) : new Date(),
     changeFrequency: "monthly" as const,

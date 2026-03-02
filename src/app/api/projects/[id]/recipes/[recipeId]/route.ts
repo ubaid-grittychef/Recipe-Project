@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getRecipe, updateRecipe, deleteRecipe, getProject, updateProject } from "@/lib/store";
 import { publishRecipeToSite } from "@/lib/site-publisher";
 import { createLogger } from "@/lib/logger";
+import { UpdateRecipeSchema } from "@/lib/validation";
 
 const log = createLogger("API:Recipe");
 
@@ -31,9 +32,20 @@ export async function PUT(
 ) {
   try {
     const { id: projectId, recipeId } = await params;
-    const body = await request.json();
+    const raw = await request.json();
 
-    const { id: _id, project_id: _pid, created_at: _ca, ...updates } = body;
+    // Strip read-only fields the client must not set
+    const { id: _id, project_id: _pid, created_at: _ca, ...stripped } = raw;
+
+    const parsed = UpdateRecipeSchema.safeParse(stripped);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const updates = parsed.data;
 
     // Capture previous status BEFORE the update to detect publish transitions
     const previous = await getRecipe(recipeId);
