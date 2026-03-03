@@ -194,3 +194,55 @@ CREATE POLICY IF NOT EXISTS "Service role only" ON restaurants
 -- ALTER TABLE projects ADD COLUMN IF NOT EXISTS prompt_overrides JSONB;
 -- ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category TEXT;
 -- (The restaurants table is new — create it using the CREATE TABLE above)
+
+-- ============================================================
+-- Built-in Keyword Queue
+-- Alternative to Google Sheets for managing generation keywords
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS builtin_keywords (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  keyword TEXT NOT NULL,
+  restaurant_name TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'done', 'failed')),
+  error_reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  processed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS builtin_keywords_project_status ON builtin_keywords(project_id, status);
+CREATE INDEX IF NOT EXISTS builtin_keywords_created_at ON builtin_keywords(created_at);
+
+ALTER TABLE builtin_keywords ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Service role only" ON builtin_keywords
+  USING (auth.role() = 'service_role');
+
+-- Migration: if upgrading from a previous schema, run:
+-- (The builtin_keywords table is new — create it using the CREATE TABLE above)
+
+-- ============================================================
+-- Categories (auto-created from AI-generated recipe categories)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS categories (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  recipe_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(project_id, slug)
+);
+
+CREATE INDEX IF NOT EXISTS categories_project_id ON categories(project_id);
+
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Service role only" ON categories
+  USING (auth.role() = 'service_role');
+
+-- Migration: add restaurant_id and category_id to recipes table
+-- ALTER TABLE recipes ADD COLUMN IF NOT EXISTS restaurant_id TEXT REFERENCES restaurants(id) ON DELETE SET NULL;
+-- ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category_id TEXT REFERENCES categories(id) ON DELETE SET NULL;

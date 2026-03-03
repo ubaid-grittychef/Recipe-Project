@@ -139,3 +139,20 @@ create index idx_generation_logs_project on generation_logs(project_id);
 --   key text primary key,
 --   value jsonb not null
 -- );
+
+-- Built-in Keyword Queue
+create table if not exists builtin_keywords (
+  id text primary key,
+  project_id text not null references projects(id) on delete cascade,
+  keyword text not null,
+  restaurant_name text,
+  status text not null default 'pending' check (status in ('pending', 'done', 'failed')),
+  error_reason text,
+  created_at timestamptz not null default now(),
+  processed_at timestamptz
+);
+
+create index if not exists builtin_keywords_project_status on builtin_keywords(project_id, status);
+
+alter table builtin_keywords enable row level security;
+create policy if not exists "Service role only" on builtin_keywords using (auth.role() = 'service_role');

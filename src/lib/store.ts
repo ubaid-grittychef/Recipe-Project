@@ -1,4 +1,4 @@
-import { Project, Recipe, KeywordLog, GenerationLog, Deployment, Restaurant } from "./types";
+import { Project, Recipe, KeywordLog, GenerationLog, Deployment, Restaurant, BuiltInKeyword, Category } from "./types";
 import { generateId } from "./utils";
 import { createLogger } from "./logger";
 
@@ -16,6 +16,8 @@ interface DevStore {
   generationLogs: Map<string, GenerationLog>;
   deployments: Map<string, Deployment>;
   restaurants: Map<string, Restaurant>;
+  builtInKeywords: Map<string, BuiltInKeyword>;
+  categories: Map<string, Category>;
 }
 
 const globalKey = "__recipe_factory_store__" as const;
@@ -30,6 +32,8 @@ function getDevStore(): DevStore {
       generationLogs: new Map(),
       deployments: new Map(),
       restaurants: new Map(),
+      builtInKeywords: new Map(),
+      categories: new Map(),
     };
     log.info("Initialized in-memory dev store (survives HMR)");
   }
@@ -225,6 +229,33 @@ export async function getRecipesByProject(projectId: string): Promise<Recipe[]> 
   return Array.from(getDevStore().recipes.values())
     .filter((r) => r.project_id === projectId)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+export async function getRecipeByKeyword(
+  projectId: string,
+  keyword: string
+): Promise<Recipe | null> {
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    const { data, error } = await supabase
+      .from("recipes")
+      .select("id, keyword, title, status")
+      .eq("project_id", projectId)
+      .ilike("keyword", keyword.trim())
+      .limit(1)
+      .single();
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      return null; // treat lookup errors as "no duplicate"
+    }
+    return data as Recipe;
+  }
+  const normalized = keyword.trim().toLowerCase();
+  return (
+    Array.from(getDevStore().recipes.values()).find(
+      (r) => r.project_id === projectId && r.keyword.trim().toLowerCase() === normalized
+    ) ?? null
+  );
 }
 
 export async function createRecipe(data: Recipe): Promise<Recipe> {
@@ -557,4 +588,235 @@ export async function deleteRestaurant(id: string): Promise<boolean> {
     return true;
   }
   return getDevStore().restaurants.delete(id);
+}
+
+// --- Restaurant helpers ---
+
+export async function findOrCreateRestaurant(
+  projectId: string,
+  name: string
+): Promise<Restaurant> {
+  const { slugify } = await import("./utils");
+  const slug = slugify(name);
+
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    // Try find existing (case-insensitive)
+    const { data: existing } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("project_id", projectId)
+      .ilike("name", name)
+      .limit(1)
+      .single();
+    if (existing) return existing;
+    // Create new
+    const now = new Date().toISOString();
+    const rec: Restaurant = { id: generateId(), project_id: projectId, name, slug, description: null, logo_url: null, website_url: null, created_at: now };
+    const { data: row, error } = await supabase.from("restaurants").insert(rec).select().single();
+    if (error) throw error;
+    return row;
+  }
+
+  const store = getDevStore();
+  const normalized = name.trim().toLowerCase();
+  const found = Array.from(store.restaurants.values()).find(
+    (r) => r.project_id === projectId && r.name.trim().toLowerCase() === normalized
+  );
+  if (found) return found;
+  const now = new Date().toISOString();
+  const rec: Restaurant = { id: generateId(), project_id: projectId, name, slug, description: null, logo_url: null, website_url: null, created_at: now };
+  store.restaurants.set(rec.id, rec);
+  log.info("Auto-created restaurant", { projectId, name });
+  return rec;
+}
+
+// --- Categories ---
+
+export async function getCategories(projectId: string): Promise<Category[]> {
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("name", { ascending: true });
+    if (error) { log.error("Supabase getCategories failed", { projectId }, error); throw error; }
+    return data ?? [];
+  }
+  return Array.from(getDevStore().categories.values())
+    .filter((c) => c.project_id === projectId)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function findOrCreateCategory(
+  projectId: string,
+  name: string
+): Promise<Category> {
+  const { slugify } = await import("./utils");
+  const slug = slugify(name);
+
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    const { data: existing } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("project_id", projectId)
+      .ilike("name", name)
+      .limit(1)
+      .single();
+    if (existing) {
+      // Increment recipe_count
+      await supabase.from("categories").update({ recipe_count: (existing.recipe_count ?? 0) + 1 }).eq("id", existing.id);
+      return { ...existing, recipe_count: existing.recipe_count + 1 };
+    }
+    const now = new Date().toISOString();
+    const rec: Category = { id: generateId(), project_id: projectId, name, slug, recipe_count: 1, created_at: now };
+    const { data: row, error } = await supabase.from("categories").insert(rec).select().single();
+    if (error) throw error;
+    return row;
+  }
+
+  const store = getDevStore();
+  const normalized = name.trim().toLowerCase();
+  const found = Array.from(store.categories.values()).find(
+    (c) => c.project_id === projectId && c.name.trim().toLowerCase() === normalized
+  );
+  if (found) {
+    const updated = { ...found, recipe_count: found.recipe_count + 1 };
+    store.categories.set(found.id, updated);
+    return updated;
+  }
+  const now = new Date().toISOString();
+  const rec: Category = { id: generateId(), project_id: projectId, name, slug, recipe_count: 1, created_at: now };
+  store.categories.set(rec.id, rec);
+  log.info("Auto-created category", { projectId, name });
+  return rec;
+}
+
+// --- Built-in Keyword Queue ---
+
+export async function getBuiltInKeywords(
+  projectId: string,
+  status?: BuiltInKeyword["status"]
+): Promise<BuiltInKeyword[]> {
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    let query = supabase
+      .from("builtin_keywords")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: true });
+    if (status) query = query.eq("status", status);
+    const { data, error } = await query;
+    if (error) {
+      log.error("Supabase getBuiltInKeywords failed", { projectId }, error);
+      throw error;
+    }
+    return data ?? [];
+  }
+  return Array.from(getDevStore().builtInKeywords.values())
+    .filter((k) => k.project_id === projectId && (!status || k.status === status))
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+}
+
+export async function createBuiltInKeywords(
+  projectId: string,
+  rows: Array<{ keyword: string; restaurant_name: string | null }>
+): Promise<BuiltInKeyword[]> {
+  const now = new Date().toISOString();
+  const records: BuiltInKeyword[] = rows.map((r) => ({
+    id: generateId(),
+    project_id: projectId,
+    keyword: r.keyword,
+    restaurant_name: r.restaurant_name,
+    status: "pending",
+    error_reason: null,
+    created_at: now,
+    processed_at: null,
+  }));
+
+  log.info("Creating built-in keywords", { projectId, count: records.length });
+
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    const { data, error } = await supabase
+      .from("builtin_keywords")
+      .insert(records)
+      .select();
+    if (error) {
+      log.error("Supabase createBuiltInKeywords failed", { projectId }, error);
+      throw error;
+    }
+    return data ?? [];
+  }
+  const store = getDevStore();
+  for (const rec of records) {
+    store.builtInKeywords.set(rec.id, rec);
+  }
+  return records;
+}
+
+export async function updateBuiltInKeyword(
+  id: string,
+  updates: Partial<Omit<BuiltInKeyword, "id" | "project_id" | "created_at">>
+): Promise<BuiltInKeyword | null> {
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    const { data, error } = await supabase
+      .from("builtin_keywords")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      log.error("Supabase updateBuiltInKeyword failed", { id }, error);
+      throw error;
+    }
+    return data;
+  }
+  const store = getDevStore();
+  const existing = store.builtInKeywords.get(id);
+  if (!existing) return null;
+  const updated = { ...existing, ...updates };
+  store.builtInKeywords.set(id, updated);
+  return updated;
+}
+
+export async function deleteBuiltInKeyword(id: string): Promise<boolean> {
+  log.info("Deleting built-in keyword", { id });
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    const { error } = await supabase.from("builtin_keywords").delete().eq("id", id);
+    if (error) {
+      log.error("Supabase deleteBuiltInKeyword failed", { id }, error);
+      throw error;
+    }
+    return true;
+  }
+  return getDevStore().builtInKeywords.delete(id);
+}
+
+export async function deleteBuiltInKeywords(
+  projectId: string,
+  status?: BuiltInKeyword["status"]
+): Promise<void> {
+  log.info("Deleting built-in keywords", { projectId, status });
+  if (hasSupabase()) {
+    const { supabase } = await import("./supabase");
+    let query = supabase.from("builtin_keywords").delete().eq("project_id", projectId);
+    if (status) query = query.eq("status", status);
+    const { error } = await query;
+    if (error) {
+      log.error("Supabase deleteBuiltInKeywords failed", { projectId }, error);
+      throw error;
+    }
+    return;
+  }
+  const store = getDevStore();
+  for (const [key, kw] of store.builtInKeywords.entries()) {
+    if (kw.project_id === projectId && (!status || kw.status === status)) {
+      store.builtInKeywords.delete(key);
+    }
+  }
 }

@@ -33,6 +33,20 @@ export async function POST(
 
   log.info("Manual generation triggered (async)", { project: project.name, id });
 
+  // Surface configuration warnings without blocking the run
+  const warnings: string[] = [];
+  if (!process.env.OPENAI_API_KEY) {
+    warnings.push("OPENAI_API_KEY is not set — recipe generation will fail. Add it to .env.local and restart the server.");
+    log.warn("OPENAI_API_KEY missing — generation will fail", { projectId: id });
+  }
+  if (!process.env.PEXELS_API_KEY) {
+    warnings.push("PEXELS_API_KEY is not set — generated recipes will have no images");
+    log.warn("PEXELS_API_KEY missing — images will be skipped", { projectId: id });
+  }
+  if (project.status === "paused") {
+    warnings.push("Project is paused — click Activate on the dashboard to resume scheduled runs");
+  }
+
   // Fire-and-forget: respond immediately so the request does not time out on
   // Vercel (10s hobby / 60s pro). Progress is tracked via generation logs.
   void runGenerationForProject(id).then((result) => {
@@ -42,7 +56,7 @@ export async function POST(
   });
 
   return NextResponse.json(
-    { message: "Generation started", project_id: id },
+    { message: "Generation started", project_id: id, warnings },
     { status: 202 }
   );
 }

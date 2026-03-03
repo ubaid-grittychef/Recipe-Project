@@ -10,6 +10,10 @@ import {
   Pause,
   Play,
   Trash2,
+  Rocket,
+  CheckCircle2,
+  AlertTriangle,
+  Copy,
 } from "lucide-react";
 import { Project } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
@@ -25,12 +29,14 @@ interface ProjectCardProps {
   project: Project;
   onToggleStatus: (id: string) => void;
   onDelete: (id: string) => void;
+  onCopy?: (id: string) => void;
 }
 
 export default function ProjectCard({
   project,
   onToggleStatus,
   onDelete,
+  onCopy,
 }: ProjectCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -100,6 +106,18 @@ export default function ProjectCard({
                   )}
                   {project.status === "active" ? "Pause" : "Activate"}
                 </button>
+                {onCopy && (
+                  <button
+                    onClick={() => {
+                      onCopy(project.id);
+                      setMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Duplicate
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     onDelete(project.id);
@@ -130,12 +148,32 @@ export default function ProjectCard({
           <span className="font-medium text-slate-700">
             {project.keywords_remaining}
           </span>
-          <span className="text-slate-400">keywords</span>
+          <span className="text-slate-400">left</span>
+          {project.keywords_failed > 0 && (
+            <span className="flex items-center gap-0.5 text-xs font-medium text-red-500">
+              <AlertTriangle className="h-3 w-3" />
+              {project.keywords_failed}
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <Globe className="h-4 w-4 text-slate-400" />
-          <span className="truncate text-slate-500">
-            {project.domain || "No domain"}
+        <div className="flex items-center gap-1.5 text-xs">
+          {project.deployment_status === "deployed" ? (
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+          ) : project.deployment_status === "deploying" ? (
+            <Rocket className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+          ) : project.deployment_status === "failed" ? (
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400" />
+          ) : (
+            <Globe className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+          )}
+          <span className={cn("truncate", project.deployment_status === "deployed" ? "text-emerald-600" : "text-slate-400")}>
+            {project.deployment_status === "deployed"
+              ? (project.domain || "Live")
+              : project.deployment_status === "deploying"
+              ? "Deploying…"
+              : project.deployment_status === "failed"
+              ? "Deploy failed"
+              : "Not deployed"}
           </span>
         </div>
       </div>

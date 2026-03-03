@@ -6,7 +6,7 @@ import { api } from "@/lib/api-client";
 import { Recipe } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowLeft, Search, BookOpen, Upload, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Search, BookOpen, Upload, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, Eye } from "lucide-react";
 
 const PAGE_SIZE = 50;
 
@@ -30,14 +30,20 @@ export default function RecipesPage({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [publishing, setPublishing] = useState(false);
+  const [sort, setSort] = useState("created_at");
+  const [sortDir, setSortDir] = useState("desc");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const loadRecipes = useCallback(
-    (currentOffset: number, searchQuery: string) => {
+    (currentOffset: number, searchQuery: string, sortField = sort, direction = sortDir, status = statusFilter) => {
       const params = new URLSearchParams({
         limit: String(PAGE_SIZE),
         offset: String(currentOffset),
+        sort: sortField,
+        sortDir: direction,
       });
       if (searchQuery) params.set("search", searchQuery);
+      if (status) params.set("status", status);
       return api
         .get<RecipesResponse>(`/api/projects/${id}/recipes?${params.toString()}`)
         .then((data) => {
@@ -50,7 +56,7 @@ export default function RecipesPage({ params }: Props) {
           setRecipes([]);
         });
     },
-    [id]
+    [id, sort, sortDir, statusFilter]
   );
 
   useEffect(() => {
@@ -147,9 +153,9 @@ export default function RecipesPage({ params }: Props) {
         )}
       </div>
 
-      {/* Search bar */}
-      <div className="mb-6">
-        <div className="relative">
+      {/* Search + filter bar */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -158,6 +164,50 @@ export default function RecipesPage({ params }: Props) {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setLoading(true);
+            setOffset(0);
+            loadRecipes(0, search, sort, sortDir, e.target.value).finally(() => setLoading(false));
+          }}
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-brand-500 focus:outline-none"
+        >
+          <option value="">All statuses</option>
+          <option value="draft">Draft only</option>
+          <option value="published">Published only</option>
+        </select>
+        <div className="flex items-center gap-1.5">
+          <ArrowUpDown className="h-4 w-4 text-slate-400" />
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value);
+              setLoading(true);
+              setOffset(0);
+              loadRecipes(0, search, e.target.value, sortDir, statusFilter).finally(() => setLoading(false));
+            }}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-brand-500 focus:outline-none"
+          >
+            <option value="created_at">Date created</option>
+            <option value="published_at">Date published</option>
+            <option value="word_count">Word count</option>
+          </select>
+          <button
+            onClick={() => {
+              const dir = sortDir === "desc" ? "asc" : "desc";
+              setSortDir(dir);
+              setLoading(true);
+              setOffset(0);
+              loadRecipes(0, search, sort, dir, statusFilter).finally(() => setLoading(false));
+            }}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+            title={sortDir === "desc" ? "Descending — click for ascending" : "Ascending — click for descending"}
+          >
+            {sortDir === "desc" ? "↓" : "↑"}
+          </button>
         </div>
       </div>
 
@@ -176,14 +226,20 @@ export default function RecipesPage({ params }: Props) {
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                     Keyword
                   </th>
+                  <th className="hidden px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500 md:table-cell">
+                    Category
+                  </th>
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                    Word Count
+                  <th className="hidden px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell">
+                    Words
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                     Date
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Preview
                   </th>
                 </tr>
               </thead>
@@ -202,14 +258,33 @@ export default function RecipesPage({ params }: Props) {
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
                       {recipe.keyword}
                     </td>
+                    <td className="hidden whitespace-nowrap px-6 py-4 md:table-cell">
+                      {recipe.category ? (
+                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                          {recipe.category}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <StatusBadge status={recipe.status} />
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                    <td className="hidden whitespace-nowrap px-6 py-4 text-sm text-slate-600 sm:table-cell">
                       {recipe.word_count}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
                       {formatDate(recipe.created_at)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <Link
+                        href={`/projects/${id}/recipes/${recipe.id}/preview`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                        title="Preview recipe"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Link>
                     </td>
                   </tr>
                 ))}

@@ -27,6 +27,10 @@ import {
   Globe,
   ExternalLink,
   ChefHat,
+  Activity,
+  WifiOff,
+  ListChecks,
+  Tag,
 } from "lucide-react";
 import GenerationProgressCard from "@/components/GenerationProgressCard";
 
@@ -38,13 +42,30 @@ export default function ProjectDetailPage({ params }: Props) {
   const { id } = use(params);
   const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
+  const [draftCount, setDraftCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [healthCheck, setHealthCheck] = useState<{ healthy: boolean | null; latency_ms?: number; checked_at?: string } | null>(null);
+  const [checkingHealth, setCheckingHealth] = useState(false);
+  const [configStatus, setConfigStatus] = useState<{ openai: boolean; pexels: boolean } | null>(null);
 
   useEffect(() => {
-    api
-      .get<Project>(`/api/projects/${id}`)
-      .then(setProject)
+    fetch("/api/system/config")
+      .then((r) => r.json())
+      .then(setConfigStatus)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    Promise.all([
+      api.get<Project>(`/api/projects/${id}`),
+      api.get<{ total: number }>(`/api/projects/${id}/recipes?status=draft&limit=1`),
+    ])
+      .then(([proj, drafts]) => {
+        setProject(proj);
+        setDraftCount(drafts.total ?? 0);
+      })
       .catch((err) => {
         console.error("[ProjectDetail] fetch failed:", err);
         if (err instanceof ApiError && err.status === 404) {
@@ -69,11 +90,46 @@ export default function ProjectDetailPage({ params }: Props) {
     }
   }
 
+  async function publishAllDrafts() {
+    setPublishing(true);
+    try {
+      const result = await api.post<{ published: number; failed: number; message: string }>(
+        `/api/projects/${id}/recipes/bulk-publish`
+      );
+      toast.success(result.message);
+      setDraftCount(0);
+      const refreshed = await api.get<Project>(`/api/projects/${id}`);
+      setProject(refreshed);
+    } catch {
+      toast.error("Publish failed — check server logs");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  async function checkSiteHealth() {
+    setCheckingHealth(true);
+    try {
+      const result = await api.get<{ healthy: boolean | null; latency_ms?: number; checked_at?: string }>(
+        `/api/projects/${id}/health`
+      );
+      setHealthCheck(result);
+    } catch {
+      setHealthCheck({ healthy: false });
+    } finally {
+      setCheckingHealth(false);
+    }
+  }
+
   async function triggerGeneration() {
     setGenerating(true);
     try {
-      await api.post(`/api/projects/${id}/generate`);
-      toast.success("Generation started — recipes will appear shortly");
+      const result = await api.post<{ message: string; warnings?: string[] }>(`/api/projects/${id}/generate`);
+      if (result.warnings?.length) {
+        for (const w of result.warnings) toast.warning(w);
+      } else {
+        toast.success("Generation started — recipes will appear shortly");
+      }
       // Poll the project every 4 s for up to 3 minutes to surface updated stats
       let attempts = 0;
       const poll = setInterval(async () => {
@@ -235,13 +291,26 @@ export default function ProjectDetailPage({ params }: Props) {
               )}
             </div>
           </div>
-          <Link
-            href={`/projects/${id}/deploy`}
-            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600"
-          >
-            <Rocket className="h-4 w-4" />
-            {project.deployment_status === "deployed" ? "Manage" : "Deploy"}
-          </Link>
+          <div className="flex items-center gap-2">
+            {project.deployment_status === "deployed" && project.vercel_deployment_url && (
+              <a
+                href={project.vercel_deployment_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open Site
+              </a>
+            )}
+            <Link
+              href={`/projects/${id}/deploy`}
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600"
+            >
+              <Rocket className="h-4 w-4" />
+              {project.deployment_status === "deployed" ? "Manage" : "Deploy"}
+            </Link>
+          </div>
         </div>
         {project.domain && project.deployment_status === "deployed" && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
@@ -249,7 +318,91 @@ export default function ProjectDetailPage({ params }: Props) {
             Custom domain: <span className="font-medium">{project.domain}</span>
           </div>
         )}
+        {project.deployment_status === "deployed" && (
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              onClick={checkSiteHealth}
+              disabled={checkingHealth}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {checkingHealth ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Activity className="h-3.5 w-3.5" />
+              )}
+              {checkingHealth ? "Checking…" : "Check site health"}
+            </button>
+            {healthCheck && (
+              <span className={cn(
+                "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+                healthCheck.healthy === true
+                  ? "bg-emerald-100 text-emerald-700"
+                  : healthCheck.healthy === false
+                  ? "bg-red-100 text-red-700"
+                  : "bg-slate-100 text-slate-500"
+              )}>
+                {healthCheck.healthy === true ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : healthCheck.healthy === false ? (
+                  <WifiOff className="h-3.5 w-3.5" />
+                ) : null}
+                {healthCheck.healthy === true
+                  ? `Online · ${healthCheck.latency_ms}ms`
+                  : healthCheck.healthy === false
+                  ? "Unreachable"
+                  : "No URL"}
+              </span>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* API key / config warning banner */}
+      {configStatus && !configStatus.openai && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+          <div>
+            <p className="text-sm font-semibold text-red-800">OpenAI API key missing — generation is disabled</p>
+            <p className="mt-1 text-xs text-red-600">
+              Add <code className="font-mono">OPENAI_API_KEY=sk-...</code> to your <code className="font-mono">.env.local</code> file, then restart the server.
+              Get a free key at <strong>platform.openai.com/api-keys</strong>.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Draft recipes banner */}
+      {draftCount > 0 && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-amber-600" />
+            <div>
+              <p className="text-sm font-medium text-amber-900">
+                {draftCount} draft recipe{draftCount !== 1 ? "s" : ""} ready to publish
+              </p>
+              <p className="mt-0.5 text-xs text-amber-700">
+                Draft recipes are saved but not visible on your live site yet.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={publishAllDrafts}
+              disabled={publishing}
+              className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-600 disabled:opacity-50"
+            >
+              {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {publishing ? "Publishing..." : "Publish All Now"}
+            </button>
+            <Link
+              href={`/projects/${id}/recipes`}
+              className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+            >
+              Review
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Live generation progress */}
       <GenerationProgressCard
@@ -299,10 +452,12 @@ export default function ProjectDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <QuickLink href={`/projects/${id}/recipes`} icon={BookOpen} title="Recipes" description="View all generated recipes, edit content, manage publishing" />
-        <QuickLink href={`/projects/${id}/restaurants`} icon={ChefHat} title="Restaurants" description="Manage restaurant CMS entries — each becomes a category page" />
-        <QuickLink href={`/projects/${id}/keywords`} icon={KeyRound} title="Keywords" description="Keyword processing log with status and timestamps" />
+        <QuickLink href={`/projects/${id}/queue`} icon={ListChecks} title="Keyword Queue" description="Add and manage keywords to generate — no Google Sheets needed" />
+        <QuickLink href={`/projects/${id}/restaurants`} icon={ChefHat} title="Restaurants" description="Auto-created from keywords — edit descriptions, logos, links" />
+        <QuickLink href={`/projects/${id}/categories`} icon={Tag} title="Categories" description="Auto-created from recipe AI output — browse by category" />
+        <QuickLink href={`/projects/${id}/keywords`} icon={KeyRound} title="Keyword Logs" description="Keyword processing log with status and timestamps" />
         <QuickLink href={`/projects/${id}/logs`} icon={BarChart3} title="Generation Logs" description="History of all generation runs with success/failure stats" />
         <QuickLink href={`/projects/${id}/deploy`} icon={Rocket} title="Deploy & Domains" description="Deploy your recipe site to Vercel and connect custom domains" />
       </div>

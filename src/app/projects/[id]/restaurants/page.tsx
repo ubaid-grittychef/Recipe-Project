@@ -17,6 +17,7 @@ import {
   Save,
   X,
   ExternalLink,
+  Sparkles,
 } from "lucide-react";
 
 interface Props {
@@ -40,6 +41,7 @@ export default function RestaurantsPage({ params }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [generatingBioId, setGeneratingBioId] = useState<string | null>(null);
   const [confirm, ConfirmDialog] = useConfirm();
 
   useEffect(() => {
@@ -126,6 +128,23 @@ export default function RestaurantsPage({ params }: Props) {
       toast.error("Failed to save restaurant");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleGenerateBio(restaurantId: string) {
+    setGeneratingBioId(restaurantId);
+    try {
+      const result = await api.post<{ description: string; restaurant: Restaurant }>(
+        `/api/projects/${id}/restaurants/${restaurantId}/generate-bio`
+      );
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === restaurantId ? result.restaurant : r))
+      );
+      toast.success("Bio generated");
+    } catch {
+      toast.error("Failed to generate bio — check OPENAI_API_KEY");
+    } finally {
+      setGeneratingBioId(null);
     }
   }
 
@@ -345,6 +364,18 @@ export default function RestaurantsPage({ params }: Props) {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => handleGenerateBio(r.id)}
+                        disabled={generatingBioId === r.id || editingId === r.id || adding}
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-purple-50 hover:text-purple-500 disabled:opacity-40"
+                        title="Auto-generate description with AI"
+                      >
+                        {generatingBioId === r.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" />
+                        )}
+                      </button>
                       <button
                         onClick={() => startEdit(r)}
                         disabled={editingId === r.id || adding}

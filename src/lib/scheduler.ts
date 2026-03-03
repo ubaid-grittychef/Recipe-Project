@@ -148,12 +148,14 @@ export async function runDueProjects(): Promise<{
         generation_time: project.generation_time,
         missed: missedRun && !isDue,
       });
+      // Update next_scheduled_at synchronously BEFORE fire-and-forget to
+      // prevent the missedRun check from re-triggering on the next cron tick.
+      await updateProject(project.id, {
+        next_scheduled_at: nextRunAt(project.generation_time),
+      }).catch(() => { /* non-critical */ });
       // Fire-and-forget — don't block the cron response
       void (async () => {
         try {
-          await updateProject(project.id, {
-            next_scheduled_at: nextRunAt(project.generation_time),
-          });
           const { runGenerationForProject } = await import("./generator");
           await runGenerationForProject(project.id);
           log.info("HTTP cron generation completed", { project: project.name });
