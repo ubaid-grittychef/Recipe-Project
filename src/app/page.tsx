@@ -8,11 +8,14 @@ import EmptyState from "@/components/dashboard/EmptyState";
 import { PlusCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { SkeletonProjectGrid } from "@/components/Skeleton";
+import { useConfirm } from "@/components/ConfirmModal";
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [confirm, ConfirmDialog] = useConfirm();
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -42,23 +45,40 @@ export default function DashboardPage() {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
     const newStatus = project.status === "active" ? "paused" : "active";
+    // Optimistic update — no refetch needed
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+    );
     try {
-      await api.put(`/api/projects/${id}`, { status: newStatus });
-      fetchProjects();
-    } catch (err) {
+      const updated = await api.put<Project>(`/api/projects/${id}`, { status: newStatus });
+      setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    } catch {
+      // Revert optimistic update on failure
+      setProjects((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, status: project.status } : p))
+      );
       toast.error(`Failed to ${newStatus === "active" ? "activate" : "pause"} project`);
-      console.error("[Dashboard] toggleStatus failed:", err);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this project? This cannot be undone.")) return;
+    const project = projects.find((p) => p.id === id);
+    const ok = await confirm({
+      title: `Delete "${project?.name ?? "this project"}"?`,
+      description: "All recipes, keywords, and deployment history will be permanently deleted. This cannot be undone.",
+      confirmLabel: "Delete project",
+      danger: true,
+    });
+    if (!ok) return;
+    // Optimistic removal
+    setProjects((prev) => prev.filter((p) => p.id !== id));
     try {
       await api.delete(`/api/projects/${id}`);
+      toast.success("Project deleted");
+    } catch {
+      // Restore on failure
       fetchProjects();
-    } catch (err) {
       toast.error("Failed to delete project");
-      console.error("[Dashboard] delete failed:", err);
     }
   }
 
@@ -84,8 +104,17 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
+      <div>
+        <div className="mb-8 grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white p-5">
+              <div className="mb-2 h-3 w-1/3 rounded bg-slate-100" />
+              <div className="h-7 w-1/2 rounded bg-slate-100" />
+            </div>
+          ))}
+        </div>
+        <div className="mb-6 h-10 w-48 animate-pulse rounded-lg bg-slate-100" />
+        <SkeletonProjectGrid count={6} />
       </div>
     );
   }
@@ -96,6 +125,7 @@ export default function DashboardPage() {
 
   return (
     <div>
+      {ConfirmDialog}
       {/* Stats bar */}
       <div className="mb-8 grid grid-cols-3 gap-4">
         <div className="rounded-xl border border-slate-200 bg-white p-5">

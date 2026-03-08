@@ -35,6 +35,7 @@ import {
   Upload,
 } from "lucide-react";
 import GenerationProgressCard from "@/components/GenerationProgressCard";
+import { SkeletonProjectDetail } from "@/components/Skeleton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -155,18 +156,13 @@ export default function ProjectDetailPage({ params }: Props) {
         ? `Generation failed: ${(err.body as { details?: string })?.details ?? err.statusText}`
         : "Generation failed — check server logs";
       toast.error(msg);
-      console.error("[ProjectDetail] generation failed:", err);
     } finally {
       setGenerating(false);
     }
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonProjectDetail />;
   }
 
   if (!project) {
@@ -189,6 +185,7 @@ export default function ProjectDetailPage({ params }: Props) {
         )
       : 0;
 
+  // Setup checklist — derive from project state
   return (
     <div>
       <Link
@@ -754,3 +751,4 @@ function QuickLink({ href, icon: Icon, title, description }: { href: string; ico
     </Link>
   );
 }
+

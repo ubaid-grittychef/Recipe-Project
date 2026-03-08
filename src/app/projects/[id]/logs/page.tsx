@@ -14,6 +14,7 @@ import {
   Loader2,
   Clock,
 } from "lucide-react";
+import { SkeletonLogsList } from "@/components/Skeleton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -54,11 +55,7 @@ export default function GenerationLogsPage({ params }: Props) {
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonLogsList />;
   }
 
   return (

@@ -26,6 +26,7 @@ import {
   Upload,
   ListChecks,
 } from "lucide-react";
+import { SkeletonSettingsPage } from "@/components/Skeleton";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -135,11 +136,7 @@ export default function ProjectSettingsPage({ params }: Props) {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonSettingsPage />;
   }
 
   if (!project) {
