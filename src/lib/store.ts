@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Project, Recipe, KeywordLog, GenerationLog, Deployment, Restaurant, BuiltInKeyword, Category } from "./types";
 import { generateId } from "./utils";
 import { createLogger } from "./logger";
@@ -6,6 +8,7 @@ const log = createLogger("Store");
 
 /* ----------------------------------------------------------------
    globalThis persistence — survives Next.js HMR in dev mode.
+   Also persists to .dev-data.json so data survives server restarts.
    In production with Supabase configured, this is never used.
    ---------------------------------------------------------------- */
 
@@ -21,21 +24,71 @@ interface DevStore {
 }
 
 const globalKey = "__recipe_factory_store__" as const;
+const DEV_STORE_PATH = path.join(process.cwd(), ".dev-data.json");
+
+// Debounced disk write — batches rapid mutations (e.g. during generation loops)
+let _saveTimer: ReturnType<typeof setTimeout> | null = null;
+function scheduleSave() {
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    _saveTimer = null;
+    const g = globalThis as unknown as Record<string, DevStore>;
+    const store = g[globalKey];
+    if (!store) return;
+    try {
+      const data = {
+        projects: [...store.projects.entries()],
+        recipes: [...store.recipes.entries()],
+        keywordLogs: [...store.keywordLogs.entries()],
+        generationLogs: [...store.generationLogs.entries()],
+        deployments: [...store.deployments.entries()],
+        restaurants: [...store.restaurants.entries()],
+        builtInKeywords: [...store.builtInKeywords.entries()],
+        categories: [...store.categories.entries()],
+      };
+      fs.writeFileSync(DEV_STORE_PATH, JSON.stringify(data));
+    } catch (err) {
+      log.warn("Failed to persist dev store to disk", {}, err);
+    }
+  }, 300);
+}
 
 function getDevStore(): DevStore {
   const g = globalThis as unknown as Record<string, DevStore>;
   if (!g[globalKey]) {
-    g[globalKey] = {
-      projects: new Map(),
-      recipes: new Map(),
-      keywordLogs: new Map(),
-      generationLogs: new Map(),
-      deployments: new Map(),
-      restaurants: new Map(),
-      builtInKeywords: new Map(),
-      categories: new Map(),
-    };
-    log.info("Initialized in-memory dev store (survives HMR)");
+    // Try loading from disk first (survives server restarts)
+    try {
+      if (fs.existsSync(DEV_STORE_PATH)) {
+        const raw = JSON.parse(fs.readFileSync(DEV_STORE_PATH, "utf-8"));
+        g[globalKey] = {
+          projects: new Map(raw.projects ?? []),
+          recipes: new Map(raw.recipes ?? []),
+          keywordLogs: new Map(raw.keywordLogs ?? []),
+          generationLogs: new Map(raw.generationLogs ?? []),
+          deployments: new Map(raw.deployments ?? []),
+          restaurants: new Map(raw.restaurants ?? []),
+          builtInKeywords: new Map(raw.builtInKeywords ?? []),
+          categories: new Map(raw.categories ?? []),
+        };
+        log.info("Loaded dev store from disk", { projects: g[globalKey].projects.size });
+      }
+    } catch (err) {
+      log.warn("Failed to load dev store from disk — starting fresh", {}, err);
+    }
+
+    if (!g[globalKey]) {
+      g[globalKey] = {
+        projects: new Map(),
+        recipes: new Map(),
+        keywordLogs: new Map(),
+        generationLogs: new Map(),
+        deployments: new Map(),
+        restaurants: new Map(),
+        builtInKeywords: new Map(),
+        categories: new Map(),
+      };
+      log.info("Initialized fresh in-memory dev store");
+    }
   }
   return g[globalKey];
 }
@@ -162,6 +215,7 @@ export async function createProject(data: Partial<Project>): Promise<Project> {
   }
 
   getDevStore().projects.set(project.id, project);
+  scheduleSave();
   return project;
 }
 
@@ -192,6 +246,7 @@ export async function updateProject(
   if (!existing) return null;
   const updated = { ...existing, ...safe, updated_at: new Date().toISOString() };
   store.projects.set(id, updated);
+  scheduleSave();
   log.info("Updated project (dev store)", { id });
   return updated;
 }
@@ -207,7 +262,9 @@ export async function deleteProject(id: string): Promise<boolean> {
     }
     return true;
   }
-  return getDevStore().projects.delete(id);
+  const result = getDevStore().projects.delete(id);
+  scheduleSave();
+  return result;
 }
 
 // --- Recipes ---
@@ -274,6 +331,7 @@ export async function createRecipe(data: Recipe): Promise<Recipe> {
     return row;
   }
   getDevStore().recipes.set(data.id, data);
+  scheduleSave();
   return data;
 }
 
@@ -318,6 +376,7 @@ export async function updateRecipe(
   if (!existing) return null;
   const updated = { ...existing, ...updates };
   getDevStore().recipes.set(recipeId, updated);
+  scheduleSave();
   return updated;
 }
 
@@ -335,7 +394,9 @@ export async function deleteRecipe(recipeId: string): Promise<boolean> {
     }
     return true;
   }
-  return getDevStore().recipes.delete(recipeId);
+  const result = getDevStore().recipes.delete(recipeId);
+  scheduleSave();
+  return result;
 }
 
 // --- Keyword Logs ---
@@ -374,6 +435,7 @@ export async function createKeywordLog(data: KeywordLog): Promise<KeywordLog> {
     return row;
   }
   getDevStore().keywordLogs.set(data.id, data);
+  scheduleSave();
   return data;
 }
 
@@ -414,6 +476,7 @@ export async function createGenerationLog(data: GenerationLog): Promise<Generati
     return row;
   }
   getDevStore().generationLogs.set(data.id, data);
+  scheduleSave();
   return data;
 }
 
@@ -431,6 +494,7 @@ export async function updateGenerationLog(id: string, data: Partial<GenerationLo
   const existing = store.generationLogs.get(id);
   if (existing) {
     store.generationLogs.set(id, { ...existing, ...data });
+    scheduleSave();
   }
 }
 
@@ -471,6 +535,7 @@ export async function createDeployment(data: Deployment): Promise<Deployment> {
     return row;
   }
   getDevStore().deployments.set(data.id, data);
+  scheduleSave();
   return data;
 }
 
@@ -488,6 +553,7 @@ export async function updateDeployment(id: string, data: Partial<Deployment>): P
   const existing = store.deployments.get(id);
   if (existing) {
     store.deployments.set(id, { ...existing, ...data });
+    scheduleSave();
   }
 }
 
@@ -546,6 +612,7 @@ export async function createRestaurant(data: Restaurant): Promise<Restaurant> {
     return row;
   }
   getDevStore().restaurants.set(data.id, data);
+  scheduleSave();
   return data;
 }
 
@@ -573,6 +640,7 @@ export async function updateRestaurant(
   if (!existing) return null;
   const updated = { ...existing, ...data };
   store.restaurants.set(id, updated);
+  scheduleSave();
   return updated;
 }
 
@@ -587,7 +655,9 @@ export async function deleteRestaurant(id: string): Promise<boolean> {
     }
     return true;
   }
-  return getDevStore().restaurants.delete(id);
+  const result = getDevStore().restaurants.delete(id);
+  scheduleSave();
+  return result;
 }
 
 // --- Restaurant helpers ---
@@ -627,6 +697,7 @@ export async function findOrCreateRestaurant(
   const now = new Date().toISOString();
   const rec: Restaurant = { id: generateId(), project_id: projectId, name, slug, description: null, logo_url: null, website_url: null, created_at: now };
   store.restaurants.set(rec.id, rec);
+  scheduleSave();
   log.info("Auto-created restaurant", { projectId, name });
   return rec;
 }
@@ -685,11 +756,13 @@ export async function findOrCreateCategory(
   if (found) {
     const updated = { ...found, recipe_count: found.recipe_count + 1 };
     store.categories.set(found.id, updated);
+    scheduleSave();
     return updated;
   }
   const now = new Date().toISOString();
   const rec: Category = { id: generateId(), project_id: projectId, name, slug, recipe_count: 1, created_at: now };
   store.categories.set(rec.id, rec);
+  scheduleSave();
   log.info("Auto-created category", { projectId, name });
   return rec;
 }
@@ -754,6 +827,7 @@ export async function createBuiltInKeywords(
   for (const rec of records) {
     store.builtInKeywords.set(rec.id, rec);
   }
+  scheduleSave();
   return records;
 }
 
@@ -780,6 +854,7 @@ export async function updateBuiltInKeyword(
   if (!existing) return null;
   const updated = { ...existing, ...updates };
   store.builtInKeywords.set(id, updated);
+  scheduleSave();
   return updated;
 }
 
@@ -794,7 +869,9 @@ export async function deleteBuiltInKeyword(id: string): Promise<boolean> {
     }
     return true;
   }
-  return getDevStore().builtInKeywords.delete(id);
+  const result = getDevStore().builtInKeywords.delete(id);
+  scheduleSave();
+  return result;
 }
 
 export async function deleteBuiltInKeywords(
@@ -819,4 +896,5 @@ export async function deleteBuiltInKeywords(
       store.builtInKeywords.delete(key);
     }
   }
+  scheduleSave();
 }

@@ -173,6 +173,41 @@ export default function DeployPage({ params }: Props) {
         </p>
       </div>
 
+      {/* Live site hero — shown only when deployed */}
+      {project.deployment_status === "deployed" && project.vercel_deployment_url && (
+        <div className="mb-6 overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+                <Globe className="h-7 w-7 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Your website is live</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{project.name}</p>
+                <a
+                  href={project.domain ? `https://${project.domain}` : project.vercel_deployment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700"
+                >
+                  {project.domain ?? project.vercel_deployment_url}
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+            <a
+              href={project.domain ? `https://${project.domain}` : project.vercel_deployment_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600"
+            >
+              <Globe className="h-4 w-4" />
+              Open Website
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Deployment Status Card */}
       <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
         <div className="flex items-start justify-between">

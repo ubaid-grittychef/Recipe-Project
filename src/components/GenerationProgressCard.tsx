@@ -26,9 +26,11 @@ interface Props {
   projectId: string;
   /** Called when an active run transitions to completed/failed */
   onComplete?: () => void;
+  /** Called whenever the running state changes */
+  onRunningChange?: (isRunning: boolean) => void;
 }
 
-export default function GenerationProgressCard({ projectId, onComplete }: Props) {
+export default function GenerationProgressCard({ projectId, onComplete, onRunningChange }: Props) {
   const [activeLog, setActiveLog] = useState<GenerationLog | null>(null);
   const [justFinished, setJustFinished] = useState<GenerationLog | null>(null);
   const [recentKeywords, setRecentKeywords] = useState<KeywordLog[]>([]);
@@ -99,7 +101,13 @@ export default function GenerationProgressCard({ projectId, onComplete }: Props)
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [projectId, onComplete]);
+  }, [projectId, onComplete, onRunningChange]);
+
+  // Notify parent of running state changes — must be outside the poll loop
+  // to avoid calling setState on a different component during render.
+  useEffect(() => {
+    onRunningChange?.(activeLog !== null);
+  }, [activeLog, onRunningChange]);
 
   if (!activeLog && !justFinished) return null;
 

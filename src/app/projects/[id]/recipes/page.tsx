@@ -6,7 +6,7 @@ import { api } from "@/lib/api-client";
 import { Recipe } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowLeft, Search, BookOpen, Upload, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, Eye } from "lucide-react";
+import { ArrowLeft, Search, BookOpen, Upload, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, Eye, ListChecks, Zap } from "lucide-react";
 
 const PAGE_SIZE = 50;
 
@@ -214,7 +214,7 @@ export default function RecipesPage({ params }: Props) {
       {/* Table card */}
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         {recipes.length === 0 ? (
-          <EmptyState hasSearch={!!search.trim()} />
+          <EmptyState hasSearch={!!search.trim()} projectId={id} />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200">
@@ -339,24 +339,44 @@ function StatusBadge({ status }: { status: "draft" | "published" }) {
   );
 }
 
-function EmptyState({ hasSearch }: { hasSearch: boolean }) {
+function EmptyState({ hasSearch, projectId }: { hasSearch: boolean; projectId: string }) {
+  if (hasSearch) {
+    return (
+      <div className="flex flex-col items-center justify-center px-8 py-20">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50">
+          <Search className="h-8 w-8 text-slate-400" />
+        </div>
+        <h3 className="mt-6 text-lg font-semibold text-slate-900">No matching recipes</h3>
+        <p className="mt-2 text-sm text-slate-500">Try a different search term or clear the filter.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center px-8 py-20">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
-        {hasSearch ? (
-          <Search className="h-8 w-8 text-brand-500" />
-        ) : (
-          <BookOpen className="h-8 w-8 text-brand-500" />
-        )}
+        <BookOpen className="h-8 w-8 text-brand-500" />
       </div>
-      <h3 className="mt-6 text-lg font-semibold text-slate-900">
-        {hasSearch ? "No matching recipes" : "No recipes yet"}
-      </h3>
+      <h3 className="mt-6 text-lg font-semibold text-slate-900">No recipes yet</h3>
       <p className="mt-2 max-w-sm text-center text-sm text-slate-500">
-        {hasSearch
-          ? "Try a different search term or clear the filter."
-          : "Recipes will appear here once content generation runs."}
+        Recipes are generated from your keywords. Add keywords, then run generation from the project dashboard.
       </p>
+      <div className="mt-6 flex items-center gap-3">
+        <Link
+          href={`/projects/${projectId}/queue`}
+          className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          <ListChecks className="h-4 w-4" />
+          Add Keywords
+        </Link>
+        <Link
+          href={`/projects/${projectId}`}
+          className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+        >
+          <Zap className="h-4 w-4" />
+          Generate Now
+        </Link>
+      </div>
     </div>
   );
 }
