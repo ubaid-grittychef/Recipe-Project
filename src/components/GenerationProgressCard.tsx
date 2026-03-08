@@ -65,10 +65,10 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
           return running;
         });
 
-        // Show only keywords processed in THIS run (most recent first)
+        // Show only keywords processed in THIS run (newest first)
         if (running || mostRecent) {
           const runStart = runStartCountRef.current;
-          const newKws = kwLogs.slice(0, Math.max(0, kwLogs.length - runStart));
+          const newKws = [...kwLogs.slice(runStart)].reverse();
           setRecentKeywords(newKws.slice(0, 8));
         }
 
@@ -76,9 +76,9 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
           setJustFinished((prev) => {
             if (!prev || prev.id !== mostRecent.id) {
               onComplete?.();
-              // Show all keywords from the finished run
+              // Show all keywords from the finished run (newest first)
               const runStart = runStartCountRef.current;
-              const newKws = kwLogs.slice(0, Math.max(0, kwLogs.length - runStart));
+              const newKws = [...kwLogs.slice(runStart)].reverse();
               setRecentKeywords(newKws.slice(0, 8));
               runStartCountRef.current = 0;
               return mostRecent;

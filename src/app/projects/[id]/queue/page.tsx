@@ -107,6 +107,7 @@ export default function QueuePage() {
   }
 
   async function handleClearDone() {
+    if (!confirm(`Clear all ${counts.done} done keywords? This cannot be undone.`)) return;
     try {
       const res = await fetch(`/api/projects/${projectId}/queue?status=done`, {
         method: "DELETE",
@@ -120,7 +121,7 @@ export default function QueuePage() {
   }
 
   async function handleClearPending() {
-    if (!confirm("Clear all pending keywords? This cannot be undone.")) return;
+    if (!confirm(`Clear all ${counts.pending} pending keywords? This cannot be undone.`)) return;
     try {
       const res = await fetch(`/api/projects/${projectId}/queue?status=pending`, {
         method: "DELETE",

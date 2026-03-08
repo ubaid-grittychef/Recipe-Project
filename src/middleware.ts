@@ -30,14 +30,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const expectedToken = await sha256hex(factoryPassword);
+
+  // Allow server-to-server calls (e.g. from the template in local preview mode)
+  // that pass the hashed factory password as x-factory-secret header
+  const internalSecret = request.headers.get("x-factory-secret");
+  if (internalSecret && internalSecret === expectedToken) {
+    return NextResponse.next();
+  }
+
   const session = request.cookies.get(SESSION_COOKIE);
 
   if (!session?.value) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
-
-  const expectedToken = await sha256hex(factoryPassword);
 
   if (session.value !== expectedToken) {
     const loginUrl = new URL("/login", request.url);

@@ -2,15 +2,45 @@ import { getSupabase } from "./supabase";
 import { Recipe } from "./types";
 import { slugifyCategory } from "./utils";
 
-function isConfigured(): boolean {
+// ── Data source detection ─────────────────────────────────────────────────────
+
+function isSupabaseConfigured(): boolean {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 }
 
+// Local preview mode: reads from the factory app running on localhost
+const FACTORY_URL = process.env.FACTORY_API_URL; // e.g. http://localhost:3000
+const FACTORY_PROJECT_ID = process.env.FACTORY_PROJECT_ID;
+// FACTORY_SECRET = sha256(FACTORY_PASSWORD) — pre-computed so we avoid crypto here
+const FACTORY_SECRET = process.env.FACTORY_SECRET;
+
+function isFactoryMode(): boolean {
+  return !isSupabaseConfigured() && !!FACTORY_URL && !!FACTORY_PROJECT_ID;
+}
+
+async function fetchAllFromFactory(): Promise<Recipe[]> {
+  const url = `${FACTORY_URL}/api/projects/${FACTORY_PROJECT_ID}/recipes?status=published&limit=500`;
+  const headers: Record<string, string> = { "x-factory-secret": FACTORY_SECRET ?? "" };
+  try {
+    const res = await fetch(url, { cache: "no-store", headers });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return (json.recipes ?? []) as Recipe[];
+  } catch {
+    console.error("[FactoryMode] fetch failed:", url);
+    return [];
+  }
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
 export async function getAllRecipes(): Promise<Recipe[]> {
-  if (!isConfigured()) return [];
+  if (isFactoryMode()) return fetchAllFromFactory();
+  if (!isSupabaseConfigured()) return [];
+
   const { data, error } = await getSupabase()
     .from("recipes")
     .select("*")
@@ -22,7 +52,12 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 }
 
 export async function getRecipeBySlug(slug: string): Promise<Recipe | null> {
-  if (!isConfigured()) return null;
+  if (isFactoryMode()) {
+    const all = await fetchAllFromFactory();
+    return all.find((r) => r.slug === slug) ?? null;
+  }
+  if (!isSupabaseConfigured()) return null;
+
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("recipes")
@@ -42,7 +77,12 @@ export async function getRecipeBySlug(slug: string): Promise<Recipe | null> {
 export async function getRecipesByRestaurant(
   restaurant: string
 ): Promise<Recipe[]> {
-  if (!isConfigured()) return [];
+  if (isFactoryMode()) {
+    const all = await fetchAllFromFactory();
+    return all.filter((r) => r.restaurant_name === restaurant);
+  }
+  if (!isSupabaseConfigured()) return [];
+
   const { data, error } = await getSupabase()
     .from("recipes")
     .select("*")
@@ -55,7 +95,12 @@ export async function getRecipesByRestaurant(
 }
 
 export async function getRecipesByCategory(category: string): Promise<Recipe[]> {
-  if (!isConfigured()) return [];
+  if (isFactoryMode()) {
+    const all = await fetchAllFromFactory();
+    return all.filter((r) => r.category === category);
+  }
+  if (!isSupabaseConfigured()) return [];
+
   const { data, error } = await getSupabase()
     .from("recipes")
     .select("*")
@@ -70,54 +115,53 @@ export async function getRecipesByCategory(category: string): Promise<Recipe[]> 
 export async function getCategories(): Promise<
   { name: string; slug: string; count: number }[]
 > {
-  if (!isConfigured()) return [];
-  const { data, error } = await getSupabase()
-    .from("recipes")
-    .select("category, restaurant_name")
-    .eq("status", "published");
-
-  if (error) throw error;
+  const rows = isFactoryMode()
+    ? await fetchAllFromFactory()
+    : await (async () => {
+        if (!isSupabaseConfigured()) return [];
+        const { data, error } = await getSupabase()
+          .from("recipes")
+          .select("category, restaurant_name")
+          .eq("status", "published");
+        if (error) throw error;
+        return data ?? [];
+      })();
 
   const counts = new Map<string, number>();
-  for (const row of data ?? []) {
-    // Prefer the AI-assigned category field; fall back to restaurant_name for legacy recipes
+  for (const row of rows) {
     const name = (row.category as string | null) || (row.restaurant_name as string | null);
     if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
   }
 
   return Array.from(counts.entries())
-    .map(([name, count]) => ({
-      name,
-      slug: slugifyCategory(name),
-      count,
-    }))
+    .map(([name, count]) => ({ name, slug: slugifyCategory(name), count }))
     .sort((a, b) => b.count - a.count);
 }
 
 export async function getRestaurantNames(): Promise<
   { name: string; slug: string; count: number }[]
 > {
-  if (!isConfigured()) return [];
-  const { data, error } = await getSupabase()
-    .from("recipes")
-    .select("restaurant_name")
-    .eq("status", "published")
-    .not("restaurant_name", "is", null);
-
-  if (error) throw error;
+  const rows = isFactoryMode()
+    ? await fetchAllFromFactory()
+    : await (async () => {
+        if (!isSupabaseConfigured()) return [];
+        const { data, error } = await getSupabase()
+          .from("recipes")
+          .select("restaurant_name")
+          .eq("status", "published")
+          .not("restaurant_name", "is", null);
+        if (error) throw error;
+        return data ?? [];
+      })();
 
   const counts = new Map<string, number>();
-  for (const row of data ?? []) {
-    const name = row.restaurant_name as string;
+  for (const row of rows) {
+    const name = row.restaurant_name as string | null;
     if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
   }
 
   return Array.from(counts.entries())
-    .map(([name, count]) => ({
-      name,
-      slug: slugifyCategory(name),
-      count,
-    }))
+    .map(([name, count]) => ({ name, slug: slugifyCategory(name), count }))
     .sort((a, b) => b.count - a.count);
 }
 
@@ -127,9 +171,22 @@ export async function getRelatedRecipes(
   category: string | null = null,
   limit = 4
 ): Promise<Recipe[]> {
-  if (!isConfigured()) return [];
-  const supabase = getSupabase();
+  if (isFactoryMode()) {
+    const all = await fetchAllFromFactory();
+    const others = all.filter((r) => r.slug !== currentSlug);
+    if (restaurant) {
+      const match = others.filter((r) => r.restaurant_name === restaurant);
+      if (match.length > 0) return match.slice(0, limit);
+    }
+    if (category) {
+      const match = others.filter((r) => r.category === category);
+      if (match.length > 0) return match.slice(0, limit);
+    }
+    return others.slice(0, limit);
+  }
+  if (!isSupabaseConfigured()) return [];
 
+  const supabase = getSupabase();
   const base = supabase
     .from("recipes")
     .select("*")
@@ -138,28 +195,28 @@ export async function getRelatedRecipes(
     .limit(limit)
     .order("published_at", { ascending: false });
 
-  // 1. Try restaurant match first
   if (restaurant) {
     const { data, error } = await base.eq("restaurant_name", restaurant);
     if (error) throw error;
     if (data && data.length > 0) return data;
   }
-
-  // 2. Try category match
   if (category) {
     const { data, error } = await base.eq("category", category);
     if (error) throw error;
     if (data && data.length > 0) return data;
   }
-
-  // 3. Fall back to latest recipes
   const { data, error } = await base;
   if (error) throw error;
   return data ?? [];
 }
 
 export async function getRecipeSlugs(): Promise<string[]> {
-  if (!isConfigured()) return [];
+  if (isFactoryMode()) {
+    const all = await fetchAllFromFactory();
+    return all.map((r) => r.slug);
+  }
+  if (!isSupabaseConfigured()) return [];
+
   const { data, error } = await getSupabase()
     .from("recipes")
     .select("slug")
@@ -172,7 +229,12 @@ export async function getRecipeSlugs(): Promise<string[]> {
 export async function getRecipeSlugsWithDates(): Promise<
   { slug: string; published_at: string | null }[]
 > {
-  if (!isConfigured()) return [];
+  if (isFactoryMode()) {
+    const all = await fetchAllFromFactory();
+    return all.map((r) => ({ slug: r.slug, published_at: r.published_at }));
+  }
+  if (!isSupabaseConfigured()) return [];
+
   const { data, error } = await getSupabase()
     .from("recipes")
     .select("slug, published_at")

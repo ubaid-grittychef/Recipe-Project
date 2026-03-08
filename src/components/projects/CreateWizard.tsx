@@ -29,6 +29,7 @@ import {
   Loader2,
   AlertTriangle,
   ListChecks,
+  Sparkles,
 } from "lucide-react";
 
 const STEPS = [
@@ -97,6 +98,7 @@ export default function CreateWizard() {
   >("idle");
   const [sheetError, setSheetError] = useState("");
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState<string | null>(null); // field key being generated
 
   useEffect(() => {
     api
@@ -147,6 +149,53 @@ export default function CreateWizard() {
       setSheetStatus("invalid");
       setSheetError("Could not connect. Check the URL and service account permissions.");
       toast.error("Failed to validate sheet");
+    }
+  }
+
+  async function fillAllWithAI() {
+    if (!form.name.trim()) {
+      toast.error("Enter a site name first — AI will use it to generate suggestions");
+      return;
+    }
+    setAiLoading("all");
+    try {
+      const res = await api.post<{
+        niche?: string; restaurant_category?: string; tagline?: string;
+        meta_description?: string; author_name?: string; target_audience?: string;
+        site_category?: string;
+      }>("/api/ai/fill-project", { name: form.name, niche: form.niche });
+      update({
+        niche: res.niche ?? form.niche,
+        restaurant_category: res.restaurant_category ?? form.restaurant_category,
+        tagline: res.tagline ?? form.tagline,
+        meta_description: res.meta_description ?? form.meta_description,
+        author_name: res.author_name ?? form.author_name,
+        target_audience: res.target_audience ?? form.target_audience,
+        site_category: res.site_category ?? form.site_category,
+      });
+      toast.success("AI filled your site details — review and adjust as needed");
+    } catch {
+      toast.error("AI fill failed — check your OpenAI API key");
+    } finally {
+      setAiLoading(null);
+    }
+  }
+
+  async function fillFieldWithAI(field: keyof WizardFormData) {
+    if (!form.name.trim()) {
+      toast.error("Enter a site name first");
+      return;
+    }
+    setAiLoading(field);
+    try {
+      const res = await api.post<Record<string, string>>("/api/ai/fill-project", {
+        name: form.name, niche: form.niche,
+      });
+      if (res[field]) update({ [field]: res[field] } as Partial<WizardFormData>);
+    } catch {
+      toast.error("AI generation failed");
+    } finally {
+      setAiLoading(null);
     }
   }
 
@@ -226,7 +275,14 @@ export default function CreateWizard() {
         </div>
 
         <div className="space-y-5">
-          {step === 0 && <StepBasicInfo form={form} update={update} />}
+          {step === 0 && (
+            <StepBasicInfo
+              form={form}
+              update={update}
+              aiLoading={aiLoading}
+              onFillAll={fillAllWithAI}
+            />
+          )}
           {step === 1 && (
             <StepKeywords
               form={form}
@@ -237,8 +293,22 @@ export default function CreateWizard() {
               googleEmail={googleEmail}
             />
           )}
-          {step === 2 && <StepBranding form={form} update={update} />}
-          {step === 3 && <StepSEO form={form} update={update} />}
+          {step === 2 && (
+            <StepBranding
+              form={form}
+              update={update}
+              aiLoading={aiLoading}
+              fillField={fillFieldWithAI}
+            />
+          )}
+          {step === 3 && (
+            <StepSEO
+              form={form}
+              update={update}
+              aiLoading={aiLoading}
+              fillField={fillFieldWithAI}
+            />
+          )}
           {step === 4 && <StepTone form={form} update={update} />}
           {step === 5 && <StepSchedule form={form} update={update} />}
           {step === 6 && <StepMonetization form={form} update={update} />}
@@ -296,18 +366,25 @@ interface StepProps {
 function Field({
   label,
   hint,
+  action,
   children,
 }: {
   label: string;
   hint?: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-      {hint && <span className="ml-2 text-xs text-slate-400">{hint}</span>}
+    <div className="block">
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-sm font-medium text-slate-700">{label}</span>
+          {hint && <span className="ml-2 text-xs text-slate-400">{hint}</span>}
+        </div>
+        {action}
+      </div>
       <div className="mt-1.5">{children}</div>
-    </label>
+    </div>
   );
 }
 
@@ -355,7 +432,15 @@ function TextArea({
   );
 }
 
-function StepBasicInfo({ form, update }: StepProps) {
+function StepBasicInfo({
+  form,
+  update,
+  aiLoading,
+  onFillAll,
+}: StepProps & {
+  aiLoading: string | null;
+  onFillAll: () => void;
+}) {
   return (
     <>
       <Field label="Site Name">
@@ -365,6 +450,22 @@ function StepBasicInfo({ form, update }: StepProps) {
           placeholder="e.g. Copycat Kitchen"
         />
       </Field>
+
+      {/* AI fill button */}
+      <button
+        type="button"
+        onClick={onFillAll}
+        disabled={aiLoading === "all" || !form.name.trim()}
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100 disabled:opacity-50"
+      >
+        {aiLoading === "all" ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Sparkles className="h-4 w-4" />
+        )}
+        {aiLoading === "all" ? "AI is thinking…" : "Fill remaining fields with AI"}
+      </button>
+
       <Field label="Niche Description">
         <TextArea
           value={form.niche}
@@ -615,7 +716,43 @@ function StepKeywords({
   );
 }
 
-function StepBranding({ form, update }: StepProps) {
+function AiButton({
+  field,
+  aiLoading,
+  fillField,
+}: {
+  field: keyof WizardFormData;
+  aiLoading: string | null;
+  fillField: (f: keyof WizardFormData) => void;
+}) {
+  const loading = aiLoading === field;
+  return (
+    <button
+      type="button"
+      onClick={() => fillField(field)}
+      disabled={!!aiLoading}
+      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 disabled:opacity-40"
+      title="Generate with AI"
+    >
+      {loading ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : (
+        <Sparkles className="h-3 w-3" />
+      )}
+      {loading ? "…" : "AI"}
+    </button>
+  );
+}
+
+function StepBranding({
+  form,
+  update,
+  aiLoading,
+  fillField,
+}: StepProps & {
+  aiLoading: string | null;
+  fillField: (f: keyof WizardFormData) => void;
+}) {
   return (
     <>
       <Field label="Logo URL" hint="Optional — paste a link to your logo">
@@ -674,7 +811,10 @@ function StepBranding({ form, update }: StepProps) {
           ))}
         </div>
       </Field>
-      <Field label="Site Tagline">
+      <Field
+        label="Site Tagline"
+        action={<AiButton field="tagline" aiLoading={aiLoading} fillField={fillField} />}
+      >
         <TextInput
           value={form.tagline}
           onChange={(v) => update({ tagline: v })}
@@ -685,31 +825,53 @@ function StepBranding({ form, update }: StepProps) {
   );
 }
 
-function StepSEO({ form, update }: StepProps) {
+function StepSEO({
+  form,
+  update,
+  aiLoading,
+  fillField,
+}: StepProps & {
+  aiLoading: string | null;
+  fillField: (f: keyof WizardFormData) => void;
+}) {
   return (
     <>
-      <Field label="Site Meta Description" hint="For search engine results">
+      <Field
+        label="Site Meta Description"
+        hint="For search engine results"
+        action={<AiButton field="meta_description" aiLoading={aiLoading} fillField={fillField} />}
+      >
         <TextArea
           value={form.meta_description}
           onChange={(v) => update({ meta_description: v })}
           placeholder="e.g. Discover easy copycat recipes from your favorite restaurants. Step-by-step guides to recreate popular dishes at home."
         />
       </Field>
-      <Field label="Default Author Name" hint="Builds E-E-A-T trust signals">
+      <Field
+        label="Default Author Name"
+        hint="Builds E-E-A-T trust signals"
+        action={<AiButton field="author_name" aiLoading={aiLoading} fillField={fillField} />}
+      >
         <TextInput
           value={form.author_name}
           onChange={(v) => update({ author_name: v })}
           placeholder="e.g. Chef Sarah Mitchell"
         />
       </Field>
-      <Field label="Target Audience">
+      <Field
+        label="Target Audience"
+        action={<AiButton field="target_audience" aiLoading={aiLoading} fillField={fillField} />}
+      >
         <TextInput
           value={form.target_audience}
           onChange={(v) => update({ target_audience: v })}
           placeholder="e.g. Home cooks aged 25-45 who love dining out"
         />
       </Field>
-      <Field label="Site Category">
+      <Field
+        label="Site Category"
+        action={<AiButton field="site_category" aiLoading={aiLoading} fillField={fillField} />}
+      >
         <TextInput
           value={form.site_category}
           onChange={(v) => update({ site_category: v })}
