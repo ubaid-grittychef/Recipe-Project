@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit)",
+      "Bash(ls -la .env*)",
+      "Bash(node --version)",
+      "Bash(npm --version)",
+      "Bash(npm install)",
+      "Bash(grep -n \"WifiOff\\\\|Globe\\\\|ExternalLink\\\\|TrendingUp\\\\|Target\" src/app/projects/[id]/page.tsx)",
+      "Bash(grep -n \"Zap\\\\|Play\\\\|Loader2\\\\|Activity\\\\|CheckCircle2\\\\|Rocket\\\\|ArrowLeft\\\\|Clock\\\\|Calendar\\\\|BarChart3\\\\|BookOpen\\\\|KeyRound\\\\|AlertCircle\\\\|ChefHat\\\\|ListChecks\\\\|Tag\" src/app/projects/[id]/page.tsx)",
+      "Bash(ls -la /c/Users/Admin/Documents/GitHub/Recipe-Project/.env*)"
+    ]
+  }
+}

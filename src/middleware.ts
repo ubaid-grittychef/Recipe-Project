@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import * as crypto from "crypto";
 
 const PUBLIC_PATHS = ["/login", "/api/auth/login"];
 const SESSION_COOKIE = "factory_session";
 
-export function middleware(request: NextRequest) {
+/** SHA-256 via the Web Crypto API — works in both Edge and Node runtimes */
+async function sha256hex(text: string): Promise<string> {
+  const encoded = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export async function middleware(request: NextRequest) {
   const factoryPassword = process.env.FACTORY_PASSWORD;
 
   if (!factoryPassword) {
@@ -29,10 +37,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const expectedToken = crypto
-    .createHash("sha256")
-    .update(factoryPassword)
-    .digest("hex");
+  const expectedToken = await sha256hex(factoryPassword);
 
   if (session.value !== expectedToken) {
     const loginUrl = new URL("/login", request.url);

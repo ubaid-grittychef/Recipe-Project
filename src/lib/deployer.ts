@@ -6,7 +6,7 @@ import {
   updateDeployment,
 } from "./store";
 import { Deployment } from "./types";
-import { generateId } from "./utils";
+import { generateId, withRetry } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
@@ -33,14 +33,16 @@ async function vercelApi(
   const url = new URL(`https://api.vercel.com${urlPath}`);
   if (teamId) url.searchParams.set("teamId", teamId);
 
-  const res = await fetch(url.toString(), {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  const res = await withRetry(() =>
+    fetch(url.toString(), {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+  );
 
   const data = await res.json();
   if (!res.ok) {
@@ -215,16 +217,18 @@ async function uploadFile(
   const url = new URL("https://api.vercel.com/v2/files");
   if (teamId) url.searchParams.set("teamId", teamId);
 
-  const res = await fetch(url.toString(), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/octet-stream",
-      "x-vercel-digest": sha,
-      "x-vercel-size": String(content.length),
-    },
-    body: content,
-  });
+  const res = await withRetry(() =>
+    fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/octet-stream",
+        "x-vercel-digest": sha,
+        "x-vercel-size": String(content.length),
+      },
+      body: content,
+    })
+  );
 
   if (!res.ok && res.status !== 409) {
     const data = await res.json().catch(() => ({}));

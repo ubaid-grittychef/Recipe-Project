@@ -82,6 +82,17 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleCopy(id: string) {
+    try {
+      await api.post(`/api/projects/${id}/copy`);
+      toast.success("Project duplicated");
+      fetchProjects();
+    } catch (err) {
+      toast.error("Failed to duplicate project");
+      console.error("[Dashboard] copy failed:", err);
+    }
+  }
+
   const filtered = projects.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -166,6 +177,7 @@ export default function DashboardPage() {
             project={project}
             onToggleStatus={handleToggleStatus}
             onDelete={handleDelete}
+            onCopy={handleCopy}
           />
         ))}
       </div>

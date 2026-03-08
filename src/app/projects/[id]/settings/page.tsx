@@ -21,6 +21,10 @@ import {
   Loader2,
   Trash2,
   Sparkles,
+  ClipboardCopy,
+  CheckCircle2,
+  Upload,
+  ListChecks,
 } from "lucide-react";
 import { SkeletonSettingsPage } from "@/components/Skeleton";
 import { toast } from "sonner";
@@ -432,15 +436,124 @@ function SectionKeywords({
   form: Partial<Project>;
   update: (f: Partial<Project>) => void;
 }) {
+  const [validating, setValidating] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importResult, setImportResult] = useState<string | null>(null);
+  const [sheetStatus, setSheetStatus] = useState<{
+    valid: boolean;
+    preview: Array<{ keyword: string; restaurant: string }>;
+    error?: string;
+  } | null>(null);
+  const [queueCounts, setQueueCounts] = useState<{ pending: number; done: number; failed: number } | null>(null);
+  const projectId = (form as Project).id;
+
+  useEffect(() => {
+    if (!form.sheet_url && projectId) {
+      fetch(`/api/projects/${projectId}/queue`)
+        .then((r) => r.json())
+        .then((d) => setQueueCounts(d.counts))
+        .catch(() => {});
+    }
+  }, [form.sheet_url, projectId]);
+
+  async function validateSheet() {
+    if (!form.sheet_url) {
+      toast.error("Enter a Google Sheet URL first");
+      return;
+    }
+    setValidating(true);
+    setSheetStatus(null);
+    try {
+      const result = await api.post<{
+        valid: boolean;
+        preview: Array<{ keyword: string; restaurant: string }>;
+        error?: string;
+      }>("/api/sheets/validate", {
+        sheet_url: form.sheet_url,
+        keyword_col: form.sheet_keyword_column ?? "A",
+        restaurant_col: form.sheet_restaurant_column ?? "B",
+        status_col: form.sheet_status_column ?? "C",
+      });
+      setSheetStatus(result);
+      if (result.valid) {
+        toast.success(`Sheet connected — ${result.preview.length} pending keywords found`);
+      } else {
+        toast.error(result.error ?? "Could not connect to sheet");
+      }
+    } catch {
+      toast.error("Failed to validate sheet");
+    } finally {
+      setValidating(false);
+    }
+  }
+
+  async function importKeywords() {
+    if (!projectId) { toast.error("Save project settings first"); return; }
+    const lines = importText.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) { toast.error("Paste at least one keyword"); return; }
+
+    // Parse lines: "keyword" or "keyword, restaurant" or "keyword | restaurant"
+    const keywords = lines.map((line) => {
+      const sep = line.includes("|") ? "|" : ",";
+      const parts = line.split(sep).map((p) => p.trim());
+      return { keyword: parts[0] ?? "", restaurant: parts[1] ?? "" };
+    }).filter((k) => k.keyword);
+
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const result = await api.post<{ appended: number; message: string }>(
+        `/api/projects/${projectId}/keywords/import`,
+        { keywords }
+      );
+      setImportText("");
+      setImportResult(result.message);
+      toast.success(result.message);
+    } catch {
+      toast.error("Failed to import keywords — check Sheet permissions");
+    } finally {
+      setImporting(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
+      {!form.sheet_url && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-2">
+              <ListChecks className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-blue-800">Using Built-in Keyword Queue</p>
+                <p className="mt-0.5 text-xs text-blue-600">
+                  {queueCounts !== null
+                    ? `${queueCounts.pending} pending · ${queueCounts.done} done${queueCounts.failed > 0 ? ` · ${queueCounts.failed} failed` : ""}`
+                    : "No Google Sheet configured — keywords are managed in-app."}
+                </p>
+              </div>
+            </div>
+            {projectId && (
+              <Link
+                href={`/projects/${projectId}/queue`}
+                className="shrink-0 rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200"
+              >
+                Manage Queue →
+              </Link>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-blue-500">
+            To use Google Sheets instead, add your sheet URL below.
+          </p>
+        </div>
+      )}
       <Field
         label="Google Sheet URL"
         hint="Share the sheet with the service account email"
       >
         <TextInput
           value={form.sheet_url}
-          onChange={(v) => update({ sheet_url: v })}
+          onChange={(v) => { update({ sheet_url: v }); setSheetStatus(null); }}
           placeholder="https://docs.google.com/spreadsheets/d/..."
         />
       </Field>
@@ -466,6 +579,79 @@ function SectionKeywords({
             placeholder="C"
           />
         </Field>
+      </div>
+
+      <button
+        type="button"
+        onClick={validateSheet}
+        disabled={validating}
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+      >
+        {validating ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <FileSpreadsheet className="h-4 w-4" />
+        )}
+        {validating ? "Connecting..." : "Test Sheet Connection"}
+      </button>
+
+      {sheetStatus && (
+        <div className={cn(
+          "rounded-lg border px-4 py-3 text-xs",
+          sheetStatus.valid
+            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+            : "border-red-200 bg-red-50 text-red-600"
+        )}>
+          {sheetStatus.valid ? (
+            <>
+              <p className="font-medium">Sheet connected successfully</p>
+              {sheetStatus.preview.length > 0 && (
+                <ul className="mt-2 space-y-0.5">
+                  {sheetStatus.preview.slice(0, 3).map((kw, i) => (
+                    <li key={i} className="text-emerald-600">
+                      &bull; {kw.keyword}{kw.restaurant ? ` (${kw.restaurant})` : ""}
+                    </li>
+                  ))}
+                  {sheetStatus.preview.length > 3 && (
+                    <li className="text-emerald-500">…and {sheetStatus.preview.length - 3} more pending</li>
+                  )}
+                </ul>
+              )}
+            </>
+          ) : (
+            <p>{sheetStatus.error ?? "Connection failed"}</p>
+          )}
+        </div>
+      )}
+
+      {/* Keyword import */}
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <p className="mb-2 text-sm font-medium text-slate-700">Import Keywords</p>
+        <p className="mb-3 text-xs text-slate-500">
+          Paste keywords directly into your sheet — one per line.
+          Optionally add a restaurant name separated by a comma or pipe: <span className="font-mono">Big Mac recipe, McDonald&apos;s</span>
+        </p>
+        <textarea
+          value={importText}
+          onChange={(e) => { setImportText(e.target.value); setImportResult(null); }}
+          placeholder={"Big Mac copycat recipe, McDonald's\nOlive Garden Alfredo pasta\nChipotle burrito bowl | Chipotle"}
+          rows={5}
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        />
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={importKeywords}
+            disabled={importing || !importText.trim()}
+            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-600 disabled:opacity-50"
+          >
+            {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {importing ? "Importing..." : "Add to Sheet"}
+          </button>
+          {importResult && (
+            <span className="text-xs font-medium text-emerald-600">{importResult}</span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -821,6 +1007,8 @@ function SectionSiteDatabase({
   update: (f: Partial<Project>) => void;
 }) {
   const [testing, setTesting] = useState(false);
+  const [settingUp, setSettingUp] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [connStatus, setConnStatus] = useState<{
     connected: boolean;
     hasTable: boolean;
@@ -847,7 +1035,7 @@ function SectionSiteDatabase({
       if (result.connected && result.hasTable) {
         toast.success(`Connected — ${result.recipeCount} recipes in database`);
       } else if (result.connected) {
-        toast.error(result.error ?? "Table not found");
+        toast.error(result.error ?? "Table not found — run Setup Database");
       } else {
         toast.error(result.error ?? "Connection failed");
       }
@@ -855,6 +1043,56 @@ function SectionSiteDatabase({
       toast.error("Failed to test connection");
     } finally {
       setTesting(false);
+    }
+  }
+
+  async function setupDatabase() {
+    if (!projectId) {
+      toast.error("Save project settings first");
+      return;
+    }
+    setSettingUp(true);
+    try {
+      const result = await api.post<{ success: boolean; error?: string }>(
+        `/api/projects/${projectId}/site`,
+        { action: "setup-schema" }
+      );
+      if (result.success) {
+        toast.success("Database schema created successfully");
+        // Re-test connection to refresh status
+        const status = await api.get<{
+          connected: boolean;
+          hasTable: boolean;
+          recipeCount: number;
+          error?: string;
+        }>(`/api/projects/${projectId}/site`);
+        setConnStatus(status);
+      } else {
+        toast.error(result.error ?? "Setup failed — copy the SQL and run it manually in Supabase");
+      }
+    } catch {
+      toast.error("Setup failed — copy the SQL and run it manually in Supabase");
+    } finally {
+      setSettingUp(false);
+    }
+  }
+
+  async function copySQL() {
+    if (!projectId) {
+      toast.error("Save project settings first");
+      return;
+    }
+    try {
+      const result = await api.post<{ sql: string }>(
+        `/api/projects/${projectId}/site`,
+        { action: "get-sql" }
+      );
+      await navigator.clipboard.writeText(result.sql);
+      setCopied(true);
+      toast.success("SQL copied — paste it into your Supabase SQL editor");
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast.error("Failed to copy SQL");
     }
   }
 
@@ -885,7 +1123,8 @@ function SectionSiteDatabase({
           type="password"
         />
       </Field>
-      <div className="flex items-center gap-3">
+
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={testConnection}
@@ -899,21 +1138,54 @@ function SectionSiteDatabase({
           )}
           Test Connection
         </button>
-        {connStatus && (
-          <span
-            className={cn(
-              "text-xs font-medium",
-              connStatus.connected && connStatus.hasTable
-                ? "text-emerald-600"
-                : "text-red-500"
-            )}
-          >
-            {connStatus.connected && connStatus.hasTable
-              ? `Connected (${connStatus.recipeCount} recipes)`
-              : connStatus.error ?? "Not connected"}
-          </span>
-        )}
+
+        <button
+          type="button"
+          onClick={setupDatabase}
+          disabled={settingUp}
+          className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm transition-colors hover:bg-emerald-100 disabled:opacity-50"
+        >
+          {settingUp ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+          {settingUp ? "Setting up..." : "Setup Database"}
+        </button>
+
+        <button
+          type="button"
+          onClick={copySQL}
+          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+        >
+          {copied ? (
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+          ) : (
+            <ClipboardCopy className="h-4 w-4" />
+          )}
+          {copied ? "Copied!" : "Copy SQL"}
+        </button>
       </div>
+
+      {connStatus && (
+        <div
+          className={cn(
+            "rounded-lg border px-4 py-3 text-xs",
+            connStatus.connected && connStatus.hasTable
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-red-200 bg-red-50 text-red-600"
+          )}
+        >
+          {connStatus.connected && connStatus.hasTable
+            ? `Connected — ${connStatus.recipeCount} recipes in database`
+            : connStatus.error ?? "Not connected"}
+          {connStatus.connected && !connStatus.hasTable && (
+            <p className="mt-1 text-red-500">
+              Click &quot;Setup Database&quot; to create the recipes table, or &quot;Copy SQL&quot; to run it manually in Supabase.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

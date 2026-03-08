@@ -1,0 +1,92 @@
+import { NextResponse } from "next/server";
+import { getBuiltInKeywords, createBuiltInKeywords, deleteBuiltInKeywords } from "@/lib/store";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("API:Queue");
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const { searchParams } = new URL(request.url);
+  const status = searchParams.get("status") as "pending" | "done" | "failed" | null;
+
+  try {
+    const keywords = await getBuiltInKeywords(id, status ?? undefined);
+    const allKeywords = await getBuiltInKeywords(id);
+    const counts = {
+      pending: allKeywords.filter((k) => k.status === "pending").length,
+      done: allKeywords.filter((k) => k.status === "done").length,
+      failed: allKeywords.filter((k) => k.status === "failed").length,
+    };
+    return NextResponse.json({ keywords, counts });
+  } catch (error) {
+    log.error("Failed to fetch queue", { projectId: id }, error);
+    return NextResponse.json({ error: "Failed to fetch queue" }, { status: 500 });
+  }
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  try {
+    const { text } = await request.json();
+    if (!text || typeof text !== "string") {
+      return NextResponse.json({ error: "text is required" }, { status: 400 });
+    }
+
+    // Parse pasted text — one keyword per line
+    // Supports: "keyword" or "keyword, Restaurant" or "keyword | Restaurant"
+    const rows: Array<{ keyword: string; restaurant_name: string | null }> = [];
+    for (const line of text.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      let keyword = trimmed;
+      let restaurant_name: string | null = null;
+
+      const separatorMatch = trimmed.match(/^(.+?)\s*[,|]\s*(.+)$/);
+      if (separatorMatch) {
+        keyword = separatorMatch[1].trim();
+        restaurant_name = separatorMatch[2].trim() || null;
+      }
+
+      if (keyword) {
+        rows.push({ keyword, restaurant_name });
+      }
+    }
+
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "No valid keywords found" }, { status: 400 });
+    }
+
+    const created = await createBuiltInKeywords(id, rows);
+    log.info("Added keywords to queue", { projectId: id, count: created.length });
+    return NextResponse.json({ added: created.length, keywords: created });
+  } catch (error) {
+    log.error("Failed to add keywords to queue", { projectId: id }, error);
+    return NextResponse.json({ error: "Failed to add keywords" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const { searchParams } = new URL(request.url);
+  const status = searchParams.get("status") as "pending" | "done" | "failed" | null;
+
+  try {
+    await deleteBuiltInKeywords(id, status ?? undefined);
+    log.info("Cleared queue", { projectId: id, status });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    log.error("Failed to clear queue", { projectId: id }, error);
+    return NextResponse.json({ error: "Failed to clear queue" }, { status: 500 });
+  }
+}

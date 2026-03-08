@@ -1,5 +1,6 @@
 import { auth, sheets } from "@googleapis/sheets";
 import { createLogger } from "./logger";
+import { withRetry } from "./utils";
 
 const log = createLogger("Sheets");
 
@@ -90,10 +91,9 @@ export async function fetchPendingKeywords(
 
   log.debug("Fetching sheet data", { spreadsheetId, range });
 
-  const res = await client.spreadsheets.values.get({
-    spreadsheetId,
-    range,
-  });
+  const res = await withRetry(() =>
+    client.spreadsheets.values.get({ spreadsheetId, range })
+  );
 
   const rows = res.data.values ?? [];
 
@@ -141,12 +141,14 @@ export async function markKeywordDone(
 
   log.debug("Marking keyword in sheet", { row, status, col: statusCol });
 
-  await client.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${statusCol}${row}`,
-    valueInputOption: "RAW",
-    requestBody: { values: [[value]] },
-  });
+  await withRetry(() =>
+    client.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${statusCol}${row}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[value]] },
+    })
+  );
 }
 
 /**
@@ -170,7 +172,9 @@ export async function resetKeywordsToPending(
   const maxIdx = Math.max(columnToIndex(keywordCol), columnToIndex(statusCol));
   const range = `${indexToColumn(minIdx)}:${indexToColumn(maxIdx)}`;
 
-  const res = await client.spreadsheets.values.get({ spreadsheetId, range });
+  const res = await withRetry(() =>
+    client.spreadsheets.values.get({ spreadsheetId, range })
+  );
   const rows = res.data.values ?? [];
   const kOffset = columnToIndex(keywordCol) - minIdx;
   const sOffset = columnToIndex(statusCol) - minIdx;
@@ -186,12 +190,14 @@ export async function resetKeywordsToPending(
     if (keywordSet.has(kw) && status.startsWith("failed")) {
       const rowNumber = i + 1;
       updates.push(
-        client.spreadsheets.values.update({
-          spreadsheetId,
-          range: `${statusCol}${rowNumber}`,
-          valueInputOption: "RAW",
-          requestBody: { values: [[""]] },
-        })
+        withRetry(() =>
+          client.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${statusCol}${rowNumber}`,
+            valueInputOption: "RAW",
+            requestBody: { values: [[""]] },
+          })
+        )
       );
     }
   }
@@ -199,6 +205,64 @@ export async function resetKeywordsToPending(
   await Promise.all(updates);
   log.info("Reset keywords to pending in sheet", { count: updates.length });
   return { reset: updates.length };
+}
+
+/**
+ * Append new keyword rows to the sheet.
+ * Each row is written to the keyword and restaurant columns; status column is left blank (= "pending").
+ */
+export async function appendKeywordsToSheet(
+  sheetUrl: string,
+  keywordCol: string,
+  restaurantCol: string,
+  statusCol: string,
+  keywords: Array<{ keyword: string; restaurant: string }>
+): Promise<{ appended: number }> {
+  if (keywords.length === 0) return { appended: 0 };
+
+  const client = getSheetsClient();
+  const spreadsheetId = extractSheetId(sheetUrl);
+
+  const kIdx = columnToIndex(keywordCol);
+  const rIdx = columnToIndex(restaurantCol);
+  const sIdx = columnToIndex(statusCol);
+
+  // Find the first empty row by reading the keyword column
+  const res = await withRetry(() =>
+    client.spreadsheets.values.get({ spreadsheetId, range: `${keywordCol}:${keywordCol}` })
+  );
+  const existingRows = res.data.values ?? [];
+  // Next empty row (1-based, skip header row 1)
+  const startRow = Math.max(existingRows.length + 1, 2);
+
+  // Build the minimal column span needed
+  const minIdx = Math.min(kIdx, rIdx, sIdx);
+  const maxIdx = Math.max(kIdx, rIdx, sIdx);
+  const numCols = maxIdx - minIdx + 1;
+
+  const rows = keywords.map(({ keyword, restaurant }) => {
+    const row: string[] = Array(numCols).fill("");
+    row[kIdx - minIdx] = keyword;
+    row[rIdx - minIdx] = restaurant;
+    row[sIdx - minIdx] = ""; // empty = pending
+    return row;
+  });
+
+  const startColLetter = indexToColumn(minIdx);
+  const endColLetter = indexToColumn(maxIdx);
+  const range = `${startColLetter}${startRow}:${endColLetter}${startRow + rows.length - 1}`;
+
+  await withRetry(() =>
+    client.spreadsheets.values.update({
+      spreadsheetId,
+      range,
+      valueInputOption: "RAW",
+      requestBody: { values: rows },
+    })
+  );
+
+  log.info("Appended keywords to sheet", { count: rows.length, startRow });
+  return { appended: rows.length };
 }
 
 export async function validateSheet(

@@ -27,6 +27,12 @@ import {
   Globe,
   ExternalLink,
   ChefHat,
+  Activity,
+  WifiOff,
+  ListChecks,
+  Tag,
+  Circle,
+  Upload,
 } from "lucide-react";
 import GenerationProgressCard from "@/components/GenerationProgressCard";
 import { SkeletonProjectDetail } from "@/components/Skeleton";
@@ -39,13 +45,34 @@ export default function ProjectDetailPage({ params }: Props) {
   const { id } = use(params);
   const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
+  const [draftCount, setDraftCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [queueCounts, setQueueCounts] = useState<{ pending: number; done: number; failed: number } | null>(null);
+  const [generationRunning, setGenerationRunning] = useState(false);
+  const [healthCheck, setHealthCheck] = useState<{ healthy: boolean | null; latency_ms?: number; checked_at?: string } | null>(null);
+  const [checkingHealth, setCheckingHealth] = useState(false);
+  const [configStatus, setConfigStatus] = useState<{ openai: boolean; pexels: boolean } | null>(null);
 
   useEffect(() => {
-    api
-      .get<Project>(`/api/projects/${id}`)
-      .then(setProject)
+    fetch("/api/system/config")
+      .then((r) => r.json())
+      .then(setConfigStatus)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    Promise.all([
+      api.get<Project>(`/api/projects/${id}`),
+      api.get<{ total: number }>(`/api/projects/${id}/recipes?status=draft&limit=1`),
+      api.get<{ counts: { pending: number; done: number; failed: number } }>(`/api/projects/${id}/queue`),
+    ])
+      .then(([proj, drafts, queue]) => {
+        setProject(proj);
+        setDraftCount(drafts.total ?? 0);
+        setQueueCounts(queue.counts ?? null);
+      })
       .catch((err) => {
         console.error("[ProjectDetail] fetch failed:", err);
         if (err instanceof ApiError && err.status === 404) {
@@ -70,18 +97,60 @@ export default function ProjectDetailPage({ params }: Props) {
     }
   }
 
+  async function publishAllDrafts() {
+    setPublishing(true);
+    try {
+      const result = await api.post<{ published: number; failed: number; message: string }>(
+        `/api/projects/${id}/recipes/bulk-publish`
+      );
+      toast.success(result.message);
+      setDraftCount(0);
+      const refreshed = await api.get<Project>(`/api/projects/${id}`);
+      setProject(refreshed);
+    } catch {
+      toast.error("Publish failed — check server logs");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  async function checkSiteHealth() {
+    setCheckingHealth(true);
+    try {
+      const result = await api.get<{ healthy: boolean | null; latency_ms?: number; checked_at?: string }>(
+        `/api/projects/${id}/health`
+      );
+      setHealthCheck(result);
+    } catch {
+      setHealthCheck({ healthy: false });
+    } finally {
+      setCheckingHealth(false);
+    }
+  }
+
   async function triggerGeneration() {
     setGenerating(true);
     try {
-      await api.post(`/api/projects/${id}/generate`);
-      toast.success("Generation started — watch the progress card below");
-      // GenerationProgressCard handles live polling — just refresh stats once after 5s
-      setTimeout(async () => {
+      const result = await api.post<{ message: string; warnings?: string[] }>(`/api/projects/${id}/generate`);
+      if (result.warnings?.length) {
+        for (const w of result.warnings) toast.warning(w);
+      } else {
+        toast.success("Generation started — recipes will appear shortly");
+      }
+      // Poll the project every 4 s for up to 3 minutes to surface updated stats
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
         try {
-          const refreshed = await api.get<Project>(`/api/projects/${id}`);
+          const [refreshed, queue] = await Promise.all([
+            api.get<Project>(`/api/projects/${id}`),
+            api.get<{ counts: { pending: number; done: number; failed: number } }>(`/api/projects/${id}/queue`),
+          ]);
           setProject(refreshed);
-        } catch { /* ignore */ }
-      }, 5000);
+          setQueueCounts(queue.counts ?? null);
+        } catch { /* ignore transient errors */ }
+        if (attempts >= 45) clearInterval(poll);
+      }, 4000);
     } catch (err) {
       const msg = err instanceof ApiError
         ? `Generation failed: ${(err.body as { details?: string })?.details ?? err.statusText}`
@@ -117,12 +186,6 @@ export default function ProjectDetailPage({ params }: Props) {
       : 0;
 
   // Setup checklist — derive from project state
-  const hasSiteDb = !!(project.site_supabase_url && project.site_supabase_service_key);
-  const hasSheet = !!project.sheet_url;
-  const hasRecipes = project.recipes_published > 0;
-  const hasDeployment = project.deployment_status === "deployed";
-  const checklistDone = hasSiteDb && hasSheet && hasRecipes && hasDeployment;
-
   return (
     <div>
       <Link
@@ -153,24 +216,23 @@ export default function ProjectDetailPage({ params }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={triggerGeneration}
-            disabled={generating}
-            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-600 disabled:opacity-50"
-          >
-            {generating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Zap className="h-4 w-4" />
-            )}
-            {generating ? "Running..." : "Manual Run"}
-          </button>
+          {project.deployment_status === "deployed" && project.vercel_deployment_url && (
+            <a
+              href={project.vercel_deployment_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600"
+            >
+              <Globe className="h-4 w-4" />
+              View Site
+            </a>
+          )}
           <button
             onClick={toggleStatus}
             className={cn(
               "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-colors",
               project.status === "active"
-                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
             )}
           >
@@ -179,7 +241,7 @@ export default function ProjectDetailPage({ params }: Props) {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            {project.status === "active" ? "Pause" : "Activate"}
+            {project.status === "active" ? "Pause Schedule" : "Activate Schedule"}
           </button>
           <Link
             href={`/projects/${id}/settings`}
@@ -190,6 +252,18 @@ export default function ProjectDetailPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      {/* Onboarding checklist — disappears once all steps done */}
+      <SetupChecklist
+        id={id}
+        project={project}
+        queueCounts={queueCounts}
+        draftCount={draftCount}
+        generating={generating}
+        publishing={publishing}
+        onGenerate={triggerGeneration}
+        onPublish={publishAllDrafts}
+      />
 
       {/* Deployment Banner */}
       <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5">
@@ -235,13 +309,26 @@ export default function ProjectDetailPage({ params }: Props) {
               )}
             </div>
           </div>
-          <Link
-            href={`/projects/${id}/deploy`}
-            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600"
-          >
-            <Rocket className="h-4 w-4" />
-            {project.deployment_status === "deployed" ? "Manage" : "Deploy"}
-          </Link>
+          <div className="flex items-center gap-2">
+            {project.deployment_status === "deployed" && project.vercel_deployment_url && (
+              <a
+                href={project.vercel_deployment_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open Site
+              </a>
+            )}
+            <Link
+              href={`/projects/${id}/deploy`}
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600"
+            >
+              <Rocket className="h-4 w-4" />
+              {project.deployment_status === "deployed" ? "Manage" : "Deploy"}
+            </Link>
+          </div>
         </div>
         {project.domain && project.deployment_status === "deployed" && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
@@ -249,70 +336,149 @@ export default function ProjectDetailPage({ params }: Props) {
             Custom domain: <span className="font-medium">{project.domain}</span>
           </div>
         )}
+        {project.deployment_status === "deployed" && (
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              onClick={checkSiteHealth}
+              disabled={checkingHealth}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {checkingHealth ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Activity className="h-3.5 w-3.5" />
+              )}
+              {checkingHealth ? "Checking…" : "Check site health"}
+            </button>
+            {healthCheck && (
+              <span className={cn(
+                "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+                healthCheck.healthy === true
+                  ? "bg-emerald-100 text-emerald-700"
+                  : healthCheck.healthy === false
+                  ? "bg-red-100 text-red-700"
+                  : "bg-slate-100 text-slate-500"
+              )}>
+                {healthCheck.healthy === true ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : healthCheck.healthy === false ? (
+                  <WifiOff className="h-3.5 w-3.5" />
+                ) : null}
+                {healthCheck.healthy === true
+                  ? `Online · ${healthCheck.latency_ms}ms`
+                  : healthCheck.healthy === false
+                  ? "Unreachable"
+                  : "No URL"}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ── Setup Checklist ──────────────────────────────────────────────── */}
-      {!checklistDone && (
-        <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-5">
-          <h3 className="mb-3 text-sm font-semibold text-blue-900">
-            Setup checklist — complete these steps to go live
-          </h3>
-          <ul className="space-y-2">
-            <ChecklistItem done label="Project created" />
-            <ChecklistItem
-              done={hasSheet}
-              label="Google Sheet connected"
-              action={!hasSheet ? { href: `/projects/${id}/settings`, text: "Configure in Settings" } : undefined}
-            />
-            <ChecklistItem
-              done={hasSiteDb}
-              label="Site database configured (Supabase)"
-              action={!hasSiteDb ? { href: `/projects/${id}/settings`, text: "Add in Settings → Site Database" } : undefined}
-              warn={!hasSiteDb}
-              warnText="Without this, generated recipes won't appear on your live site"
-            />
-            <ChecklistItem
-              done={hasRecipes}
-              label="Recipes generated & published"
-              action={!hasRecipes ? { href: `/projects/${id}/recipes`, text: "Generate & publish recipes" } : undefined}
-            />
-            <ChecklistItem
-              done={hasDeployment}
-              label="Site deployed to Vercel"
-              action={!hasDeployment ? { href: `/projects/${id}/deploy`, text: "Deploy now" } : undefined}
-            />
-          </ul>
+      {/* ── Workflow action strip — one banner at a time ── */}
+
+      {/* Step 0: config error */}
+      {configStatus && !configStatus.openai && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+          <div>
+            <p className="text-sm font-semibold text-red-800">OpenAI API key missing — generation is disabled</p>
+            <p className="mt-1 text-xs text-red-600">
+              Add <code className="font-mono">OPENAI_API_KEY=sk-...</code> to <code className="font-mono">.env.local</code> and restart the server.
+            </p>
+          </div>
         </div>
       )}
 
-      {/* ── Site DB warning (shown even when checklist is dismissed) ─────── */}
-      {!hasSiteDb && checklistDone === false && hasRecipes && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-          <p className="text-sm text-amber-800">
-            <span className="font-medium">Site database not configured.</span>{" "}
-            Recipes are saved but won&apos;t appear on your live site until you add your Supabase credentials.{" "}
-            <Link href={`/projects/${id}/settings`} className="font-medium underline">
-              Configure now →
-            </Link>
-          </p>
+      {/* Step 1: keywords queued (hidden while generation is running or just finished) */}
+      {!generationRunning && !generating && queueCounts && queueCounts.pending > 0 && !project.sheet_url && draftCount === 0 && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <ListChecks className="h-5 w-5 text-brand-600" />
+            <div>
+              <p className="text-sm font-medium text-brand-900">
+                {queueCounts.pending} keyword{queueCounts.pending !== 1 ? "s" : ""} queued
+              </p>
+              <p className="mt-0.5 text-xs text-brand-700">
+                Ready to generate — runs up to {project.recipes_per_day} per batch.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={triggerGeneration}
+            disabled={generating}
+            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600 disabled:opacity-50"
+          >
+            <Zap className="h-4 w-4" />
+            Generate Now
+          </button>
         </div>
       )}
 
-      {/* Live generation progress */}
+      {/* Step 2: generation running — progress card handles its own visibility */}
       <GenerationProgressCard
         projectId={id}
+        onRunningChange={setGenerationRunning}
         onComplete={() => {
-          // Refresh project stats when a run finishes
-          api.get<Project>(`/api/projects/${id}`)
-            .then(setProject)
-            .catch(() => {});
+          Promise.all([
+            api.get<Project>(`/api/projects/${id}`),
+            api.get<{ counts: { pending: number; done: number; failed: number } }>(`/api/projects/${id}/queue`),
+          ]).then(([proj, queue]) => {
+            setProject(proj);
+            setQueueCounts(queue.counts ?? null);
+          }).catch(() => {});
         }}
+      />
+
+      {/* Step 3: drafts ready to publish (hidden while generation is running) */}
+      {!generationRunning && draftCount > 0 && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-amber-600" />
+            <div>
+              <p className="text-sm font-medium text-amber-900">
+                {draftCount} draft recipe{draftCount !== 1 ? "s" : ""} ready to publish
+              </p>
+              <p className="mt-0.5 text-xs text-amber-700">
+                Not visible on your live site until published.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/projects/${id}/recipes`}
+              className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+            >
+              Review
+            </Link>
+            <button
+              onClick={publishAllDrafts}
+              disabled={publishing}
+              className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-600 disabled:opacity-50"
+            >
+              {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {publishing ? "Publishing..." : "Publish All Now"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Generate → Publish → Deploy pipeline */}
+      <PipelineBar
+        id={id}
+        project={project}
+        draftCount={draftCount}
+        generationRunning={generationRunning}
       />
 
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard icon={BookOpen} label="Recipes Published" value={project.recipes_published} color="text-brand-500" />
-        <StatCard icon={KeyRound} label="Keywords Remaining" value={project.keywords_remaining} color="text-blue-500" />
+        <StatCard
+          icon={KeyRound}
+          label="Keywords Remaining"
+          value={!project.sheet_url && queueCounts != null ? queueCounts.pending : project.keywords_remaining}
+          color="text-blue-500"
+        />
         <StatCard icon={AlertCircle} label="Keywords Failed" value={project.keywords_failed} color="text-red-500" />
         <StatCard icon={TrendingUp} label="Success Rate" value={`${successRate}%`} color="text-emerald-500" />
       </div>
@@ -335,6 +501,7 @@ export default function ProjectDetailPage({ params }: Props) {
           <p className="mt-1 text-sm font-medium text-slate-900">
             {formatDate(project.next_scheduled_at)}
           </p>
+          <p className="mt-1 text-xs text-slate-400">Manual Run triggers immediately</p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -347,13 +514,218 @@ export default function ProjectDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <QuickLink href={`/projects/${id}/recipes`} icon={BookOpen} title="Recipes" description="View all generated recipes, edit content, manage publishing" />
-        <QuickLink href={`/projects/${id}/restaurants`} icon={ChefHat} title="Restaurants" description="Manage restaurant CMS entries — each becomes a category page" />
-        <QuickLink href={`/projects/${id}/keywords`} icon={KeyRound} title="Keywords" description="Keyword processing log with status and timestamps" />
+        <QuickLink href={`/projects/${id}/queue`} icon={ListChecks} title="Keyword Queue" description="Add and manage keywords to generate — no Google Sheets needed" />
+        <QuickLink href={`/projects/${id}/restaurants`} icon={ChefHat} title="Restaurants" description="Auto-created from keywords — edit descriptions, logos, links" />
+        <QuickLink href={`/projects/${id}/categories`} icon={Tag} title="Categories" description="Auto-created from recipe AI output — browse by category" />
+        <QuickLink href={`/projects/${id}/keywords`} icon={KeyRound} title="Keyword Logs" description="Keyword processing log with status and timestamps" />
         <QuickLink href={`/projects/${id}/logs`} icon={BarChart3} title="Generation Logs" description="History of all generation runs with success/failure stats" />
         <QuickLink href={`/projects/${id}/deploy`} icon={Rocket} title="Deploy & Domains" description="Deploy your recipe site to Vercel and connect custom domains" />
       </div>
+    </div>
+  );
+}
+
+// ── Onboarding checklist ──────────────────────────────────────────────────────
+
+interface ChecklistProps {
+  id: string;
+  project: Project;
+  queueCounts: { pending: number; done: number; failed: number } | null;
+  draftCount: number;
+  generating: boolean;
+  publishing: boolean;
+  onGenerate: () => void;
+  onPublish: () => void;
+}
+
+function SetupChecklist({ id, project, queueCounts, draftCount, generating, publishing, onGenerate, onPublish }: ChecklistProps) {
+  const hasKeywords =
+    !!project.sheet_url ||
+    (queueCounts != null && queueCounts.pending + queueCounts.done + queueCounts.failed > 0);
+  const hasGenerated = project.recipes_published > 0 || draftCount > 0;
+  const hasPublished = project.recipes_published > 0;
+  const hasDeployed = project.deployment_status === "deployed";
+
+  const steps = [
+    { label: "Project created", done: true, note: "Configured niche, branding & settings" },
+    {
+      label: "Add keywords",
+      done: hasKeywords,
+      note: hasKeywords
+        ? `${(queueCounts?.pending ?? 0) + (queueCounts?.done ?? 0)} keywords added`
+        : "Paste keywords to start generating recipes",
+      cta: !hasKeywords ? { label: "Add Keywords", href: `/projects/${id}/queue` } : undefined,
+    },
+    {
+      label: "Generate recipes",
+      done: hasGenerated,
+      note: hasGenerated ? "Recipes generated" : "Run AI generation on your keywords",
+      cta: !hasGenerated && hasKeywords ? { label: generating ? "Generating…" : "Generate Now", onClick: onGenerate, disabled: generating } : undefined,
+    },
+    {
+      label: "Publish to live site",
+      done: hasPublished,
+      note: hasPublished ? `${project.recipes_published} recipes published` : "Make recipes visible on your site",
+      cta: !hasPublished && draftCount > 0 ? { label: publishing ? "Publishing…" : `Publish All (${draftCount})`, onClick: onPublish, disabled: publishing } : undefined,
+    },
+    {
+      label: "Deploy website to Vercel",
+      done: hasDeployed,
+      note: hasDeployed
+        ? (project.domain ? `https://${project.domain}` : project.vercel_deployment_url ?? "Your site is live")
+        : "Publish your recipe website for the world to see",
+      cta: !hasDeployed ? { label: "Deploy Site", href: `/projects/${id}/deploy` } : undefined,
+    },
+  ];
+
+  if (steps.every((s) => s.done)) return null;
+
+  const completedCount = steps.filter((s) => s.done).length;
+
+  return (
+    <div className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+        <div className="flex items-center gap-2.5">
+          <ListChecks className="h-4 w-4 text-brand-500" />
+          <span className="text-sm font-semibold text-slate-900">Getting started</span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+            {completedCount}/{steps.length}
+          </span>
+        </div>
+        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-brand-500 transition-all duration-500"
+            style={{ width: `${(completedCount / steps.length) * 100}%` }}
+          />
+        </div>
+      </div>
+      <ul className="divide-y divide-slate-50 px-5">
+        {steps.map((step, i) => (
+          <li key={i} className="flex items-center gap-3 py-3">
+            {step.done ? (
+              <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-500" />
+            ) : (
+              <Circle className="h-4.5 w-4.5 shrink-0 text-slate-300" />
+            )}
+            <div className="flex-1 min-w-0">
+              <span className={cn("text-sm font-medium", step.done ? "text-slate-400 line-through" : "text-slate-900")}>
+                {step.label}
+              </span>
+              <p className="text-xs text-slate-400 truncate">{step.note}</p>
+            </div>
+            {step.cta && (
+              step.cta.href ? (
+                <Link
+                  href={step.cta.href}
+                  className="shrink-0 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600"
+                >
+                  {step.cta.label}
+                </Link>
+              ) : (
+                <button
+                  onClick={step.cta.onClick}
+                  disabled={step.cta.disabled}
+                  className="shrink-0 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+                >
+                  {step.cta.label}
+                </button>
+              )
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ── Generate → Publish → Deploy pipeline bar ──────────────────────────────────
+
+interface PipelineBarProps {
+  id: string;
+  project: Project;
+  draftCount: number;
+  generationRunning: boolean;
+}
+
+function PipelineBar({ id, project, draftCount, generationRunning }: PipelineBarProps) {
+  const siteUrl = project.domain
+    ? `https://${project.domain}`
+    : project.vercel_deployment_url ?? null;
+  const totalRecipes = project.recipes_published + draftCount;
+
+  type StageStatus = "done" | "active" | "pending";
+
+  const generateStatus: StageStatus = generationRunning ? "active" : totalRecipes > 0 ? "done" : "pending";
+  const publishStatus: StageStatus =
+    project.recipes_published > 0 ? "done" : draftCount > 0 ? "active" : "pending";
+  const deployStatus: StageStatus =
+    project.deployment_status === "deployed" ? "done" :
+    project.deployment_status === "deploying" ? "active" : "pending";
+
+  const stageColor = (s: StageStatus) =>
+    s === "done" ? "text-emerald-600 bg-emerald-50 border-emerald-200" :
+    s === "active" ? "text-blue-600 bg-blue-50 border-blue-200" :
+    "text-slate-400 bg-slate-50 border-slate-200";
+
+  const dotColor = (s: StageStatus) =>
+    s === "done" ? "bg-emerald-400" : s === "active" ? "bg-blue-400 animate-pulse" : "bg-slate-200";
+
+  return (
+    <div className="mb-6 flex items-stretch gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white text-sm">
+      <Link href={`/projects/${id}/recipes`} className={cn("flex flex-1 items-center gap-3 border-r px-5 py-3.5 transition-colors hover:brightness-95", stageColor(generateStatus))}>
+        <div className={cn("h-2 w-2 shrink-0 rounded-full", dotColor(generateStatus))} />
+        <Zap className="h-4 w-4 shrink-0" />
+        <div className="min-w-0">
+          <p className="font-semibold leading-tight">Generate</p>
+          <p className="text-xs opacity-70 leading-tight">
+            {generationRunning ? "Running…" : totalRecipes > 0 ? `${totalRecipes} recipe${totalRecipes !== 1 ? "s" : ""}` : "Not started"}
+          </p>
+        </div>
+      </Link>
+      <Link href={`/projects/${id}/recipes?status=draft`} className={cn("flex flex-1 items-center gap-3 border-r px-5 py-3.5 transition-colors hover:brightness-95", stageColor(publishStatus))}>
+        <div className={cn("h-2 w-2 shrink-0 rounded-full", dotColor(publishStatus))} />
+        <Upload className="h-4 w-4 shrink-0" />
+        <div className="min-w-0">
+          <p className="font-semibold leading-tight">Publish</p>
+          <p className="text-xs opacity-70 leading-tight">
+            {project.recipes_published > 0
+              ? `${project.recipes_published} published${draftCount > 0 ? `, ${draftCount} draft` : ""}`
+              : draftCount > 0 ? `${draftCount} draft${draftCount !== 1 ? "s" : ""} ready`
+              : "No recipes yet"}
+          </p>
+        </div>
+      </Link>
+      {siteUrl && project.deployment_status === "deployed" ? (
+        <a
+          href={siteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn("flex flex-1 items-center gap-3 px-5 py-3.5 transition-colors hover:brightness-95", stageColor(deployStatus))}
+        >
+          <div className={cn("h-2 w-2 shrink-0 rounded-full", dotColor(deployStatus))} />
+          <Globe className="h-4 w-4 shrink-0" />
+          <div className="min-w-0">
+            <p className="font-semibold leading-tight">Website Live</p>
+            <p className="text-xs opacity-70 leading-tight truncate">{siteUrl}</p>
+          </div>
+          <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 opacity-50" />
+        </a>
+      ) : (
+        <Link href={`/projects/${id}/deploy`} className={cn("flex flex-1 items-center gap-3 px-5 py-3.5 transition-colors hover:brightness-95", stageColor(deployStatus))}>
+          <div className={cn("h-2 w-2 shrink-0 rounded-full", dotColor(deployStatus))} />
+          <Rocket className="h-4 w-4 shrink-0" />
+          <div className="min-w-0">
+            <p className="font-semibold leading-tight">Deploy Website</p>
+            <p className="text-xs opacity-70 leading-tight">
+              {project.deployment_status === "deploying" ? "Building…"
+                : project.deployment_status === "failed" ? "Failed — retry"
+                : "Launch your recipe site"}
+            </p>
+          </div>
+        </Link>
+      )}
     </div>
   );
 }
@@ -380,39 +752,3 @@ function QuickLink({ href, icon: Icon, title, description }: { href: string; ico
   );
 }
 
-function ChecklistItem({
-  done,
-  label,
-  action,
-  warn,
-  warnText,
-}: {
-  done: boolean;
-  label: string;
-  action?: { href: string; text: string };
-  warn?: boolean;
-  warnText?: string;
-}) {
-  return (
-    <li className="flex items-start gap-2.5">
-      <div className={cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full", done ? "bg-emerald-500" : warn ? "bg-amber-400" : "bg-slate-200")}>
-        {done && (
-          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-          </svg>
-        )}
-      </div>
-      <div className="flex-1">
-        <span className={cn("text-sm", done ? "text-slate-600 line-through" : "text-slate-800")}>{label}</span>
-        {!done && action && (
-          <Link href={action.href} className="ml-2 text-xs font-medium text-brand-500 hover:text-brand-600">
-            {action.text} →
-          </Link>
-        )}
-        {!done && warn && warnText && (
-          <p className="mt-0.5 text-xs text-amber-600">{warnText}</p>
-        )}
-      </div>
-    </li>
-  );
-}

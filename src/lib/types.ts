@@ -75,11 +75,22 @@ export interface Project {
   next_scheduled_at: string | null;
 }
 
+export interface Category {
+  id: string;
+  project_id: string;
+  name: string;
+  slug: string;
+  recipe_count: number;
+  created_at: string;
+}
+
 export interface Recipe {
   id: string;
   project_id: string;
   keyword: string;
   restaurant_name: string | null;
+  restaurant_id: string | null;
+  category_id: string | null;
   title: string;
   slug: string;
   description: string;
@@ -148,6 +159,17 @@ export interface GenerationLog {
   keywords_succeeded: number;
   keywords_failed: number;
   status: "running" | "completed" | "failed";
+}
+
+export interface BuiltInKeyword {
+  id: string;
+  project_id: string;
+  keyword: string;
+  restaurant_name: string | null;
+  status: "pending" | "done" | "failed";
+  error_reason: string | null;
+  created_at: string;
+  processed_at: string | null;
 }
 
 export interface Restaurant {

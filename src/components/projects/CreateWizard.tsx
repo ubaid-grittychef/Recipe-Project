@@ -28,6 +28,7 @@ import {
   ExternalLink,
   Loader2,
   AlertTriangle,
+  ListChecks,
 } from "lucide-react";
 
 const STEPS = [
@@ -432,106 +433,183 @@ function StepKeywords({
   onValidate: () => void;
   googleEmail: string | null;
 }) {
+  // "builtin" = no sheet_url; "sheets" = using Google Sheets
+  const mode = form.sheet_url !== undefined && form.sheet_url !== "" ? "sheets" : "builtin";
+
+  function setMode(m: "builtin" | "sheets") {
+    if (m === "builtin") update({ sheet_url: "" });
+    // If switching to sheets, just focus the URL field — don't auto-fill anything
+  }
+
   return (
     <>
-      <Field
-        label="Google Sheet URL"
-        hint="Share the sheet with the service account email below"
-      >
-        <TextInput
-          value={form.sheet_url}
-          onChange={(v) => {
-            update({ sheet_url: v });
-          }}
-          placeholder="https://docs.google.com/spreadsheets/d/..."
-        />
-      </Field>
+      {/* Mode selector */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => setMode("builtin")}
+          className={cn(
+            "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-colors",
+            mode === "builtin"
+              ? "border-brand-400 bg-brand-50"
+              : "border-slate-200 bg-white hover:border-slate-300"
+          )}
+        >
+          <div className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg",
+            mode === "builtin" ? "bg-brand-100" : "bg-slate-100"
+          )}>
+            <ListChecks className={cn("h-5 w-5", mode === "builtin" ? "text-brand-600" : "text-slate-500")} />
+          </div>
+          <div>
+            <p className={cn("text-sm font-semibold", mode === "builtin" ? "text-brand-900" : "text-slate-700")}>
+              Built-in Queue
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Paste keywords directly in the app — no Google account needed
+            </p>
+          </div>
+          {mode === "builtin" && (
+            <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-medium text-white">Selected</span>
+          )}
+        </button>
 
-      {googleEmail ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
-          <p className="text-xs font-medium text-emerald-800">
-            Share your Google Sheet with this service account:
-          </p>
-          <p className="mt-1 break-all font-mono text-xs text-emerald-700 select-all">
-            {googleEmail}
-          </p>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-xs text-amber-800">
-            <strong>Google Sheets not configured.</strong> Add{" "}
-            <code className="font-mono">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> and{" "}
-            <code className="font-mono">GOOGLE_PRIVATE_KEY</code> to{" "}
-            <code className="font-mono">.env.local</code>, then restart the server.
+        <button
+          type="button"
+          onClick={() => setMode("sheets")}
+          className={cn(
+            "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-colors",
+            mode === "sheets"
+              ? "border-brand-400 bg-brand-50"
+              : "border-slate-200 bg-white hover:border-slate-300"
+          )}
+        >
+          <div className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg",
+            mode === "sheets" ? "bg-brand-100" : "bg-slate-100"
+          )}>
+            <FileSpreadsheet className={cn("h-5 w-5", mode === "sheets" ? "text-brand-600" : "text-slate-500")} />
+          </div>
+          <div>
+            <p className={cn("text-sm font-semibold", mode === "sheets" ? "text-brand-900" : "text-slate-700")}>
+              Google Sheets
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Connect a spreadsheet — keywords are read and marked done automatically
+            </p>
+          </div>
+          {mode === "sheets" && (
+            <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-medium text-white">Selected</span>
+          )}
+        </button>
+      </div>
+
+      {/* Built-in queue info */}
+      {mode === "builtin" && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+          <p className="text-sm font-medium text-blue-800">You&apos;re all set!</p>
+          <p className="mt-1 text-xs text-blue-600">
+            After creating the project, go to <strong>Keyword Queue</strong> on your project dashboard to paste in your keywords. Generation will use them automatically.
           </p>
         </div>
       )}
 
-      <p className="rounded-lg bg-blue-50 px-4 py-3 text-xs text-blue-700">
-        Your Google Sheet should have columns for keyword, restaurant name, and
-        a status column. The app will read pending keywords and mark them done
-        after generation.
-      </p>
-      <div className="grid grid-cols-3 gap-4">
-        <Field label="Keyword Column">
-          <TextInput
-            value={form.sheet_keyword_column}
-            onChange={(v) => update({ sheet_keyword_column: v })}
-            placeholder="A"
-          />
-        </Field>
-        <Field label="Restaurant Column">
-          <TextInput
-            value={form.sheet_restaurant_column}
-            onChange={(v) => update({ sheet_restaurant_column: v })}
-            placeholder="B"
-          />
-        </Field>
-        <Field label="Status Column">
-          <TextInput
-            value={form.sheet_status_column}
-            onChange={(v) => update({ sheet_status_column: v })}
-            placeholder="C"
-          />
-        </Field>
-      </div>
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onValidate}
-          disabled={!form.sheet_url || sheetStatus === "validating"}
-          className="flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100 disabled:opacity-50"
-        >
-          {sheetStatus === "validating" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : sheetStatus === "valid" ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          ) : (
-            <FileSpreadsheet className="h-4 w-4" />
-          )}
-          {sheetStatus === "validating"
-            ? "Validating..."
-            : sheetStatus === "valid"
-            ? "Connected"
-            : "Test Connection"}
-        </button>
-        {form.sheet_url && (
-          <a
-            href={form.sheet_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600"
+      {/* Google Sheets fields */}
+      {mode === "sheets" && (
+        <>
+          <Field
+            label="Google Sheet URL"
+            hint="Share the sheet with the service account email below"
           >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Open sheet
-          </a>
-        )}
-      </div>
-      {sheetStatus === "invalid" && sheetError && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-          <p className="text-sm text-red-700">{sheetError}</p>
-        </div>
+            <TextInput
+              value={form.sheet_url}
+              onChange={(v) => update({ sheet_url: v })}
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+            />
+          </Field>
+
+          {googleEmail ? (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <p className="text-xs font-medium text-emerald-800">
+                Share your Google Sheet with this service account:
+              </p>
+              <p className="mt-1 break-all font-mono text-xs text-emerald-700 select-all">
+                {googleEmail}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-xs text-amber-800">
+                <strong>Google Sheets not configured.</strong> Add{" "}
+                <code className="font-mono">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> and{" "}
+                <code className="font-mono">GOOGLE_PRIVATE_KEY</code> to{" "}
+                <code className="font-mono">.env.local</code>, then restart the server.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="Keyword Column">
+              <TextInput
+                value={form.sheet_keyword_column}
+                onChange={(v) => update({ sheet_keyword_column: v })}
+                placeholder="A"
+              />
+            </Field>
+            <Field label="Restaurant Column">
+              <TextInput
+                value={form.sheet_restaurant_column}
+                onChange={(v) => update({ sheet_restaurant_column: v })}
+                placeholder="B"
+              />
+            </Field>
+            <Field label="Status Column">
+              <TextInput
+                value={form.sheet_status_column}
+                onChange={(v) => update({ sheet_status_column: v })}
+                placeholder="C"
+              />
+            </Field>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onValidate}
+              disabled={!form.sheet_url || sheetStatus === "validating"}
+              className="flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100 disabled:opacity-50"
+            >
+              {sheetStatus === "validating" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : sheetStatus === "valid" ? (
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4" />
+              )}
+              {sheetStatus === "validating"
+                ? "Validating..."
+                : sheetStatus === "valid"
+                ? "Connected"
+                : "Test Connection"}
+            </button>
+            {form.sheet_url && (
+              <a
+                href={form.sheet_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Open sheet
+              </a>
+            )}
+          </div>
+          {sheetStatus === "invalid" && sheetError && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+              <p className="text-sm text-red-700">{sheetError}</p>
+            </div>
+          )}
+        </>
       )}
     </>
   );
