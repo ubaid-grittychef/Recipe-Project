@@ -21,6 +21,7 @@ import {
   Server,
   Shield,
 } from "lucide-react";
+import { SkeletonDeployPage } from "@/components/Skeleton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -138,11 +139,7 @@ export default function DeployPage({ params }: Props) {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonDeployPage />;
   }
 
   if (!project) {

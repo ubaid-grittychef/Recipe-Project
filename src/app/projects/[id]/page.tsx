@@ -29,6 +29,7 @@ import {
   ChefHat,
 } from "lucide-react";
 import GenerationProgressCard from "@/components/GenerationProgressCard";
+import { SkeletonProjectDetail } from "@/components/Skeleton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -73,34 +74,26 @@ export default function ProjectDetailPage({ params }: Props) {
     setGenerating(true);
     try {
       await api.post(`/api/projects/${id}/generate`);
-      toast.success("Generation started — recipes will appear shortly");
-      // Poll the project every 4 s for up to 3 minutes to surface updated stats
-      let attempts = 0;
-      const poll = setInterval(async () => {
-        attempts++;
+      toast.success("Generation started — watch the progress card below");
+      // GenerationProgressCard handles live polling — just refresh stats once after 5s
+      setTimeout(async () => {
         try {
           const refreshed = await api.get<Project>(`/api/projects/${id}`);
           setProject(refreshed);
-        } catch { /* ignore transient errors */ }
-        if (attempts >= 45) clearInterval(poll);
-      }, 4000);
+        } catch { /* ignore */ }
+      }, 5000);
     } catch (err) {
       const msg = err instanceof ApiError
         ? `Generation failed: ${(err.body as { details?: string })?.details ?? err.statusText}`
         : "Generation failed — check server logs";
       toast.error(msg);
-      console.error("[ProjectDetail] generation failed:", err);
     } finally {
       setGenerating(false);
     }
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonProjectDetail />;
   }
 
   if (!project) {
@@ -122,6 +115,13 @@ export default function ProjectDetailPage({ params }: Props) {
             100
         )
       : 0;
+
+  // Setup checklist — derive from project state
+  const hasSiteDb = !!(project.site_supabase_url && project.site_supabase_service_key);
+  const hasSheet = !!project.sheet_url;
+  const hasRecipes = project.recipes_published > 0;
+  const hasDeployment = project.deployment_status === "deployed";
+  const checklistDone = hasSiteDb && hasSheet && hasRecipes && hasDeployment;
 
   return (
     <div>
@@ -251,6 +251,54 @@ export default function ProjectDetailPage({ params }: Props) {
         )}
       </div>
 
+      {/* ── Setup Checklist ──────────────────────────────────────────────── */}
+      {!checklistDone && (
+        <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-5">
+          <h3 className="mb-3 text-sm font-semibold text-blue-900">
+            Setup checklist — complete these steps to go live
+          </h3>
+          <ul className="space-y-2">
+            <ChecklistItem done label="Project created" />
+            <ChecklistItem
+              done={hasSheet}
+              label="Google Sheet connected"
+              action={!hasSheet ? { href: `/projects/${id}/settings`, text: "Configure in Settings" } : undefined}
+            />
+            <ChecklistItem
+              done={hasSiteDb}
+              label="Site database configured (Supabase)"
+              action={!hasSiteDb ? { href: `/projects/${id}/settings`, text: "Add in Settings → Site Database" } : undefined}
+              warn={!hasSiteDb}
+              warnText="Without this, generated recipes won't appear on your live site"
+            />
+            <ChecklistItem
+              done={hasRecipes}
+              label="Recipes generated & published"
+              action={!hasRecipes ? { href: `/projects/${id}/recipes`, text: "Generate & publish recipes" } : undefined}
+            />
+            <ChecklistItem
+              done={hasDeployment}
+              label="Site deployed to Vercel"
+              action={!hasDeployment ? { href: `/projects/${id}/deploy`, text: "Deploy now" } : undefined}
+            />
+          </ul>
+        </div>
+      )}
+
+      {/* ── Site DB warning (shown even when checklist is dismissed) ─────── */}
+      {!hasSiteDb && checklistDone === false && hasRecipes && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <p className="text-sm text-amber-800">
+            <span className="font-medium">Site database not configured.</span>{" "}
+            Recipes are saved but won&apos;t appear on your live site until you add your Supabase credentials.{" "}
+            <Link href={`/projects/${id}/settings`} className="font-medium underline">
+              Configure now →
+            </Link>
+          </p>
+        </div>
+      )}
+
       {/* Live generation progress */}
       <GenerationProgressCard
         projectId={id}
@@ -329,5 +377,42 @@ function QuickLink({ href, icon: Icon, title, description }: { href: string; ico
       <h3 className="mt-3 text-sm font-semibold text-slate-900">{title}</h3>
       <p className="mt-1 text-xs text-slate-500">{description}</p>
     </Link>
+  );
+}
+
+function ChecklistItem({
+  done,
+  label,
+  action,
+  warn,
+  warnText,
+}: {
+  done: boolean;
+  label: string;
+  action?: { href: string; text: string };
+  warn?: boolean;
+  warnText?: string;
+}) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <div className={cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full", done ? "bg-emerald-500" : warn ? "bg-amber-400" : "bg-slate-200")}>
+        {done && (
+          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+          </svg>
+        )}
+      </div>
+      <div className="flex-1">
+        <span className={cn("text-sm", done ? "text-slate-600 line-through" : "text-slate-800")}>{label}</span>
+        {!done && action && (
+          <Link href={action.href} className="ml-2 text-xs font-medium text-brand-500 hover:text-brand-600">
+            {action.text} →
+          </Link>
+        )}
+        {!done && warn && warnText && (
+          <p className="mt-0.5 text-xs text-amber-600">{warnText}</p>
+        )}
+      </div>
+    </li>
   );
 }

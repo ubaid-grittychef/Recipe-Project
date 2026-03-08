@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { SkeletonKeywordsPage } from "@/components/Skeleton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -75,11 +76,7 @@ export default function KeywordsPage({ params }: Props) {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonKeywordsPage />;
   }
 
   const pills: { value: StatusFilter; label: string; count: number }[] = [

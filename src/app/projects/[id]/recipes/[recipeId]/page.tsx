@@ -16,6 +16,8 @@ import {
   Plus,
   GripVertical,
 } from "lucide-react";
+import { SkeletonRecipeEditor } from "@/components/Skeleton";
+import RecipePreview from "@/components/RecipePreview";
 
 interface Props {
   params: Promise<{ id: string; recipeId: string }>;
@@ -28,6 +30,7 @@ export default function RecipeEditorPage({ params }: Props) {
   const [savedRecipe, setSavedRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
   const [confirm, ConfirmDialog] = useConfirm();
   // Track whether there are unsaved changes
   const isDirty = recipe !== null && savedRecipe !== null &&
@@ -120,11 +123,7 @@ export default function RecipeEditorPage({ params }: Props) {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonRecipeEditor />;
   }
 
   if (!recipe) {
@@ -175,6 +174,29 @@ export default function RecipeEditorPage({ params }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Tab toggle */}
+          <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+            <button
+              onClick={() => setActiveTab("edit")}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                activeTab === "edit"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setActiveTab("preview")}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                activeTab === "preview"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Preview
+            </button>
+          </div>
           {recipe.status === "draft" && (
             <button
               onClick={() => handleSave(true)}
@@ -216,7 +238,11 @@ export default function RecipeEditorPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="space-y-6">
+      {activeTab === "preview" && (
+        <RecipePreview recipe={recipe} />
+      )}
+
+      {activeTab === "edit" && <div className="space-y-6">
         {/* Title & SEO */}
         <Section title="Title & SEO">
           <Field label="Title (H1)">
@@ -735,7 +761,7 @@ export default function RecipeEditorPage({ params }: Props) {
             </Field>
           </div>
         </Section>
-      </div>
+      </div>}
 
       <style jsx>{`
         .input-field {

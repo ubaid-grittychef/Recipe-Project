@@ -7,6 +7,7 @@ import { Recipe } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowLeft, Search, BookOpen, Upload, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { SkeletonRecipeList } from "@/components/Skeleton";
 
 const PAGE_SIZE = 50;
 
@@ -102,11 +103,7 @@ export default function RecipesPage({ params }: Props) {
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
-      </div>
-    );
+    return <SkeletonRecipeList />;
   }
 
   return (
@@ -146,6 +143,22 @@ export default function RecipesPage({ params }: Props) {
           </button>
         )}
       </div>
+
+      {/* Draft warning banner */}
+      {draftCount > 0 && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-900">
+              {draftCount} recipe{draftCount !== 1 ? "s" : ""} ready to publish
+            </p>
+            <p className="mt-0.5 text-xs text-amber-700">
+              These recipes are saved but won&apos;t appear on your live site until published. Click{" "}
+              <span className="font-medium">Publish All Drafts</span> above to push them live.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Search bar */}
       <div className="mb-6">
