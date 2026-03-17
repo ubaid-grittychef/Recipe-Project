@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template V3 — Homepage Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f0f0f0; }
+
+  /* ─── SELECTOR PANEL ─────────────────────────────── */
+  .selector {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: #1a1a1a; padding: 10px 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .selector span { color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .pal-btn {
+    padding: 5px 14px; border-radius: 20px; border: 2px solid transparent;
+    font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .pal-btn.active { border-color: #fff; }
+  #btn-coral { background: #ff4d2e; color: #fff; }
+  #btn-saffron { background: #f5a623; color: #111; }
+  #btn-emerald { background: #00a86b; color: #fff; }
+  #btn-violet { background: #7c3aed; color: #fff; }
+  .note { color: #555; font-size: 11px; margin-left: auto; }
+
+  /* ─── THEME VARIABLES ────────────────────────────── */
+  .theme-coral  { --accent: #ff4d2e; --accent2: #ff6b4a; --hero-bg: #0f0f0f; --hero-text: #ffffff; --nav-bg: #ff4d2e; }
+  .theme-saffron{ --accent: #f5a623; --accent2: #f7b944; --hero-bg: #1a1410; --hero-text: #ffffff; --nav-bg: #f5a623; }
+  .theme-emerald{ --accent: #00a86b; --accent2: #00c47e; --hero-bg: #0a1f14; --hero-text: #ffffff; --nav-bg: #00a86b; }
+  .theme-violet { --accent: #7c3aed; --accent2: #9155fd; --hero-bg: #0d0a1a; --hero-text: #ffffff; --nav-bg: #7c3aed; }
+
+  /* ─── SITE WRAPPER ───────────────────────────────── */
+  .site { max-width: 1200px; margin: 60px auto 0; box-shadow: 0 0 40px rgba(0,0,0,0.2); }
+
+  /* ─── NAV ────────────────────────────────────────── */
+  .nav {
+    background: var(--nav-bg); padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between; height: 56px;
+  }
+  .nav-logo { font-size: 15px; font-weight: 900; color: #fff; letter-spacing: -0.3px; text-transform: uppercase; }
+  .theme-saffron .nav-logo { color: #111; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a {
+    font-size: 12px; font-weight: 700; text-decoration: none; text-transform: uppercase;
+    letter-spacing: 0.8px; color: rgba(255,255,255,0.85);
+  }
+  .theme-saffron .nav-links a { color: rgba(0,0,0,0.7); }
+  .nav-search {
+    background: rgba(0,0,0,0.2); border: none; border-radius: 6px;
+    padding: 6px 12px; color: rgba(255,255,255,0.7); font-size: 12px; width: 180px;
+  }
+  .theme-saffron .nav-search { background: rgba(0,0,0,0.12); color: rgba(0,0,0,0.5); }
+
+  /* ─── HERO ───────────────────────────────────────── */
+  .hero {
+    background: var(--hero-bg); padding: 56px 32px;
+    display: grid; grid-template-columns: 1fr 400px; gap: 40px; align-items: center;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff; padding: 4px 12px;
+    border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 20px;
+  }
+  .theme-saffron .hero-tag { color: #111; }
+  .hero-title {
+    font-size: 48px; font-weight: 900; color: var(--hero-text);
+    line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 16px;
+  }
+  .hero-title em { color: var(--accent); font-style: normal; }
+  .hero-sub { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 28px; max-width: 420px; }
+  .hero-stats { display: flex; gap: 28px; }
+  .hero-stat-num { font-size: 28px; font-weight: 900; color: var(--hero-text); letter-spacing: -1px; }
+  .hero-stat-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* ─── FEATURED CARD (hero right) ─────────────────── */
+  .hero-card { background: #fff; border-radius: 12px; overflow: hidden; }
+  .hero-card-img {
+    height: 200px; background: #222;
+    display: flex; align-items: flex-end; padding: 16px;
+    position: relative;
+  }
+  .hero-card-img-placeholder {
+    position: absolute; inset: 0;
+    background: #2a2a2a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .hero-card-badge {
+    position: relative; z-index: 1;
+    background: var(--accent); color: #fff; padding: 3px 10px;
+    border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .theme-saffron .hero-card-badge { color: #111; }
+  .hero-card-body { padding: 16px; }
+  .hero-card-meta { font-size: 10px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .hero-card-title { font-size: 17px; font-weight: 800; color: #111; line-height: 1.2; letter-spacing: -0.3px; margin-bottom: 10px; }
+  .hero-card-pills { display: flex; gap: 6px; }
+  .pill { background: #f5f5f5; color: #555; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+
+  /* ─── SECTION ────────────────────────────────────── */
+  .section { background: #fff; padding: 48px 32px; }
+  .section + .section { border-top: 1px solid #f0f0f0; }
+  .section-dark { background: #fafafa; }
+  .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; }
+  .section-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 4px; }
+  .section-title { font-size: 26px; font-weight: 900; color: #111; letter-spacing: -0.5px; }
+  .section-link { font-size: 12px; font-weight: 700; color: var(--accent); text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ─── RECIPE GRID ────────────────────────────────── */
+  .recipe-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .recipe-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; overflow: hidden; }
+  .recipe-card:hover { border-color: var(--accent); }
+  .recipe-card-img {
+    height: 140px; background: #f0f0f0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; position: relative;
+  }
+  .recipe-card-difficulty {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--accent); color: #fff; padding: 2px 7px;
+    border-radius: 3px; font-size: 9px; font-weight: 800; text-transform: uppercase;
+  }
+  .theme-saffron .recipe-card-difficulty { color: #111; }
+  .recipe-card-body { padding: 12px; }
+  .recipe-card-cat { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 5px; }
+  .recipe-card-title { font-size: 13px; font-weight: 800; color: #111; line-height: 1.3; margin-bottom: 8px; letter-spacing: -0.2px; }
+  .recipe-card-meta { font-size: 10px; color: #aaa; font-weight: 600; }
+  .recipe-card-meta span { margin-right: 10px; }
+
+  /* ─── CATEGORIES ROW ─────────────────────────────── */
+  .cat-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .cat-chip {
+    background: #f5f5f5; border: 1px solid #e8e8e8; border-radius: 8px;
+    padding: 14px 8px; text-align: center; cursor: pointer;
+  }
+  .cat-chip:hover { background: var(--accent); border-color: var(--accent); }
+  .cat-chip:hover .cat-chip-name { color: #fff; }
+  .cat-chip:hover .cat-chip-count { color: rgba(255,255,255,0.7); }
+  .cat-chip-emoji { font-size: 22px; margin-bottom: 6px; }
+  .cat-chip-name { font-size: 11px; font-weight: 800; color: #222; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cat-chip-count { font-size: 10px; color: #aaa; font-weight: 600; margin-top: 3px; }
+
+  /* ─── RESTAURANT TAGS ────────────────────────────── */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    background: #fff; border: 1.5px solid #e8e8e8; border-radius: 6px;
+    padding: 6px 14px; font-size: 12px; font-weight: 700; color: #444;
+    cursor: pointer; transition: all 0.1s;
+  }
+  .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── FOOTER ─────────────────────────────────────── */
+  .footer { background: #111; padding: 32px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-logo { font-size: 14px; font-weight: 900; color: #fff; text-transform: uppercase; }
+  .footer-accent { color: var(--accent); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { font-size: 11px; color: #555; text-decoration: none; font-weight: 600; }
+  .footer-copy { font-size: 11px; color: #444; }
+</style>
+</head>
+<body>
+
+<!-- PALETTE SELECTOR -->
+<div class="selector">
+  <span>Pick a palette →</span>
+  <button class="pal-btn active" id="btn-coral" onclick="setPalette('coral')">A — Coral</button>
+  <button class="pal-btn" id="btn-saffron" onclick="setPalette('saffron')">B — Saffron</button>
+  <button class="pal-btn" id="btn-emerald" onclick="setPalette('emerald')">C — Emerald</button>
+  <button class="pal-btn" id="btn-violet" onclick="setPalette('violet')">D — Violet</button>
+  <span class="note">Full homepage mockup — no gradients anywhere</span>
+</div>
+
+<!-- SITE MOCKUP -->
+<div class="site theme-coral" id="site">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">Copycat Kitchen</div>
+    <div class="nav-links">
+      <a href="#">Recipes</a>
+      <a href="#">Categories</a>
+      <a href="#">Restaurants</a>
+      <a href="#">About</a>
+    </div>
+    <input class="nav-search" placeholder="🔍  Search recipes...">
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="hero-tag">🔥 Restaurant Copycat Recipes</div>
+      <h1 class="hero-title">Cook Your<br>Favourite <em>Restaurant</em><br>Meals at Home</h1>
+      <p class="hero-sub">247 copycat recipes from the world's most popular restaurants. Exact flavours, your kitchen.</p>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">247</div>
+          <div class="hero-stat-label">Recipes</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">34</div>
+          <div class="hero-stat-label">Restaurants</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">12</div>
+          <div class="hero-stat-label">Categories</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-img">
+        <div class="hero-card-img-placeholder">🍗</div>
+        <span class="hero-card-badge">Editor's Pick</span>
+      </div>
+      <div class="hero-card-body">
+        <div class="hero-card-meta">McDonald's · Chicken</div>
+        <div class="hero-card-title">McSpicy Burger — Exact Copycat Recipe</div>
+        <div class="hero-card-pills">
+          <span class="pill">⏱ 30 min</span>
+          <span class="pill">👤 2 servings</span>
+          <span class="pill">⭐ 4.9</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED RECIPES -->
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Most Popular</div>
+        <div class="section-title">Fan Favourite Recipes</div>
+      </div>
+      <a class="section-link" href="#">View All →</a>
+    </div>
+    <div class="recipe-grid">
+      <div class="recipe-card">
+        <div class="recipe-card-img">🌮<span class="recipe-card-difficulty">Easy</span></div>
+        <div class="recipe-card-body">
+          <div class="recipe-card-cat">Taco Bell</div>
+          <div class="recipe-card-title">Crunchwrap Supreme Copycat</div>
+          <div class="recipe-card-meta"><span>⏱ 25 min</span><span>⭐ 4.8</span></div>
+        </div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-card-img">🍝<span class="recipe-card-difficulty">Medium</span></div>
+        <div class="recipe-card-body">
+          <div class="recipe-card-cat">Olive Garden</div>
+          <div class="recipe-card-title">Never Ending Pasta Bowl</div>
+          <div class="recipe-card-meta"><span>⏱ 40 min</span><span>⭐ 4.7</span></div>
+        </div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-card-img">🍜<span class="recipe-card-difficulty">Medium</span></div>
+        <div class="recipe-card-body">
+          <div class="recipe-card-cat">Panda Express</div>
+          <div class="recipe-card-title">Beijing Beef Copycat</div>
+          <div class="recipe-card-meta"><span>⏱ 35 min</span><span>⭐ 4.9</span></div>
+        </div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-card-img">🍔<span class="recipe-card-difficulty">Easy</span></div>
+        <div class="recipe-card-body">
+          <div class="recipe-card-cat">Five Guys</div>
+          <div class="recipe-card-title">Famous Style Burger</div>
+          <div class="recipe-card-meta"><span>⏱ 20 min</span><span>⭐ 4.6</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="section section-dark">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Explore</div>
+        <div class="section-title">Browse by Category</div>
+      </div>
+      <a class="section-link" href="#">All Categories →</a>
+    </div>
+    <div class="cat-row">
+      <div class="cat-chip"><div class="cat-chip-emoji">🍔</div><div class="cat-chip-name">Burgers</div><div class="cat-chip-count">38 recipes</div></div>
+      <div class="cat-chip"><div class="cat-chip-emoji">🍕</div><div class="cat-chip-name">Pizza</div><div class="cat-chip-count">24 recipes</div></div>
+      <div class="cat-chip"><div class="cat-chip-emoji">🌮</div><div class="cat-chip-name">Mexican</div><div class="cat-chip-count">31 recipes</div></div>
+      <div class="cat-chip"><div class="cat-chip-emoji">🍜</div><div class="cat-chip-name">Asian</div><div class="cat-chip-count">45 recipes</div></div>
+      <div class="cat-chip"><div class="cat-chip-emoji">🍗</div><div class="cat-chip-name">Chicken</div><div class="cat-chip-count">52 recipes</div></div>
+      <div class="cat-chip"><div class="cat-chip-emoji">🍰</div><div class="cat-chip-name">Desserts</div><div class="cat-chip-count">29 recipes</div></div>
+    </div>
+  </section>
+
+  <!-- RESTAURANTS -->
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">By Restaurant</div>
+        <div class="section-title">Which Restaurant Today?</div>
+      </div>
+    </div>
+    <div class="tag-cloud">
+      <div class="tag">McDonald's</div>
+      <div class="tag">Chick-fil-A</div>
+      <div class="tag">Taco Bell</div>
+      <div class="tag">Olive Garden</div>
+      <div class="tag">Chipotle</div>
+      <div class="tag">Panda Express</div>
+      <div class="tag">Five Guys</div>
+      <div class="tag">Applebee's</div>
+      <div class="tag">Cheesecake Factory</div>
+      <div class="tag">P.F. Chang's</div>
+      <div class="tag">Texas Roadhouse</div>
+      <div class="tag">In-N-Out</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo">Copycat <span class="footer-accent">Kitchen</span></div>
+    <div class="footer-links">
+      <a href="#">Recipes</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">About</a>
+    </div>
+    <div class="footer-copy">© 2026 Copycat Kitchen</div>
+  </footer>
+
+</div>
+
+<script>
+function setPalette(name) {
+  const site = document.getElementById('site');
+  site.className = 'site theme-' + name;
+  document.querySelectorAll('.pal-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + name).classList.add('active');
+  // record choice
+  fetch('/__events', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({type: 'click', choice: name, text: 'Palette: ' + name, timestamp: Date.now()})
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
