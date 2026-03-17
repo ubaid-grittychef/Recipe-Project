@@ -7,8 +7,16 @@ export default async function AdminUsersPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Defence-in-depth: verify admin role server-side, not just middleware
-  if (!user || user.app_metadata?.user_role !== "admin") {
+  if (!user) redirect("/login");
+
+  // Read role from DB (not JWT claims — JWT hook was removed)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
     redirect("/");
   }
 

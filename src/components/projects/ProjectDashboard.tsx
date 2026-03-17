@@ -35,6 +35,9 @@ import {
   Upload,
   Map,
   Send,
+  LayoutDashboard,
+  FileText,
+  Settings2,
 } from "lucide-react";
 import GenerationProgressCard from "@/components/GenerationProgressCard";
 
@@ -61,6 +64,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
   const [pingResult, setPingResult] = useState<{ pinged: boolean; sitemapUrl?: string; message: string } | null>(null);
   const [needsRedeploy, setNeedsRedeploy] = useState(false);
   const [redeploying, setRedeploying] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "content" | "operations">("overview");
   const genPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Cleanup generation poll on unmount
@@ -215,194 +219,126 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
         All Projects
       </Link>
 
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          {project.logo_url ? (
-            <img
-              src={project.logo_url}
-              alt={project.name}
-              className="h-14 w-14 shrink-0 rounded-xl object-contain border border-slate-200 bg-white p-1"
-            />
-          ) : (
-            <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-2xl font-bold text-white"
-              style={{ backgroundColor: project.primary_color }}
-            >
-              {project.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-2xl font-bold text-slate-900">{project.name}</h1>
-              {project.deployment_status === "deployed" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Live
-                </span>
-              ) : project.status === "active" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                  Active
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                  Paused
-                </span>
-              )}
-              {successRate > 0 && (
-                <span className="text-sm text-slate-400">{successRate}% success rate</span>
-              )}
-            </div>
-            <p className="text-sm text-slate-500">{project.niche}</p>
-            {project.domain && (
-              <p className="mt-0.5 text-xs text-slate-400">{project.domain}</p>
+      {/* Project Header */}
+      <div
+        className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+        style={{ borderLeftColor: project.primary_color || "#f97316", borderLeftWidth: "5px" }}
+      >
+        <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            {project.logo_url ? (
+              <img
+                src={project.logo_url}
+                alt={project.name}
+                className="h-14 w-14 shrink-0 rounded-xl object-contain border border-slate-200 bg-white p-1"
+              />
+            ) : (
+              <div
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-2xl font-bold text-white shadow-sm"
+                style={{ backgroundColor: project.primary_color || "#f97316" }}
+              >
+                {project.name.charAt(0).toUpperCase()}
+              </div>
             )}
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-2xl font-bold text-slate-900">{project.name}</h1>
+                {project.deployment_status === "deployed" ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Live
+                  </span>
+                ) : project.status === "active" ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                    Active
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    Paused
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-slate-500">{project.niche}</p>
+              {project.domain && (
+                <p className="mt-0.5 text-xs text-slate-400">{project.domain}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {project.deployment_status === "deployed" && project.vercel_deployment_url && (
+              <a
+                href={project.vercel_deployment_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600"
+              >
+                <Globe className="h-4 w-4" />
+                View Site
+              </a>
+            )}
+            <button
+              onClick={triggerGeneration}
+              disabled={generating}
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600 disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+              {generating ? "Running…" : "Generate"}
+            </button>
+            <button
+              onClick={toggleStatus}
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-colors",
+                project.status === "active"
+                  ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+              )}
+            >
+              {project.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {project.status === "active" ? "Pause" : "Activate"}
+            </button>
+            <Link
+              href={`/projects/${id}/settings`}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
-          {project.deployment_status === "deployed" && project.vercel_deployment_url && (
-            <a
-              href={project.vercel_deployment_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600"
+        {/* Tab bar */}
+        <div className="flex gap-0 border-t border-slate-100">
+          {[
+            { key: "overview", label: "Overview", icon: LayoutDashboard },
+            { key: "content", label: "Content", icon: FileText },
+            { key: "operations", label: "Operations", icon: Settings2 },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key as typeof activeTab)}
+              className={cn(
+                "flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors",
+                activeTab === key
+                  ? "border-brand-500 text-brand-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              )}
             >
-              <Globe className="h-4 w-4" />
-              View Site
-            </a>
-          )}
-          <button
-            onClick={triggerGeneration}
-            disabled={generating}
-            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600 disabled:opacity-50"
-          >
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-            {generating ? "Running…" : "Generate"}
-          </button>
-          <button
-            onClick={toggleStatus}
-            className={cn(
-              "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-colors",
-              project.status === "active"
-                ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-            )}
-          >
-            {project.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            {project.status === "active" ? "Pause" : "Activate"}
-          </button>
-          <Link
-            href={`/projects/${id}/settings`}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            <Settings className="h-4 w-4" />
-            Settings
-          </Link>
+              <Icon className="h-4 w-4" />
+              {label}
+              {key === "content" && draftCount > 0 && (
+                <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                  {draftCount}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Onboarding checklist */}
-      <SetupChecklist
-        id={id}
-        project={project}
-        queueCounts={queueCounts}
-        draftCount={draftCount}
-        generating={generating}
-        publishing={publishing}
-        onGenerate={triggerGeneration}
-        onPublish={publishAllDrafts}
-      />
-
-      {/* Deployment card — only shown when deployed or failed */}
-      {(project.deployment_status === "deployed" || project.deployment_status === "failed") && (
-        <div className={cn(
-          "mb-6 rounded-xl border p-4",
-          project.deployment_status === "deployed" ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"
-        )}>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              {project.deployment_status === "deployed" ? (
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
-              ) : (
-                <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
-              )}
-              <div className="min-w-0">
-                <p className={cn("text-sm font-semibold", project.deployment_status === "deployed" ? "text-emerald-900" : "text-red-900")}>
-                  {project.deployment_status === "deployed" ? "Site is live" : "Last deployment failed"}
-                </p>
-                {project.vercel_deployment_url && (
-                  <a href={project.vercel_deployment_url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-emerald-700 hover:underline truncate">
-                    {project.vercel_deployment_url}
-                    <ExternalLink className="h-3 w-3 shrink-0" />
-                  </a>
-                )}
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {project.deployment_status === "deployed" && (
-                <>
-                  <button onClick={checkSiteHealth} disabled={checkingHealth}
-                    className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
-                    {checkingHealth ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Activity className="h-3.5 w-3.5" />}
-                    {healthCheck
-                      ? healthCheck.healthy ? `Online · ${healthCheck.latency_ms}ms` : "Unreachable"
-                      : checkingHealth ? "Checking…" : "Health"}
-                  </button>
-                  <button onClick={pingSitemap} disabled={pinging}
-                    className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
-                    {pinging ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                    {pinging ? "Pinging…" : "Ping"}
-                  </button>
-                </>
-              )}
-              <Link href={`/projects/${id}/deploy`}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white",
-                  project.deployment_status === "deployed" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
-                )}>
-                <Rocket className="h-3.5 w-3.5" />
-                {project.deployment_status === "deployed" ? "Manage" : "Retry"}
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Template changed — needs redeploy */}
-      {needsRedeploy && project.deployment_status === "deployed" && (
-        <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-violet-200 bg-violet-50 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <Rocket className="h-5 w-5 shrink-0 text-violet-500" />
-            <div>
-              <p className="text-sm font-semibold text-violet-900">Template changed — redeploy to apply</p>
-              <p className="mt-0.5 text-xs text-violet-700">
-                Your live site is still using the old template. Redeploy to switch it.
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              onClick={() => { localStorage.removeItem(`needs_redeploy_${id}`); setNeedsRedeploy(false); }}
-              className="rounded-lg px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100"
-            >
-              Dismiss
-            </button>
-            <button
-              onClick={triggerRedeploy}
-              disabled={redeploying}
-              className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-700 disabled:opacity-50"
-            >
-              {redeploying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-              {redeploying ? "Deploying…" : "Redeploy Now"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Config warning */}
+      {/* Config warning — always visible */}
       {configStatus && !configStatus.openai && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
@@ -415,148 +351,258 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
         </div>
       )}
 
-      {/* Keywords queued banner */}
-      {!generationRunning && !generating && queueCounts.pending > 0 && !project.sheet_url && draftCount === 0 && (
-        <div className="mb-6 flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <ListChecks className="h-5 w-5 text-brand-600" />
-            <div>
-              <p className="text-sm font-medium text-brand-900">
-                {queueCounts.pending} keyword{queueCounts.pending !== 1 ? "s" : ""} queued
-              </p>
-              <p className="mt-0.5 text-xs text-brand-700">
-                Ready to generate — runs up to {project.recipes_per_day} per batch.
-              </p>
+      {/* ── OVERVIEW TAB ─────────────────────────────────────────────────── */}
+      {activeTab === "overview" && (
+        <div>
+          {/* Onboarding checklist */}
+          <SetupChecklist
+            id={id}
+            project={project}
+            queueCounts={queueCounts}
+            draftCount={draftCount}
+            generating={generating}
+            publishing={publishing}
+            onGenerate={triggerGeneration}
+            onPublish={publishAllDrafts}
+          />
+
+          {/* Pipeline bar */}
+          <PipelineBar id={id} project={project} draftCount={draftCount} generationRunning={generationRunning} />
+
+          {/* Stats */}
+          <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard icon={BookOpen} label="Recipes Published" value={project.recipes_published} color="text-brand-600" bg="bg-orange-50" />
+            <StatCard
+              icon={KeyRound}
+              label="Keywords Remaining"
+              value={!project.sheet_url ? queueCounts.pending : project.keywords_remaining}
+              color="text-blue-600"
+              bg="bg-blue-50"
+            />
+            <StatCard icon={AlertCircle} label="Keywords Failed" value={project.keywords_failed} color="text-red-500" bg="bg-red-50" />
+            <StatCard icon={TrendingUp} label="Success Rate" value={`${successRate}%`} color="text-emerald-600" bg="bg-emerald-50" />
+          </div>
+
+          {/* Timing strip */}
+          <div className="mb-6 rounded-xl border border-slate-200 bg-white">
+            <div className="grid divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              <div className="flex items-center gap-3 px-5 py-3.5">
+                <Clock className="h-4 w-4 shrink-0 text-slate-400" />
+                <div>
+                  <p className="text-xs text-slate-500">Last Generation</p>
+                  <p className="text-sm font-medium text-slate-900">{formatDate(project.last_generation_at)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-5 py-3.5">
+                <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
+                <div>
+                  <p className="text-xs text-slate-500">Next Scheduled</p>
+                  <p className="text-sm font-medium text-slate-900">{formatDate(project.next_scheduled_at)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-5 py-3.5">
+                <Target className="h-4 w-4 shrink-0 text-slate-400" />
+                <div>
+                  <p className="text-xs text-slate-500">Batch Size</p>
+                  <p className="text-sm font-medium text-slate-900">{project.recipes_per_day} recipes / day</p>
+                </div>
+              </div>
             </div>
           </div>
-          <button
-            onClick={triggerGeneration}
-            disabled={generating}
-            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600 disabled:opacity-50"
-          >
-            <Zap className="h-4 w-4" />
-            Generate Now
-          </button>
+
+          {/* Content Health + Activity */}
+          {initialRecipes.length > 0 && (
+            <ContentHealthCard recipes={initialRecipes} />
+          )}
+          <ActivityFeed id={id} />
         </div>
       )}
 
-      {/* Generation progress card */}
-      <GenerationProgressCard
-        projectId={id}
-        onRunningChange={setGenerationRunning}
-        onComplete={() => {
-          Promise.all([
-            api.get<Project>(`/api/projects/${id}`),
-            api.get<{ counts: { pending: number; done: number; failed: number } }>(`/api/projects/${id}/queue`),
-          ]).then(([proj, queue]) => {
-            setProject(proj);
-            setQueueCounts(queue.counts ?? queueCounts);
-          }).catch(() => {});
-        }}
-      />
+      {/* ── CONTENT TAB ──────────────────────────────────────────────────── */}
+      {activeTab === "content" && (
+        <div>
+          {/* Generation progress card */}
+          <GenerationProgressCard
+            projectId={id}
+            onRunningChange={setGenerationRunning}
+            onComplete={() => {
+              Promise.all([
+                api.get<Project>(`/api/projects/${id}`),
+                api.get<{ counts: { pending: number; done: number; failed: number } }>(`/api/projects/${id}/queue`),
+              ]).then(([proj, queue]) => {
+                setProject(proj);
+                setQueueCounts(queue.counts ?? queueCounts);
+              }).catch(() => {});
+            }}
+          />
 
-      {/* Drafts ready to publish */}
-      {!generationRunning && draftCount > 0 && (
-        <div className="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <BookOpen className="h-5 w-5 text-amber-600" />
-            <div>
-              <p className="text-sm font-medium text-amber-900">
-                {draftCount} draft recipe{draftCount !== 1 ? "s" : ""} ready to publish
-              </p>
-              <p className="mt-0.5 text-xs text-amber-700">Not visible on your live site until published.</p>
+          {/* Keywords queued banner */}
+          {!generationRunning && !generating && queueCounts.pending > 0 && !project.sheet_url && draftCount === 0 && (
+            <div className="mb-6 flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <ListChecks className="h-5 w-5 text-brand-600" />
+                <div>
+                  <p className="text-sm font-medium text-brand-900">
+                    {queueCounts.pending} keyword{queueCounts.pending !== 1 ? "s" : ""} queued
+                  </p>
+                  <p className="mt-0.5 text-xs text-brand-700">
+                    Ready to generate — runs up to {project.recipes_per_day} per batch.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={triggerGeneration}
+                disabled={generating}
+                className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-600 disabled:opacity-50"
+              >
+                <Zap className="h-4 w-4" />
+                Generate Now
+              </button>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/projects/${id}/recipes`}
-              className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
-            >
-              Review
-            </Link>
-            <button
-              onClick={publishAllDrafts}
-              disabled={publishing}
-              className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-600 disabled:opacity-50"
-            >
-              {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              {publishing ? "Publishing..." : "Publish All Now"}
-            </button>
+          )}
+
+          {/* Drafts ready to publish */}
+          {!generationRunning && draftCount > 0 && (
+            <div className="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="text-sm font-medium text-amber-900">
+                    {draftCount} draft recipe{draftCount !== 1 ? "s" : ""} ready to publish
+                  </p>
+                  <p className="mt-0.5 text-xs text-amber-700">Not visible on your live site until published.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/projects/${id}/recipes`}
+                  className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+                >
+                  Review
+                </Link>
+                <button
+                  onClick={publishAllDrafts}
+                  disabled={publishing}
+                  className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-600 disabled:opacity-50"
+                >
+                  {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                  {publishing ? "Publishing..." : "Publish All Now"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Content quick links */}
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Manage Content</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <QuickLink href={`/projects/${id}/recipes`} icon={BookOpen} title="Recipes" description="View, edit, publish" />
+            <QuickLink href={`/projects/${id}/queue`} icon={ListChecks} title="Keyword Queue" description="Add & manage keywords" />
+            <QuickLink href={`/projects/${id}/restaurants`} icon={ChefHat} title="Restaurants" description="Edit descriptions, logos" />
+            <QuickLink href={`/projects/${id}/categories`} icon={Tag} title="Categories" description="Browse by category" />
           </div>
         </div>
       )}
 
-      {/* Pipeline bar */}
-      <PipelineBar id={id} project={project} draftCount={draftCount} generationRunning={generationRunning} />
+      {/* ── OPERATIONS TAB ───────────────────────────────────────────────── */}
+      {activeTab === "operations" && (
+        <div>
+          {/* Deployment status card */}
+          {(project.deployment_status === "deployed" || project.deployment_status === "failed") && (
+            <div className={cn(
+              "mb-6 rounded-xl border p-4",
+              project.deployment_status === "deployed" ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"
+            )}>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  {project.deployment_status === "deployed" ? (
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
+                  )}
+                  <div className="min-w-0">
+                    <p className={cn("text-sm font-semibold", project.deployment_status === "deployed" ? "text-emerald-900" : "text-red-900")}>
+                      {project.deployment_status === "deployed" ? "Site is live" : "Last deployment failed"}
+                    </p>
+                    {project.vercel_deployment_url && (
+                      <a href={project.vercel_deployment_url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-emerald-700 hover:underline truncate">
+                        {project.vercel_deployment_url}
+                        <ExternalLink className="h-3 w-3 shrink-0" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {project.deployment_status === "deployed" && (
+                    <>
+                      <button onClick={checkSiteHealth} disabled={checkingHealth}
+                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+                        {checkingHealth ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Activity className="h-3.5 w-3.5" />}
+                        {healthCheck
+                          ? healthCheck.healthy ? `Online · ${healthCheck.latency_ms}ms` : "Unreachable"
+                          : checkingHealth ? "Checking…" : "Health"}
+                      </button>
+                      <button onClick={pingSitemap} disabled={pinging}
+                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+                        {pinging ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                        {pinging ? "Pinging…" : "Ping"}
+                      </button>
+                    </>
+                  )}
+                  <Link href={`/projects/${id}/deploy`}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white",
+                      project.deployment_status === "deployed" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
+                    )}>
+                    <Rocket className="h-3.5 w-3.5" />
+                    {project.deployment_status === "deployed" ? "Manage Deploy" : "Retry"}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
 
-      {/* Stats */}
-      <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard icon={BookOpen} label="Recipes Published" value={project.recipes_published} color="text-brand-600" bg="bg-orange-50" />
-        <StatCard
-          icon={KeyRound}
-          label="Keywords Remaining"
-          value={!project.sheet_url ? queueCounts.pending : project.keywords_remaining}
-          color="text-blue-600"
-          bg="bg-blue-50"
-        />
-        <StatCard icon={AlertCircle} label="Keywords Failed" value={project.keywords_failed} color="text-red-500" bg="bg-red-50" />
-        <StatCard icon={TrendingUp} label="Success Rate" value={`${successRate}%`} color="text-emerald-600" bg="bg-emerald-50" />
-      </div>
+          {/* Template changed — needs redeploy */}
+          {needsRedeploy && project.deployment_status === "deployed" && (
+            <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-violet-200 bg-violet-50 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <Rocket className="h-5 w-5 shrink-0 text-violet-500" />
+                <div>
+                  <p className="text-sm font-semibold text-violet-900">Template changed — redeploy to apply</p>
+                  <p className="mt-0.5 text-xs text-violet-700">
+                    Your live site is still using the old template. Redeploy to switch it.
+                  </p>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  onClick={() => { localStorage.removeItem(`needs_redeploy_${id}`); setNeedsRedeploy(false); }}
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100"
+                >
+                  Dismiss
+                </button>
+                <button
+                  onClick={triggerRedeploy}
+                  disabled={redeploying}
+                  className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-700 disabled:opacity-50"
+                >
+                  {redeploying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
+                  {redeploying ? "Deploying…" : "Redeploy Now"}
+                </button>
+              </div>
+            </div>
+          )}
 
-      {/* Timing strip */}
-      <div className="mb-8 rounded-xl border border-slate-200 bg-white">
-        <div className="grid divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <div className="flex items-center gap-3 px-5 py-3.5">
-            <Clock className="h-4 w-4 shrink-0 text-slate-400" />
-            <div>
-              <p className="text-xs text-slate-500">Last Generation</p>
-              <p className="text-sm font-medium text-slate-900">{formatDate(project.last_generation_at)}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-5 py-3.5">
-            <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
-            <div>
-              <p className="text-xs text-slate-500">Next Scheduled</p>
-              <p className="text-sm font-medium text-slate-900">{formatDate(project.next_scheduled_at)}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-5 py-3.5">
-            <Target className="h-4 w-4 shrink-0 text-slate-400" />
-            <div>
-              <p className="text-xs text-slate-500">Batch Size</p>
-              <p className="text-sm font-medium text-slate-900">{project.recipes_per_day} recipes / day</p>
-            </div>
+          {/* Operations quick links */}
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Operations</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <QuickLink href={`/projects/${id}/deploy`} icon={Rocket} title="Deploy & Domains" description="Vercel + custom domains" />
+            <QuickLink href={`/projects/${id}/logs`} icon={Activity} title="Generation Logs" description="Run history & stats" />
+            <QuickLink href={`/projects/${id}/keywords`} icon={KeyRound} title="Keyword Logs" description="Status & timestamps" />
+            <QuickLink href={`/projects/${id}/analytics`} icon={BarChart3} title="Analytics" description="Charts & content insights" />
           </div>
         </div>
-      </div>
-
-      {/* Content Health + Activity */}
-      {initialRecipes.length > 0 && (
-        <ContentHealthCard recipes={initialRecipes} />
       )}
-      <ActivityFeed id={id} />
-
-      {/* Quick links — Content row */}
-      <div className="mb-2">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Content</p>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <QuickLink href={`/projects/${id}/recipes`} icon={BookOpen} title="Recipes" description="View, edit, publish" />
-          <QuickLink href={`/projects/${id}/queue`} icon={ListChecks} title="Keyword Queue" description="Add & manage keywords" />
-          <QuickLink href={`/projects/${id}/restaurants`} icon={ChefHat} title="Restaurants" description="Edit descriptions, logos" />
-          <QuickLink href={`/projects/${id}/categories`} icon={Tag} title="Categories" description="Browse by category" />
-        </div>
-      </div>
-
-      {/* Quick links — Operations row */}
-      <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Operations</p>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <QuickLink href={`/projects/${id}/keywords`} icon={KeyRound} title="Keyword Logs" description="Status & timestamps" />
-          <QuickLink href={`/projects/${id}/logs`} icon={Activity} title="Generation Logs" description="Run history & stats" />
-          <QuickLink href={`/projects/${id}/deploy`} icon={Rocket} title="Deploy & Domains" description="Vercel + custom domains" />
-          <QuickLink href={`/projects/${id}/analytics`} icon={BarChart3} title="Analytics" description="Charts & content insights" />
-        </div>
-      </div>
     </div>
   );
 }

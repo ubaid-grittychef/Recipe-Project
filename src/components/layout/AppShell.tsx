@@ -1,30 +1,28 @@
-"use client";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import AppShellClient from "./AppShellClient";
 
-import { useState } from "react";
-import { usePathname } from "next/navigation";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
+export default async function AppShell({ children }: { children: React.ReactNode }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const isAuthPage = pathname === "/login" || pathname === "/signup" ||
-    pathname.startsWith("/auth/") || pathname === "/access-required";
+  let userRole = "user";
+  let userEmail = "";
+  let userFullName = "";
 
-  if (isAuthPage) {
-    return <>{children}</>;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, email, full_name")
+      .eq("id", user.id)
+      .single();
+    userRole = profile?.role ?? "user";
+    userEmail = profile?.email ?? user.email ?? "";
+    userFullName = profile?.full_name ?? "";
   }
 
   return (
-    <>
-      <Sidebar
-        mobileOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-      />
-      <div className="lg:pl-64">
-        <Header onMenuToggle={() => setMobileOpen(true)} />
-        <main className="min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8">{children}</main>
-      </div>
-    </>
+    <AppShellClient userRole={userRole} userEmail={userEmail} userFullName={userFullName}>
+      {children}
+    </AppShellClient>
   );
 }

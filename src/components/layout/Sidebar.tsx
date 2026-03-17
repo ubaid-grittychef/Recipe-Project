@@ -19,9 +19,11 @@ import {
   UtensilsCrossed,
   Tags,
   FileText,
-  KeyRound,
+  Users,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const navigation = [
   { name: "All Projects", href: "/", icon: LayoutDashboard },
@@ -33,11 +35,15 @@ const navigation = [
 interface SidebarProps {
   mobileOpen: boolean;
   onClose: () => void;
+  userRole: string;
+  userEmail: string;
+  userFullName: string;
 }
 
-export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
+export default function Sidebar({ mobileOpen, onClose, userRole, userEmail, userFullName }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const supabase = createSupabaseBrowserClient();
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const projectId = projectMatch?.[1] ?? null;
@@ -56,10 +62,12 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   ] : [];
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   }
+
+  const avatarLetter = (userFullName || userEmail || "U").charAt(0).toUpperCase();
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-white border-r border-slate-200">
@@ -139,10 +147,49 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             </div>
           </div>
         )}
+
+        {/* Admin section — only shown to admins */}
+        {userRole === "admin" && (
+          <div>
+            <p className="section-title px-3 mb-2">Admin</p>
+            <div className="space-y-0.5">
+              <Link
+                href="/admin/users"
+                onClick={onClose}
+                className={cn("sidebar-link", pathname.startsWith("/admin") && "active")}
+              >
+                <Users className="h-4 w-4 shrink-0" />
+                Manage Users
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-slate-100 p-3 space-y-1">
+      {/* Footer — user profile + sign out */}
+      <div className="border-t border-slate-100 p-3 space-y-1.5">
+        {/* User profile card */}
+        <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 shrink-0">
+            <span className="text-xs font-bold text-brand-600">{avatarLetter}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-slate-700 truncate">
+              {userFullName || "My Account"}
+            </p>
+            <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+          </div>
+          {userRole === "admin" && (
+            <div className="flex items-center gap-1 shrink-0">
+              <Shield className="h-3 w-3 text-purple-500" />
+              <span className="rounded-full bg-purple-100 px-1.5 py-0.5 text-[9px] font-bold text-purple-600 uppercase tracking-wide">
+                Admin
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Sign out */}
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800"
@@ -150,15 +197,6 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           <LogOut className="h-4 w-4" />
           Sign Out
         </button>
-        <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-100">
-            <ChefHat className="h-3.5 w-3.5 text-brand-600" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-700">Recipe Factory</p>
-            <p className="text-[10px] text-slate-400">v1.0 · Private</p>
-          </div>
-        </div>
       </div>
     </div>
   );

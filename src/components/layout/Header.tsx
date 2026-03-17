@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Search, ChefHat, LogOut, Users } from "lucide-react";
+import { Menu, Search, ChefHat, LogOut } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -41,6 +41,7 @@ function formatHeaderDate() {
 
 interface HeaderProps {
   onMenuToggle: () => void;
+  userRole?: string;
 }
 
 export default function Header({ onMenuToggle }: HeaderProps) {
@@ -128,15 +129,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             <ChefHat className="h-4 w-4 text-white" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-              <button
-                onClick={() => { setMenuOpen(false); router.push("/admin/users"); }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
-              >
-                <Users className="h-4 w-4 text-slate-400" />
-                Manage Users
-              </button>
-              <div className="my-1 border-t border-slate-100" />
+            <div className="absolute right-0 top-10 z-50 w-40 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition"

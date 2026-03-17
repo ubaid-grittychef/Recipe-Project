@@ -17,6 +17,7 @@ interface Props {
 export default function DashboardClient({ initialProjects }: Props) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "paused" | "setup">("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
   const [confirm, ConfirmDialog] = useConfirm();
@@ -30,11 +31,13 @@ export default function DashboardClient({ initialProjects }: Props) {
     }
   }, []);
 
-  const filtered = projects.filter(
-    (p) =>
+  const filtered = projects.filter((p) => {
+    const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.niche.toLowerCase().includes(search.toLowerCase())
-  );
+      p.niche.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = filter === "all" || p.status === filter;
+    return matchesSearch && matchesFilter;
+  });
 
   // Selection helpers
   function toggleSelect(id: string) {
@@ -182,8 +185,9 @@ export default function DashboardClient({ initialProjects }: Props) {
       </div>
 
       {/* Toolbar */}
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -191,9 +195,31 @@ export default function DashboardClient({ initialProjects }: Props) {
               placeholder="Search projects..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-60 rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100 shadow-sm"
+              className="w-52 rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100 shadow-sm"
             />
           </div>
+
+          {/* Filter tabs */}
+          <div className="flex gap-0.5 rounded-lg bg-slate-100 p-1">
+            {(["all", "active", "paused", "setup"] as const).map((f) => {
+              const count = f === "all" ? projects.length : projects.filter((p) => p.status === f).length;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-all",
+                    filter === f
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  {f === "all" ? `All (${count})` : `${f.charAt(0).toUpperCase() + f.slice(1)} (${count})`}
+                </button>
+              );
+            })}
+          </div>
+
           <button
             onClick={allSelected ? clearSelection : selectAll}
             className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 shadow-sm"
