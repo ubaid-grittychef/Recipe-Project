@@ -81,9 +81,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Read role + subscription from JWT custom claims (zero extra DB call)
-  const userRole = (user.app_metadata?.user_role ?? "user") as string;
-  const subStatus = (user.app_metadata?.subscription_status ?? "inactive") as string;
+  // Fetch role + subscription directly from profiles table (no JWT hook needed)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, subscription_status")
+    .eq("id", user.id)
+    .single();
+
+  const userRole = profile?.role ?? "user";
+  const subStatus = profile?.subscription_status ?? "inactive";
 
   // Admin bypasses all subscription and route checks
   if (userRole === "admin") {
