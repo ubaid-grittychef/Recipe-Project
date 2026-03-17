@@ -89,7 +89,7 @@ export default function SignupPage() {
               </div>
             </label>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <button type="submit" disabled={loading || !!oauthLoading}
+            <button type="submit" disabled={loading}
               className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600 disabled:opacity-50">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
             </button>
