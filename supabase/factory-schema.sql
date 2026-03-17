@@ -292,6 +292,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists profiles_updated_at on profiles;
 create trigger profiles_updated_at
   before update on profiles
   for each row execute procedure set_updated_at();
@@ -305,6 +306,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure handle_new_user();
@@ -321,22 +323,33 @@ $$ language sql security definer stable;
 
 alter table profiles enable row level security;
 
-create policy "Users can read own profile" on profiles
-  for select using (auth.uid() = id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename = 'profiles' and policyname = 'Users can read own profile') then
+    create policy "Users can read own profile" on profiles for select using (auth.uid() = id);
+  end if;
+end $$;
 
-create policy "Admins can read all profiles" on profiles
-  for select using (get_my_role() = 'admin');
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename = 'profiles' and policyname = 'Admins can read all profiles') then
+    create policy "Admins can read all profiles" on profiles for select using (get_my_role() = 'admin');
+  end if;
+end $$;
 
-create policy "Admins can update all profiles" on profiles
-  for update using (get_my_role() = 'admin')
-  with check (get_my_role() = 'admin');
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename = 'profiles' and policyname = 'Admins can update all profiles') then
+    create policy "Admins can update all profiles" on profiles for update using (get_my_role() = 'admin') with check (get_my_role() = 'admin');
+  end if;
+end $$;
 
 alter table projects add column if not exists user_id uuid references profiles(id);
 
 alter table projects enable row level security;
 
-create policy "Users see own projects" on projects
-  for all using (user_id = auth.uid() or get_my_role() = 'admin');
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename = 'projects' and policyname = 'Users see own projects') then
+    create policy "Users see own projects" on projects for all using (user_id = auth.uid() or get_my_role() = 'admin');
+  end if;
+end $$;
 
 -- JWT Custom Claims Hook
 -- Register in: Supabase Dashboard → Auth → Hooks → Custom Access Token Hook
