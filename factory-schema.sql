@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS projects (
   site_supabase_service_key TEXT,
 
   -- Deployment
+  vercel_token TEXT,
   vercel_project_id TEXT,
   vercel_deployment_url TEXT,
   deployment_status TEXT NOT NULL DEFAULT 'not_deployed',
@@ -64,7 +65,8 @@ CREATE TABLE IF NOT EXISTS projects (
   keywords_remaining INTEGER NOT NULL DEFAULT 0,
   keywords_failed INTEGER NOT NULL DEFAULT 0,
   last_generation_at TIMESTAMPTZ,
-  next_scheduled_at TIMESTAMPTZ
+  next_scheduled_at TIMESTAMPTZ,
+  generation_status TEXT NOT NULL DEFAULT 'idle'
 );
 
 -- Recipes table
@@ -172,23 +174,41 @@ ALTER TABLE restaurants ENABLE ROW LEVEL SECURITY;
 
 -- Service role has full access (used by the factory server)
 -- Anon key has NO access (dashboard is password-protected at the app level)
-CREATE POLICY IF NOT EXISTS "Service role only" ON projects
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'projects' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON projects USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON recipes
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'recipes' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON recipes USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON keyword_logs
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'keyword_logs' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON keyword_logs USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON generation_logs
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'generation_logs' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON generation_logs USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON deployments
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'deployments' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON deployments USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON restaurants
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'restaurants' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON restaurants USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
 -- Migration helpers — run these if upgrading from a previous schema version:
 -- ALTER TABLE projects ADD COLUMN IF NOT EXISTS prompt_overrides JSONB;
@@ -216,8 +236,11 @@ CREATE INDEX IF NOT EXISTS builtin_keywords_created_at ON builtin_keywords(creat
 
 ALTER TABLE builtin_keywords ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON builtin_keywords
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'builtin_keywords' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON builtin_keywords USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
 -- Migration: if upgrading from a previous schema, run:
 -- (The builtin_keywords table is new — create it using the CREATE TABLE above)
@@ -240,9 +263,116 @@ CREATE INDEX IF NOT EXISTS categories_project_id ON categories(project_id);
 
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Service role only" ON categories
-  USING (auth.role() = 'service_role');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'categories' AND policyname = 'Service role only') THEN
+    CREATE POLICY "Service role only" ON categories USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
 -- Migration: add restaurant_id and category_id to recipes table
 -- ALTER TABLE recipes ADD COLUMN IF NOT EXISTS restaurant_id TEXT REFERENCES restaurants(id) ON DELETE SET NULL;
 -- ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category_id TEXT REFERENCES categories(id) ON DELETE SET NULL;
+
+-- ============================================================
+-- PROFILES (Supabase Auth users extension)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS profiles (
+  id                   UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email                TEXT NOT NULL,
+  full_name            TEXT NOT NULL DEFAULT '',
+  role                 TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  subscription_status  TEXT NOT NULL DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive')),
+  stripe_customer_id   TEXT,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- updated_at trigger
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER profiles_updated_at
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE PROCEDURE set_updated_at();
+
+-- Auto-create profile on signup
+-- SECURITY DEFINER: runs as DB owner, bypasses RLS.
+-- All profile creation goes through this trigger. Direct SDK inserts not supported.
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO profiles (id, email, full_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', '')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE handle_new_user();
+
+-- RLS helpers (security definer to avoid policy self-reference recursion)
+CREATE OR REPLACE FUNCTION get_my_role()
+RETURNS TEXT AS $$
+  SELECT role FROM profiles WHERE id = auth.uid();
+$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+CREATE OR REPLACE FUNCTION get_my_subscription_status()
+RETURNS TEXT AS $$
+  SELECT subscription_status FROM profiles WHERE id = auth.uid();
+$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+-- RLS policies for profiles
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own profile" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Admins can read all profiles" ON profiles
+  FOR SELECT USING (get_my_role() = 'admin');
+
+CREATE POLICY "Admins can update all profiles" ON profiles
+  FOR UPDATE USING (get_my_role() = 'admin')
+  WITH CHECK (get_my_role() = 'admin');
+
+-- Add user_id to projects (run after profiles table exists)
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES profiles(id);
+
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see own projects" ON projects
+  FOR ALL USING (
+    user_id = auth.uid() OR get_my_role() = 'admin'
+  );
+
+-- ============================================================
+-- JWT CUSTOM CLAIMS HOOK
+-- Register in: Supabase Dashboard → Auth → Hooks → Custom Access Token Hook
+-- Select function: custom_jwt_claims
+-- ============================================================
+CREATE OR REPLACE FUNCTION custom_jwt_claims(event JSONB)
+RETURNS JSONB AS $$
+DECLARE
+  profile_row profiles;
+BEGIN
+  SELECT * INTO profile_row FROM profiles WHERE id = (event->>'user_id')::UUID;
+  RETURN jsonb_set(
+    event,
+    '{claims}',
+    (event->'claims') || jsonb_build_object(
+      'user_role', COALESCE(profile_row.role, 'user'),
+      'subscription_status', COALESCE(profile_row.subscription_status, 'inactive')
+    )
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -1,57 +1,86 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/api/auth/login"];
-const SESSION_COOKIE = "factory_session";
-
-/** SHA-256 via the Web Crypto API — works in both Edge and Node runtimes */
-async function sha256hex(text: string): Promise<string> {
-  const encoded = new TextEncoder().encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+// Paths that never require auth
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/auth/",
+  "/access-required",
+  "/api/auth/",
+];
 
 export async function middleware(request: NextRequest) {
-  const factoryPassword = process.env.FACTORY_PASSWORD;
+  const { pathname } = request.nextUrl;
 
-  if (!factoryPassword) {
+  // Always allow static assets and cron (cron protected by CRON_SECRET separately)
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/api/cron/")
+  ) {
     return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
-
+  // Allow public paths
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
-    return NextResponse.next();
-  }
+  // Build a response we can mutate cookies on (required by @supabase/ssr)
+  let response = NextResponse.next({ request });
 
-  const expectedToken = await sha256hex(factoryPassword);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
 
-  // Allow server-to-server calls (e.g. from the template in local preview mode)
-  // that pass the hashed factory password as x-factory-secret header
-  const internalSecret = request.headers.get("x-factory-secret");
-  if (internalSecret && internalSecret === expectedToken) {
-    return NextResponse.next();
-  }
+  // Use getUser() — validates JWT signature server-side (getSession() does not)
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const session = request.cookies.get(SESSION_COOKIE);
-
-  if (!session?.value) {
+  if (!user) {
     const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (session.value !== expectedToken) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  // Read role + subscription from JWT custom claims (zero extra DB call)
+  const userRole = (user.app_metadata?.user_role ?? "user") as string;
+  const subStatus = (user.app_metadata?.subscription_status ?? "inactive") as string;
+
+  // Admin bypasses all subscription and route checks
+  if (userRole === "admin") {
+    return response;
   }
 
-  return NextResponse.next();
+  // Block non-admins from /admin/* routes
+  if (pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Non-admins need active subscription for dashboard access
+  if (subStatus !== "active") {
+    return NextResponse.redirect(new URL("/access-required", request.url));
+  }
+
+  return response;
 }
 
 export const config = {

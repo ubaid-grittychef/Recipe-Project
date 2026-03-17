@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { Project, Recipe, KeywordLog, GenerationLog, Deployment, Restaurant, BuiltInKeyword, Category } from "./types";
+import { Project, Recipe, KeywordLog, GenerationLog, Deployment, Restaurant, BuiltInKeyword, Category, Profile } from "./types";
 import { generateId } from "./utils";
 import { createLogger } from "./logger";
 
@@ -125,13 +125,41 @@ export async function getProjects(): Promise<Project[]> {
       log.error("Failed to fetch projects from Supabase", {}, error);
       throw error;
     }
-    return data ?? [];
+    const projects = data ?? [];
+    // Best-effort: compute draft_count via a single aggregate query
+    try {
+      const { data: draftData } = await supabase
+        .from("recipes")
+        .select("project_id")
+        .eq("status", "draft");
+      if (draftData) {
+        const draftCounts: Record<string, number> = {};
+        for (const row of draftData) {
+          draftCounts[row.project_id] = (draftCounts[row.project_id] ?? 0) + 1;
+        }
+        for (const p of projects) {
+          p.draft_count = draftCounts[p.id] ?? 0;
+        }
+      }
+    } catch { /* non-critical */ }
+    return projects;
   }
   const store = getDevStore();
   log.debug("Returning projects from dev store", { count: store.projects.size });
-  return Array.from(store.projects.values()).sort(
+  const projects = Array.from(store.projects.values()).sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+  // Compute draft_count in-memory
+  const draftCounts: Record<string, number> = {};
+  for (const recipe of store.recipes.values()) {
+    if (recipe.status === "draft") {
+      draftCounts[recipe.project_id] = (draftCounts[recipe.project_id] ?? 0) + 1;
+    }
+  }
+  for (const p of projects) {
+    p.draft_count = draftCounts[p.id] ?? 0;
+  }
+  return projects;
 }
 
 export async function getProject(id: string): Promise<Project | null> {
@@ -188,6 +216,8 @@ export async function createProject(data: Partial<Project>): Promise<Project> {
     site_supabase_url: data.site_supabase_url ?? null,
     site_supabase_anon_key: data.site_supabase_anon_key ?? null,
     site_supabase_service_key: data.site_supabase_service_key ?? null,
+    template_variant: data.template_variant ?? "default",
+    vercel_token: data.vercel_token ?? null,
     vercel_project_id: data.vercel_project_id ?? null,
     vercel_deployment_url: data.vercel_deployment_url ?? null,
     deployment_status: "not_deployed",
@@ -196,6 +226,7 @@ export async function createProject(data: Partial<Project>): Promise<Project> {
     keywords_failed: 0,
     last_generation_at: null,
     next_scheduled_at: null,
+    generation_status: "idle",
   };
 
   log.info("Creating project", { id: project.id, name: project.name });
@@ -738,7 +769,7 @@ export async function findOrCreateCategory(
       .single();
     if (existing) {
       // Increment recipe_count
-      await supabase.from("categories").update({ recipe_count: (existing.recipe_count ?? 0) + 1 }).eq("id", existing.id);
+      await supabase.rpc("increment_category_count", { cat_id: existing.id }).throwOnError();
       return { ...existing, recipe_count: existing.recipe_count + 1 };
     }
     const now = new Date().toISOString();
@@ -819,7 +850,7 @@ export async function createBuiltInKeywords(
       .select();
     if (error) {
       log.error("Supabase createBuiltInKeywords failed", { projectId }, error);
-      throw error;
+      throw new Error(error.message || JSON.stringify(error));
     }
     return data ?? [];
   }
@@ -897,4 +928,51 @@ export async function deleteBuiltInKeywords(
     }
   }
   scheduleSave();
+}
+
+// ── Profiles ─────────────────────────────────────────────────────────────────
+
+export async function getProfile(userId: string): Promise<Profile | null> {
+  if (!hasSupabase()) return null;
+  const { supabase } = await import("./supabase");
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+  if (error) return null;
+  return data as Profile;
+}
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  if (!hasSupabase()) return [];
+  const { supabase } = await import("./supabase");
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) {
+    log.error("Failed to fetch all profiles", {}, error);
+    return [];
+  }
+  return (data ?? []) as Profile[];
+}
+
+export async function updateProfile(
+  userId: string,
+  updates: Partial<Pick<Profile, "role" | "subscription_status" | "full_name" | "stripe_customer_id">>
+): Promise<Profile | null> {
+  if (!hasSupabase()) return null;
+  const { supabase } = await import("./supabase");
+  const { data, error } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", userId)
+    .select()
+    .single();
+  if (error) {
+    log.error("Failed to update profile", { userId }, error);
+    return null;
+  }
+  return data as Profile;
 }

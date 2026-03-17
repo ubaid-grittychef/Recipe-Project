@@ -13,9 +13,16 @@ import * as crypto from "crypto";
 
 const log = createLogger("Deployer");
 
-function getVercelToken(): string {
-  const token = process.env.VERCEL_TOKEN;
-  if (!token) throw new Error("VERCEL_TOKEN is not set. Add it to .env.local");
+/**
+ * Resolves the Vercel API token.
+ * Per-project token takes priority over the global VERCEL_TOKEN env var,
+ * ensuring each customer's site deploys to their own Vercel account.
+ */
+function getVercelToken(projectToken?: string | null): string {
+  const token = projectToken || process.env.VERCEL_TOKEN;
+  if (!token) throw new Error(
+    "No Vercel token configured. Add your Vercel API token in project Settings → Deployment."
+  );
   return token;
 }
 
@@ -26,9 +33,10 @@ function getVercelTeamId(): string | undefined {
 async function vercelApi(
   urlPath: string,
   method: "GET" | "POST" | "PATCH" | "DELETE" = "GET",
-  body?: unknown
+  body?: unknown,
+  projectToken?: string | null
 ): Promise<unknown> {
-  const token = getVercelToken();
+  const token = getVercelToken(projectToken);
   const teamId = getVercelTeamId();
   const url = new URL(`https://api.vercel.com${urlPath}`);
   if (teamId) url.searchParams.set("teamId", teamId);
@@ -44,7 +52,11 @@ async function vercelApi(
     })
   );
 
-  const data = await res.json();
+  let data: unknown = {};
+  const contentType = res.headers.get("content-type") ?? "";
+  if (res.status !== 204 && contentType.includes("application/json")) {
+    try { data = await res.json(); } catch { data = {}; }
+  }
   if (!res.ok) {
     log.error("Vercel API error", {
       path: urlPath,
@@ -52,7 +64,7 @@ async function vercelApi(
       error: data,
     });
     throw new Error(
-      data?.error?.message ?? `Vercel API ${res.status}: ${urlPath}`
+      (data as Record<string, Record<string, string>>)?.error?.message ?? `Vercel API ${res.status}: ${urlPath}`
     );
   }
   return data;
@@ -72,14 +84,33 @@ export async function createVercelProject(
 
   log.info("Creating Vercel project", { name: vercelName, projectId });
 
-  const result = (await vercelApi("/v10/projects", "POST", {
-    name: vercelName,
-    framework: "nextjs",
-  })) as { id: string };
+  let vercelProjectId: string;
 
-  await updateProject(projectId, { vercel_project_id: result.id });
-  log.info("Vercel project created", { vercelProjectId: result.id });
-  return result.id;
+  try {
+    const result = (await vercelApi("/v10/projects", "POST", {
+      name: vercelName,
+      framework: "nextjs",
+    }, project.vercel_token)) as { id: string };
+    vercelProjectId = result.id;
+    log.info("Vercel project created", { vercelProjectId });
+  } catch (err) {
+    // Project already exists — look it up by name and reuse it
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.toLowerCase().includes("already exists") || msg.includes("409") || msg.includes("422")) {
+      log.warn("Vercel project already exists — fetching existing project", { name: vercelName });
+      const existing = (await vercelApi(
+        `/v10/projects/${vercelName}`,
+        "GET", undefined, project.vercel_token
+      )) as { id: string };
+      vercelProjectId = existing.id;
+      log.info("Reusing existing Vercel project", { vercelProjectId });
+    } else {
+      throw err;
+    }
+  }
+
+  await updateProject(projectId, { vercel_project_id: vercelProjectId });
+  return vercelProjectId;
 }
 
 export async function setVercelEnvVars(
@@ -97,7 +128,8 @@ export async function setVercelEnvVars(
 
   // BUG 5 FIX: upsert env vars — delete existing ones first to avoid 409 Conflict on redeploy
   const existing = (await vercelApi(
-    `/v10/projects/${project.vercel_project_id}/env`
+    `/v10/projects/${project.vercel_project_id}/env`,
+    "GET", undefined, project.vercel_token
   )) as { envs?: Array<{ id: string; key: string }> };
 
   const keysToSet = new Set(Object.keys(envVars));
@@ -105,7 +137,7 @@ export async function setVercelEnvVars(
     if (keysToSet.has(env.key)) {
       await vercelApi(
         `/v10/projects/${project.vercel_project_id}/env/${env.id}`,
-        "DELETE"
+        "DELETE", undefined, project.vercel_token
       );
     }
   }
@@ -120,7 +152,8 @@ export async function setVercelEnvVars(
   await vercelApi(
     `/v10/projects/${project.vercel_project_id}/env`,
     "POST",
-    envList
+    envList,
+    project.vercel_token
   );
 }
 
@@ -139,6 +172,7 @@ export function buildSiteEnvVars(project: {
   hellofresh_url: string | null;
   adsense_publisher_id: string | null;
   ga_id: string | null;
+  template_variant?: string | null;
 }): Record<string, string> {
   const vars: Record<string, string> = {
     NEXT_PUBLIC_SITE_NAME: project.name,
@@ -147,7 +181,7 @@ export function buildSiteEnvVars(project: {
     NEXT_PUBLIC_SITE_AUTHOR: project.author_name,
     NEXT_PUBLIC_SITE_URL: project.domain
       ? `https://${project.domain}`
-      : "",
+      : "https://example.com",
     NEXT_PUBLIC_PRIMARY_COLOR: project.primary_color,
     NEXT_PUBLIC_FONT_PRESET: project.font_preset,
   };
@@ -166,6 +200,8 @@ export function buildSiteEnvVars(project: {
     vars.NEXT_PUBLIC_ADSENSE_ID = project.adsense_publisher_id;
   if (project.ga_id)
     vars.NEXT_PUBLIC_GA_ID = project.ga_id;
+  if (project.template_variant && project.template_variant !== "default")
+    vars.NEXT_PUBLIC_TEMPLATE_VARIANT = project.template_variant;
 
   return vars;
 }
@@ -206,9 +242,10 @@ function collectFiles(dir: string, base: string = ""): FileEntry[] {
 
 async function uploadFile(
   filePath: string,
-  templateDir: string
+  templateDir: string,
+  projectToken?: string | null
 ): Promise<void> {
-  const token = getVercelToken();
+  const token = getVercelToken(projectToken);
   const teamId = getVercelTeamId();
   const fullPath = path.join(templateDir, filePath);
   const content = fs.readFileSync(fullPath);
@@ -272,19 +309,30 @@ export async function deployToVercel(projectId: string): Promise<Deployment> {
 
     await updateDeployment(deployment.id, { status: "building" });
 
-    const templateDir = path.resolve(process.cwd(), "template");
-    if (!fs.existsSync(templateDir)) {
+    const variant = project.template_variant ?? "default";
+    const templateDirName = variant === "default" ? "template" : `template-${variant}`;
+    const templateDir = path.resolve(process.cwd(), templateDirName);
+
+    // Fall back to default template if the selected variant directory doesn't exist
+    const resolvedTemplateDir = fs.existsSync(templateDir)
+      ? templateDir
+      : path.resolve(process.cwd(), "template");
+
+    if (!fs.existsSync(resolvedTemplateDir)) {
       throw new Error(
-        `Template directory not found at ${templateDir}. The /template folder must exist in the project root.`
+        `Template directory not found at ${resolvedTemplateDir}. The /template folder must exist in the project root.`
       );
     }
+    if (resolvedTemplateDir !== templateDir) {
+      log.warn("Template variant not found, falling back to default", { variant, templateDirName });
+    }
 
-    log.info("Collecting template files", { templateDir });
-    const files = collectFiles(templateDir);
+    log.info("Collecting template files", { templateDir: resolvedTemplateDir, variant });
+    const files = collectFiles(resolvedTemplateDir);
     log.info("Template files collected", { count: files.length });
 
     for (const f of files) {
-      await uploadFile(f.file, templateDir);
+      await uploadFile(f.file, resolvedTemplateDir, project.vercel_token);
     }
     log.info("All files uploaded to Vercel");
 
@@ -300,7 +348,7 @@ export async function deployToVercel(projectId: string): Promise<Deployment> {
       projectSettings: {
         framework: "nextjs",
       },
-    })) as { id: string; url: string; readyState: string };
+    }, project.vercel_token)) as { id: string; url: string; readyState: string };
 
     const deployUrl = `https://${result.url}`;
 
@@ -368,7 +416,8 @@ export async function addDomain(
   const result = (await vercelApi(
     `/v10/projects/${project.vercel_project_id}/domains`,
     "POST",
-    { name: domain }
+    { name: domain },
+    project.vercel_token
   )) as { name: string; verified: boolean; verification?: unknown[] };
 
   await updateProject(projectId, { domain });
@@ -387,7 +436,8 @@ export async function checkDomainStatus(
   if (!project?.vercel_project_id) throw new Error("No Vercel project linked");
 
   const result = (await vercelApi(
-    `/v9/projects/${project.vercel_project_id}/domains/${domain}`
+    `/v9/projects/${project.vercel_project_id}/domains/${domain}`,
+    "GET", undefined, project.vercel_token
   )) as { verified: boolean; verification?: unknown[] };
 
   return { verified: result.verified, verification: result.verification };
@@ -402,15 +452,17 @@ export async function removeDomain(
 
   await vercelApi(
     `/v9/projects/${project.vercel_project_id}/domains/${domain}`,
-    "DELETE"
+    "DELETE", undefined, project.vercel_token
   );
 }
 
 export async function getDeploymentStatus(
-  vercelDeploymentId: string
+  vercelDeploymentId: string,
+  projectToken?: string | null
 ): Promise<{ state: string; url: string }> {
   const result = (await vercelApi(
-    `/v13/deployments/${vercelDeploymentId}`
+    `/v13/deployments/${vercelDeploymentId}`,
+    "GET", undefined, projectToken
   )) as { readyState: string; url: string };
 
   return { state: result.readyState, url: result.url };

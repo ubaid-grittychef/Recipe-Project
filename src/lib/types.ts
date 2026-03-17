@@ -3,6 +3,21 @@ export type ContentTone = "casual" | "informative" | "quick";
 export type KeywordStatus = "pending" | "done" | "failed";
 export type DeploymentStatus = "not_deployed" | "deploying" | "deployed" | "failed";
 
+// ── Auth / Profiles ──────────────────────────────────────────────────────────
+export type UserRole = "admin" | "user";
+export type SubscriptionStatus = "active" | "inactive";
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  subscription_status: SubscriptionStatus;
+  stripe_customer_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -62,7 +77,11 @@ export interface Project {
   site_supabase_anon_key: string | null;
   site_supabase_service_key: string | null;
 
+  // Template
+  template_variant: "default" | "premium" | "v3";
+
   // Deployment
+  vercel_token: string | null;
   vercel_project_id: string | null;
   vercel_deployment_url: string | null;
   deployment_status: DeploymentStatus;
@@ -73,6 +92,8 @@ export interface Project {
   keywords_failed: number;
   last_generation_at: string | null;
   next_scheduled_at: string | null;
+  draft_count?: number;
+  generation_status: "idle" | "running" | "completed" | "failed";
 }
 
 export interface Category {
@@ -238,6 +259,9 @@ export interface WizardFormData {
   hellofresh_url: string;
   adsense_publisher_id: string;
   ga_id: string;
+
+  // Template
+  template_variant: "default" | "premium" | "v3";
 }
 
 export const FONT_PRESETS = [
