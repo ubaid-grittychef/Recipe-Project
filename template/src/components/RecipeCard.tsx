@@ -2,113 +2,102 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Users, Star, ChefHat } from "lucide-react";
+import { Clock, Users, ChefHat } from "lucide-react";
 import { Recipe } from "@/lib/types";
 import { slugifyCategory } from "@/lib/utils";
 
 export default function RecipeCard({ recipe }: { recipe: Recipe }) {
-  const rating = recipe.rating ?? 4.8;
   const totalTime = recipe.total_time || recipe.cook_time || recipe.prep_time;
 
-  const difficultyColor =
-    recipe.difficulty === "Easy"
-      ? "bg-emerald-50 text-emerald-700"
-      : recipe.difficulty === "Hard"
-      ? "bg-red-50 text-red-700"
-      : "bg-amber-50 text-amber-700";
+  const difficultyConfig: Record<string, { label: string; cls: string }> = {
+    Easy:   { label: "Easy",   cls: "bg-emerald-100 text-emerald-700" },
+    Medium: { label: "Medium", cls: "bg-amber-100 text-amber-700" },
+    Hard:   { label: "Hard",   cls: "bg-red-100 text-red-700" },
+  };
+  const diff = difficultyConfig[recipe.difficulty ?? ""] ?? { label: recipe.difficulty ?? "", cls: "bg-slate-100 text-slate-600" };
 
   return (
     <Link
       href={`/recipe/${recipe.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl bg-white border border-[#ede8e0] shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:border-[#d4cfc7]"
     >
-      {/* Image area */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
+      {/* Image */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f0e8]">
         {recipe.image_url ? (
           <Image
             src={recipe.image_url}
-            alt={recipe.title}
+            alt={`${recipe.title} recipe`}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <ChefHat className="h-12 w-12 text-amber-200 transition-transform group-hover:scale-110" />
+            <ChefHat className="h-10 w-10 text-[#c9bfb0]" />
           </div>
         )}
 
-        {/* Difficulty badge */}
-        <span
-          className={`absolute right-2 top-2 rounded-full px-2.5 py-0.5 text-[11px] font-semibold shadow-sm backdrop-blur-sm ${difficultyColor}`}
-        >
-          {recipe.difficulty}
-        </span>
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
-        {/* Category badge (shown when no restaurant) */}
-        {!recipe.restaurant_name && recipe.category && (
-          <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 shadow-sm backdrop-blur-sm">
-            {recipe.category}
-          </span>
+        {/* Category pill */}
+        {(recipe.category || recipe.restaurant_name) && (
+          <div className="absolute top-3 left-3">
+            <span className="rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
+              {recipe.category || recipe.restaurant_name}
+            </span>
+          </div>
+        )}
+
+        {/* Difficulty */}
+        {recipe.difficulty && (
+          <div className="absolute bottom-3 right-3">
+            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${diff.cls} shadow-sm`}>
+              {diff.label}
+            </span>
+          </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        {/* Restaurant + Category tags */}
-        <div className="mb-2 flex flex-wrap gap-1.5">
-          {recipe.restaurant_name && (
-            <span className="inline-block rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
-              {recipe.restaurant_name}
-            </span>
-          )}
-          {recipe.category && (
-            <Link
-              href={`/category/${slugifyCategory(recipe.category)}`}
-              onClick={(e) => e.stopPropagation()}
-              className="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-200"
-            >
-              {recipe.category}
-            </Link>
-          )}
-        </div>
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-4 pt-3.5">
+        {/* Restaurant tag */}
+        {recipe.restaurant_name && recipe.category && (
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-500">
+            {recipe.restaurant_name}
+          </p>
+        )}
 
         {/* Title */}
-        <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-primary-600">
+        <h3
+          className="line-clamp-2 text-[15px] font-bold leading-snug text-slate-900 transition-colors group-hover:text-orange-600"
+          style={{ fontFamily: "var(--font-heading), 'Georgia', serif" }}
+        >
           {recipe.title}
         </h3>
 
         {/* Description */}
-        <p className="mt-1.5 line-clamp-2 text-xs text-slate-500 leading-relaxed">
-          {recipe.description}
-        </p>
+        {recipe.description && (
+          <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-slate-500">
+            {recipe.description}
+          </p>
+        )}
 
-        {/* Rating */}
-        <div className="mt-2.5 flex items-center gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`h-3 w-3 ${
-                i < Math.round(rating)
-                  ? "fill-amber-400 text-amber-400"
-                  : "fill-slate-200 text-slate-200"
-              }`}
-            />
-          ))}
-          <span className="ml-0.5 text-xs font-medium text-slate-600">
-            {rating.toFixed(1)}
+        {/* Meta */}
+        <div className="mt-auto flex items-center gap-3 border-t border-[#ede8e0] pt-3 text-[12px] text-slate-400 mt-3">
+          {totalTime && (
+            <span className="flex items-center gap-1.5 font-medium">
+              <Clock className="h-3.5 w-3.5 text-slate-300" />
+              {totalTime}
+            </span>
+          )}
+          <span className="flex items-center gap-1.5">
+            <Users className="h-3.5 w-3.5 text-slate-300" />
+            {recipe.servings} {recipe.servings === 1 ? "serving" : "servings"}
           </span>
-        </div>
-
-        {/* Meta row */}
-        <div className="mt-auto flex items-center gap-3 border-t border-slate-50 pt-3 text-xs text-slate-400">
-          <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            {totalTime || "—"}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            {recipe.servings} servings
-          </span>
+          {recipe.rating && (
+            <span className="ml-auto font-bold text-amber-500">★ {recipe.rating}</span>
+          )}
         </div>
       </div>
     </Link>

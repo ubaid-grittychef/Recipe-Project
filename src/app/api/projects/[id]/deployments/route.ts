@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDeployments, updateDeployment } from "@/lib/store";
+import { getDeployments, updateDeployment, updateProject } from "@/lib/store";
 import { getDeploymentStatus } from "@/lib/deployer";
 import { createLogger } from "@/lib/logger";
 
@@ -26,6 +26,10 @@ export async function GET(
               completed_at: new Date().toISOString(),
             });
             dep.status = newStatus;
+            // Also update the project's deployment_status so the UI poll stops
+            await updateProject(id, {
+              deployment_status: state === "READY" ? "deployed" : "failed",
+            });
           }
         } catch (syncErr) {
           // Non-critical: return stale status rather than failing the whole request

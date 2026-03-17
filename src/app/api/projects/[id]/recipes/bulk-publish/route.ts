@@ -78,12 +78,19 @@ export async function POST(
       }
     }
 
-    // Update the project's published counter
+    // Re-fetch project to get current counter (avoids TOCTOU race with concurrent generation)
+    const freshProject = await getProject(projectId);
     await updateProject(projectId, {
-      recipes_published: (project.recipes_published ?? 0) + published,
+      recipes_published: (freshProject?.recipes_published ?? project.recipes_published ?? 0) + published,
     });
 
     log.info("Bulk publish completed", { projectId, published, failed });
+
+    // Fire-and-forget: ping search engines with updated sitemap
+    if (published > 0) {
+      const pingUrl = new URL(`/api/projects/${projectId}/sitemap/ping`, request.url);
+      fetch(pingUrl.toString(), { method: "POST" }).catch(() => {});
+    }
 
     return NextResponse.json({
       published,

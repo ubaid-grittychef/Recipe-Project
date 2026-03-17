@@ -82,6 +82,7 @@ const defaultForm: WizardFormData = {
   hellofresh_url: "",
   adsense_publisher_id: "",
   ga_id: "",
+  template_variant: "default",
 };
 
 function emptyToNull(val: string): string | null {
@@ -236,6 +237,7 @@ export default function CreateWizard() {
         hellofresh_url: emptyToNull(form.hellofresh_url),
         adsense_publisher_id: emptyToNull(form.adsense_publisher_id),
         ga_id: emptyToNull(form.ga_id),
+        template_variant: form.template_variant,
       };
 
       const project = await api.post<Project>("/api/projects", payload);
@@ -820,6 +822,52 @@ function StepBranding({
           onChange={(v) => update({ tagline: v })}
           placeholder="e.g. Restaurant-quality recipes made easy at home"
         />
+      </Field>
+      <Field label="Site Template" hint="Choose the visual design for your recipe site">
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            {
+              id: "default" as const,
+              name: "Clean & Modern",
+              description: "Light, airy layout. Fast and minimal. Great for most niches.",
+              preview: "bg-white border-slate-200",
+              accent: "bg-slate-100",
+            },
+            {
+              id: "premium" as const,
+              name: "Premium Dark",
+              description: "Bold dark hero, sticky sidebar. High-converting. Best for competitive niches.",
+              preview: "bg-slate-900 border-slate-700",
+              accent: "bg-slate-700",
+            },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => update({ template_variant: t.id })}
+              className={cn(
+                "relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all",
+                form.template_variant === t.id
+                  ? "border-brand-500 shadow-md"
+                  : "border-slate-200 hover:border-slate-300"
+              )}
+            >
+              {/* Mini preview mockup */}
+              <div className={cn("mb-3 h-16 rounded-lg border", t.preview)}>
+                <div className={cn("mx-3 mt-2 h-2 w-2/3 rounded", t.accent)} />
+                <div className={cn("mx-3 mt-1 h-1.5 w-1/2 rounded opacity-60", t.accent)} />
+                <div className={cn("mx-3 mt-1.5 flex gap-1")}>
+                  <div className={cn("h-6 w-1/3 rounded", t.accent)} />
+                  <div className={cn("h-6 flex-1 rounded opacity-40", t.accent)} />
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-slate-900">{t.name}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{t.description}</p>
+              {form.template_variant === t.id && (
+                <CheckCircle2 className="absolute right-3 top-3 h-5 w-5 text-brand-500" />
+              )}
+            </button>
+          ))}
+        </div>
       </Field>
     </>
   );

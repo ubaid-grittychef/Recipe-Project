@@ -13,8 +13,8 @@ export async function GET(
   const status = searchParams.get("status") as "pending" | "done" | "failed" | null;
 
   try {
-    const keywords = await getBuiltInKeywords(id, status ?? undefined);
     const allKeywords = await getBuiltInKeywords(id);
+    const keywords = status ? allKeywords.filter((k) => k.status === status) : allKeywords;
     const counts = {
       pending: allKeywords.filter((k) => k.status === "pending").length,
       done: allKeywords.filter((k) => k.status === "done").length,
@@ -68,8 +68,9 @@ export async function POST(
     log.info("Added keywords to queue", { projectId: id, count: created.length });
     return NextResponse.json({ added: created.length, keywords: created });
   } catch (error) {
+    const msg = error instanceof Error ? error.message : "Failed to add keywords";
     log.error("Failed to add keywords to queue", { projectId: id }, error);
-    return NextResponse.json({ error: "Failed to add keywords" }, { status: 500 });
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 

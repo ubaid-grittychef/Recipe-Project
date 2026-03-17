@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary-50: #fff7ed;
+  --color-primary-100: #ffedd5;
+  --color-primary-200: #fed7aa;
+  --color-primary-500: #f97316;
+  --color-primary-600: #ea580c;
+  --color-primary-700: #c2410c;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading), system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .recipe-step-number {
+    @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-900 text-sm font-bold text-orange-300;
+  }
+  .ingredient-row {
+    @apply flex items-center gap-3 py-2 border-b border-slate-700 last:border-0 transition-opacity;
+  }
+  .ingredient-row.checked {
+    @apply opacity-40 line-through;
+  }
+  .jump-to-recipe {
+    @apply inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-orange-600 transition-colors;
+  }
+}
+
+@media print {
+  header, footer, nav, .no-print { display: none !important; }
+  .recipe-content { max-width: 100% !important; }
+  a[href]::after { content: none !important; }
+  body { background: white !important; color: black !important; }
+  img { max-width: 300px !important; }
+}

@@ -2,11 +2,23 @@ import { getAllRecipes, getCategories, getRestaurantNames } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
 import RecipeCard from "@/components/RecipeCard";
 import Link from "next/link";
-import { ArrowRight, ChefHat, Utensils } from "lucide-react";
+import { ArrowRight, ChefHat, Utensils, BookOpen } from "lucide-react";
 import HeroSearch from "@/components/HeroSearch";
-import { getCategoryEmoji } from "@/lib/utils";
+import { getCategoryEmoji, getCategoryGradient } from "@/lib/utils";
+import type { Metadata } from "next";
 
-export const revalidate = 3600;
+export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: { absolute: siteConfig.tagline ? `${siteConfig.name} | ${siteConfig.tagline}` : siteConfig.name },
+  alternates: { canonical: siteConfig.url },
+  openGraph: {
+    url: siteConfig.url,
+    ...(siteConfig.ogImage && {
+      images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }],
+    }),
+  },
+};
 
 export default async function HomePage() {
   const [recipes, categories, restaurants] = await Promise.all([
@@ -16,80 +28,76 @@ export default async function HomePage() {
   ]);
 
   const featured = recipes.slice(0, 3);
-  const latest = recipes.slice(0, 12);
+  const latest = recipes.slice(3, 15);
 
   return (
-    <>
-      {/* ─── Hero ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        {/* Decorative blobs */}
-        <div
-          className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl"
-          style={{ backgroundColor: siteConfig.primaryColor }}
-        />
-        <div
-          className="pointer-events-none absolute -bottom-20 -right-20 h-72 w-72 rounded-full opacity-10 blur-3xl"
-          style={{ backgroundColor: siteConfig.primaryColor }}
-        />
+    <div className="bg-[#fffdf7]">
 
-        <div className="relative mx-auto max-w-4xl px-4 py-24 text-center sm:px-6 sm:py-32">
-          <div
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg"
-            style={{ backgroundColor: siteConfig.primaryColor }}
-          >
-            <ChefHat className="h-8 w-8" />
+      {/* ─── Hero ──────────────────────────────────────────────────── */}
+      <section className="border-b-2 border-slate-900 bg-[#fffdf7]">
+        <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20 sm:px-6">
+
+          {/* Masthead rule */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-px flex-1 bg-slate-900" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+              Restaurant Copycat Recipes
+            </span>
+            <div className="h-px flex-1 bg-slate-900" />
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-6xl">
-            {siteConfig.name}
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300">
-            {siteConfig.tagline}
-          </p>
 
-          {/* Search bar */}
-          <HeroSearch />
+          {/* Site name */}
+          <div className="text-center">
+            <h1
+              className="text-5xl font-black text-slate-900 sm:text-7xl xl:text-8xl"
+              style={{ fontFamily: "var(--font-heading), 'Georgia', serif", letterSpacing: "-0.04em", lineHeight: 1 }}
+            >
+              {siteConfig.name}
+            </h1>
 
-          {/* Quick stat */}
+            {siteConfig.tagline && (
+              <div className="mt-5 flex items-center justify-center gap-4">
+                <div className="h-px w-12 bg-orange-400" />
+                <p className="text-sm italic text-slate-500 font-medium">{siteConfig.tagline}</p>
+                <div className="h-px w-12 bg-orange-400" />
+              </div>
+            )}
+          </div>
+
+          {/* Search */}
+          <div className="mt-10 max-w-xl mx-auto">
+            <HeroSearch />
+          </div>
+
+          {/* Stats */}
           {recipes.length > 0 && (
-            <p className="mt-6 text-sm text-slate-400">
-              Discover{" "}
-              <span className="font-semibold text-white">{recipes.length}+</span>{" "}
-              recipes
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-[13px]">
+              <span className="flex items-center gap-2 text-slate-500">
+                <BookOpen className="h-4 w-4 text-orange-400" />
+                <strong className="text-slate-900 font-bold">{recipes.length}</strong> recipes
+              </span>
               {categories.length > 0 && (
-                <>
-                  {" "}across{" "}
-                  <span className="font-semibold text-white">
-                    {categories.length}
-                  </span>{" "}
-                  categories
-                </>
+                <span className="flex items-center gap-2 text-slate-500">
+                  <Utensils className="h-4 w-4 text-orange-400" />
+                  <strong className="text-slate-900 font-bold">{categories.length}</strong> categories
+                </span>
               )}
-            </p>
+              {restaurants.length > 0 && (
+                <span className="flex items-center gap-2 text-slate-500">
+                  <ChefHat className="h-4 w-4 text-orange-400" />
+                  <strong className="text-slate-900 font-bold">{restaurants.length}</strong> restaurants
+                </span>
+              )}
+            </div>
           )}
         </div>
       </section>
 
-      {/* ─── Featured Recipes ─────────────────────────────────── */}
+      {/* ─── Featured Recipes ──────────────────────────────────────── */}
       {featured.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">
-                Editor&apos;s Picks
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-slate-900">
-                Featured Recipes
-              </h2>
-            </div>
-            <Link
-              href="/recipes"
-              className="flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
+          <SectionHeader eyebrow="Editor's Picks" title="Featured Recipes" href="/recipes" linkLabel="View all" />
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
@@ -97,73 +105,56 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ─── Browse by Category ───────────────────────────────── */}
+      {/* ─── Browse by Category ────────────────────────────────────── */}
       {categories.length > 0 && (
-        <section className="bg-slate-50">
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">
-                  Explore
-                </p>
-                <h2 className="mt-1 text-2xl font-bold text-slate-900">
-                  Browse by Category
-                </h2>
-              </div>
-              <Link
-                href="/categories"
-                className="flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
-              >
-                All categories
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {categories.slice(0, 10).map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/category/${cat.slug}`}
-                  className="group flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md"
-                >
-                  <span className="mb-2 text-3xl">
-                    {getCategoryEmoji(cat.name)}
-                  </span>
-                  <p className="font-semibold text-slate-900 group-hover:text-primary-700">
-                    {cat.name}
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    {cat.count} {cat.count === 1 ? "recipe" : "recipes"}
-                  </p>
-                </Link>
-              ))}
+        <section className="border-y border-[#e5e0d8] bg-white py-14 sm:py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionHeader eyebrow="Explore" title="Browse by Category" href="/categories" linkLabel="All categories" />
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+              {categories.slice(0, 12).map((cat) => {
+                const gradient = getCategoryGradient(cat.name);
+                const emoji = getCategoryEmoji(cat.name);
+                return (
+                  <Link
+                    key={cat.slug}
+                    href={`/category/${cat.slug}`}
+                    className="group relative overflow-hidden rounded-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                    <div className="relative flex flex-col items-center px-3 py-6 text-center">
+                      <span className="text-3xl transition-transform duration-300 group-hover:scale-110 drop-shadow">{emoji}</span>
+                      <p
+                        className="mt-2.5 text-[13px] font-bold text-white drop-shadow-sm leading-tight"
+                        style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+                      >
+                        {cat.name}
+                      </p>
+                      <span className="mt-1 rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">
+                        {cat.count}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
       )}
 
-      {/* ─── Browse by Restaurant ─────────────────────────────── */}
+      {/* ─── Browse by Restaurant ──────────────────────────────────── */}
       {restaurants.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">
-                Restaurants
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-slate-900">
-                Browse by Restaurant
-              </h2>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3">
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <SectionHeader eyebrow="Restaurants" title="Browse by Restaurant" />
+          <div className="mt-6 flex flex-wrap gap-2">
             {restaurants.map((r) => (
               <Link
                 key={r.slug}
                 href={`/category/${r.slug}`}
-                className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all duration-200 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700 hover:shadow"
+                className="group flex items-center gap-2 rounded-full border border-[#e5e0d8] bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"
               >
-                <Utensils className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary-500" />
+                <Utensils className="h-3.5 w-3.5 text-slate-300 group-hover:text-orange-400 transition-colors" />
                 {r.name}
-                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500 group-hover:bg-primary-100 group-hover:text-primary-600">
+                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">
                   {r.count}
                 </span>
               </Link>
@@ -172,28 +163,12 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ─── Latest Recipes ───────────────────────────────────── */}
+      {/* ─── Latest Recipes ────────────────────────────────────────── */}
       {latest.length > 0 && (
-        <section className={`${restaurants.length === 0 ? "" : "bg-slate-50"}`}>
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">
-                  Fresh
-                </p>
-                <h2 className="mt-1 text-2xl font-bold text-slate-900">
-                  Latest Recipes
-                </h2>
-              </div>
-              <Link
-                href="/recipes"
-                className="flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
-              >
-                View all
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <section className="border-t border-[#e5e0d8] bg-[#faf7f2] py-14 sm:py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionHeader eyebrow="Fresh" title="Latest Recipes" href="/recipes" linkLabel="View all" />
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {latest.map((recipe) => (
                 <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
@@ -202,18 +177,82 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ─── Empty state ──────────────────────────────────────── */}
-      {recipes.length === 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-20 text-center sm:px-6">
-          <ChefHat className="mx-auto h-16 w-16 text-slate-200" />
-          <h2 className="mt-4 text-xl font-semibold text-slate-900">
-            Recipes coming soon
-          </h2>
-          <p className="mt-2 text-slate-500">
-            We&apos;re cooking up amazing recipes. Check back soon!
-          </p>
+      {/* ─── All recipes when there are only a few ─────────────────── */}
+      {recipes.length > 0 && featured.length === recipes.length && (
+        <section className="border-t border-[#e5e0d8] bg-[#faf7f2] py-14 sm:py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionHeader eyebrow="All" title="Our Recipes" href="/recipes" linkLabel="View all" />
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {recipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))}
+            </div>
+          </div>
         </section>
       )}
-    </>
+
+      {/* ─── Empty state ───────────────────────────────────────────── */}
+      {recipes.length === 0 && (
+        <section className="mx-auto max-w-2xl px-4 py-28 text-center sm:px-6">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
+            <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+          </div>
+          <h2
+            className="text-3xl font-black text-slate-900"
+            style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+          >
+            Recipes are on the way
+          </h2>
+          <p className="mt-3 text-slate-500 leading-relaxed">
+            We&apos;re building our collection of restaurant-quality copycat recipes.<br />
+            Check back soon or follow us for updates.
+          </p>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link
+              href="/about"
+              className="rounded-full border border-[#e5e0d8] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow"
+            >
+              Learn more
+            </Link>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* ── Shared section header ── */
+function SectionHeader({
+  eyebrow,
+  title,
+  href,
+  linkLabel,
+}: {
+  eyebrow: string;
+  title: string;
+  href?: string;
+  linkLabel?: string;
+}) {
+  return (
+    <div className="flex items-end justify-between">
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-500">{eyebrow}</p>
+        <h2
+          className="mt-1 text-2xl font-black text-slate-900 sm:text-3xl"
+          style={{ fontFamily: "var(--font-heading), 'Georgia', serif", letterSpacing: "-0.02em" }}
+        >
+          {title}
+        </h2>
+      </div>
+      {href && linkLabel && (
+        <Link
+          href={href}
+          className="flex items-center gap-1.5 text-[13px] font-bold text-orange-500 hover:text-orange-600 transition-colors"
+        >
+          {linkLabel}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      )}
+    </div>
   );
 }

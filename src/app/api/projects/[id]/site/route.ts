@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   testSiteConnection,
   setupSiteSchema,
+  resetSiteSchema,
   RECIPES_TABLE_SQL,
 } from "@/lib/site-publisher";
 
@@ -31,6 +32,11 @@ export async function POST(
 
     if (action === "setup-schema") {
       const result = await setupSiteSchema(id);
+      return NextResponse.json(result);
+    }
+
+    if (action === "reset-schema") {
+      const result = await resetSiteSchema(id);
       return NextResponse.json(result);
     }
 

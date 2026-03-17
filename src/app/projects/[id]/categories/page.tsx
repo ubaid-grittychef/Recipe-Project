@@ -1,38 +1,26 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
-import { Tag, BookOpen, Loader2 } from "lucide-react";
+import { getCategories, getProject } from "@/lib/store";
+import { Tag, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { Category } from "@/lib/types";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import EmptyState from "@/components/ui/EmptyState";
 
-export default function CategoriesPage() {
-  const params = useParams<{ id: string }>();
-  const projectId = params.id;
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/projects/${projectId}/categories`);
-      const data = await res.json();
-      setCategories(data.categories ?? []);
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
+export default async function CategoriesPage({ params }: Props) {
+  const { id } = await params;
+  const [categories, project] = await Promise.all([getCategories(id), getProject(id)]);
   const totalRecipes = categories.reduce((sum, c) => sum + c.recipe_count, 0);
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[
+        { label: "All Projects", href: "/" },
+        { label: project?.name ?? "Project", href: `/projects/${id}` },
+        { label: "Categories" },
+      ]} />
+
       <div className="flex items-start justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
@@ -40,25 +28,21 @@ export default function CategoriesPage() {
             Categories
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Auto-created from AI-generated recipe categories. {totalRecipes > 0 && `${totalRecipes} recipes across ${categories.length} categories.`}
+            Auto-created from AI-generated recipe categories.{" "}
+            {totalRecipes > 0 && `${totalRecipes} recipes across ${categories.length} categories.`}
           </p>
         </div>
       </div>
 
+      {categories.length === 0 ? (
+        <EmptyState
+          icon={Tag}
+          title="No categories yet"
+          description="Categories are created automatically when recipes are generated."
+        />
+      ) : (
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="py-12 text-center">
-            <Tag className="mx-auto mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm text-slate-500">No categories yet.</p>
-            <p className="mt-1 text-xs text-slate-400">
-              Categories are created automatically when recipes are generated.
-            </p>
-          </div>
-        ) : (
+        {true ? (
           <div className="divide-y divide-slate-100">
             {categories.map((cat) => (
               <div key={cat.id} className="flex items-center justify-between px-5 py-4">
@@ -77,7 +61,7 @@ export default function CategoriesPage() {
                     {cat.recipe_count} recipe{cat.recipe_count !== 1 ? "s" : ""}
                   </span>
                   <Link
-                    href={`/projects/${projectId}/recipes?category=${encodeURIComponent(cat.name)}`}
+                    href={`/projects/${id}/recipes?category=${encodeURIComponent(cat.name)}`}
                     className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
                   >
                     View Recipes
@@ -86,8 +70,9 @@ export default function CategoriesPage() {
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
+      )}
     </div>
   );
 }

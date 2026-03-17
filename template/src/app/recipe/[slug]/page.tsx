@@ -10,6 +10,8 @@ import { siteConfig } from "@/lib/config";
 import { slugifyCategory } from "@/lib/utils";
 import RecipeCard from "@/components/RecipeCard";
 import RecipeActions from "@/components/RecipeActions";
+import AffiliateLink from "@/components/AffiliateLink";
+import IngredientsChecklist from "@/components/IngredientsChecklist";
 import Image from "next/image";
 import {
   Clock,
@@ -23,9 +25,11 @@ import {
   ArrowDown,
   Sparkles,
   HelpCircle,
+  Package,
+  ChevronRight,
 } from "lucide-react";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -43,24 +47,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const imageUrl = recipe.image_url || undefined;
 
+  const metaTitle = recipe.seo_title || recipe.title;
+  const metaDescription = recipe.seo_description ||
+    `${recipe.title} recipe — ready in ${recipe.total_time || recipe.cook_time || "under an hour"} | ${recipe.rating ?? "4.8"} stars. ${recipe.description?.slice(0, 100) ?? ""}`.trim();
+
   return {
-    title: recipe.seo_title,
-    description: recipe.seo_description,
+    title: metaTitle,
+    description: metaDescription,
     openGraph: {
-      title: recipe.seo_title,
-      description: recipe.seo_description,
+      title: metaTitle,
+      description: metaDescription,
       type: "article",
       url: `${siteConfig.url}/recipe/${slug}`,
       ...(imageUrl && {
-        images: [{ url: imageUrl, width: 1200, height: 630, alt: recipe.title }],
+        images: [{ url: imageUrl, width: 1200, height: 630, alt: `${recipe.title} recipe` }],
       }),
       publishedTime: recipe.published_at ?? undefined,
       authors: [siteConfig.author],
     },
     twitter: {
       card: imageUrl ? "summary_large_image" : "summary",
-      title: recipe.seo_title,
-      description: recipe.seo_description,
+      title: metaTitle,
+      description: metaDescription,
       ...(imageUrl && { images: [imageUrl] }),
     },
     alternates: {
@@ -104,6 +112,25 @@ function renderStars(rating: number) {
   return stars;
 }
 
+function renderInlineLinks(text: string): React.ReactNode[] {
+  const result: React.ReactNode[] = [];
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let keyIdx = 0;
+  while ((match = linkRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) result.push(text.slice(lastIndex, match.index));
+    result.push(
+      <Link key={keyIdx++} href={match[2]} className="font-medium text-brand-600 underline underline-offset-2 hover:text-brand-700">
+        {match[1]}
+      </Link>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length) result.push(text.slice(lastIndex));
+  return result.length > 0 ? result : [text];
+}
+
 function renderIntroContent(content: string) {
   const parts = content.split(/\*\*(.+?)\*\*/g);
   const elements: React.ReactNode[] = [];
@@ -127,7 +154,7 @@ function renderIntroContent(content: string) {
               key={`${i}-${j}`}
               className="mb-4 text-base leading-relaxed text-slate-700"
             >
-              {p.trim()}
+              {renderInlineLinks(p.trim())}
             </p>
           );
         }
@@ -163,6 +190,7 @@ export default async function RecipePage({ params }: Props) {
     recipeYield: `${recipe.servings} servings`,
     recipeCategory: recipe.category ?? recipe.restaurant_name ?? "General",
     keywords: recipe.focus_keywords?.join(", ") ?? recipe.keyword,
+    dateModified: recipe.created_at ?? recipe.published_at,
     recipeIngredient: recipe.ingredients.map(
       (i) => `${i.quantity} ${i.unit} ${i.name}`
     ),
@@ -188,7 +216,7 @@ export default async function RecipePage({ params }: Props) {
       worstRating: "1",
     },
     recipeCuisine: recipe.category ?? recipe.restaurant_name ?? "",
-    ...(recipe.image_url && { image: recipe.image_url }),
+    ...(recipe.image_url && { image: [recipe.image_url] }),
   };
 
   const middleCrumb = recipe.restaurant_name ?? recipe.category ?? null;
@@ -272,7 +300,7 @@ export default async function RecipePage({ params }: Props) {
           </Link>
           {middleCrumb && (
             <>
-              <span className="mx-2">/</span>
+              <ChevronRight className="mx-1 inline-block h-3 w-3 shrink-0" />
               <Link
                 href={`/category/${slugifyCategory(middleCrumb)}`}
                 className="hover:text-slate-600"
@@ -281,8 +309,8 @@ export default async function RecipePage({ params }: Props) {
               </Link>
             </>
           )}
-          <span className="mx-2">/</span>
-          <span className="text-slate-600">{recipe.title}</span>
+          <ChevronRight className="mx-1 inline-block h-3 w-3 shrink-0" />
+          <span className="text-slate-600" aria-current="page">{recipe.title}</span>
         </nav>
 
         {/* H1 Title */}
@@ -353,7 +381,7 @@ export default async function RecipePage({ params }: Props) {
           <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl shadow-sm">
             <Image
               src={recipe.image_url}
-              alt={recipe.title}
+              alt={`${recipe.title} recipe`}
               fill
               priority
               className="object-cover"
@@ -395,7 +423,7 @@ export default async function RecipePage({ params }: Props) {
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold">{recipe.title}</h2>
+                <div className="text-xl font-bold">{recipe.title}</div>
                 <div className="mt-1 flex items-center gap-1 text-sm text-white/80">
                   {renderStars(rating)}
                   <span className="ml-1">
@@ -439,54 +467,38 @@ export default async function RecipePage({ params }: Props) {
           </div>
 
           {/* Ingredients */}
-          <div className="px-6 py-6">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">
+          <div id="recipe-content" className="scroll-mt-20 px-6 py-6">
+            <h2 className="mb-4 text-lg font-bold text-slate-900">
               Ingredients
-            </h3>
-            <ul className="space-y-2">
-              {recipe.ingredients.map((ing, i) => (
-                <li
-                  key={i}
-                  className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3"
-                >
-                  <label className="flex items-center gap-3 text-sm text-slate-700">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300"
-                    />
-                    <span>
-                      <span className="font-medium">
-                        {ing.quantity} {ing.unit}
-                      </span>{" "}
-                      {ing.name}
-                    </span>
-                  </label>
-                  {siteConfig.amazonTag && (
-                    <a
-                      href={`https://www.amazon.com/s?k=${encodeURIComponent(ing.name)}&tag=${siteConfig.amazonTag}`}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700 hover:bg-amber-100"
-                      title={`Find ${ing.name} on Amazon`}
-                    >
-                      <ShoppingCart className="h-3 w-3" />
-                      Buy
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
+            </h2>
+            <IngredientsChecklist ingredients={recipe.ingredients} />
 
             {siteConfig.hellofreshUrl && (
-              <a
-                href={siteConfig.hellofreshUrl}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Get Ingredients Delivered
-              </a>
+              <div className="mt-5 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-emerald-900">Skip the grocery run</p>
+                    <p className="mt-0.5 text-sm leading-snug text-emerald-700">
+                      Get pre-measured ingredients for this recipe delivered fresh to your door.
+                    </p>
+                    <AffiliateLink
+                      href={siteConfig.hellofreshUrl}
+                      type="hellofresh"
+                      label="Get Ingredients Delivered"
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      Get Ingredients Delivered
+                    </AffiliateLink>
+                    <p className="mt-2 text-[10px] text-emerald-600/70">
+                      Affiliate link — we may earn a small commission at no extra cost to you.
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
@@ -499,9 +511,9 @@ export default async function RecipePage({ params }: Props) {
 
           {/* Instructions */}
           <div className="border-t border-slate-100 px-6 py-6">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">
+            <h2 className="mb-4 text-lg font-bold text-slate-900">
               Instructions
-            </h3>
+            </h2>
             <ol className="space-y-5">
               {recipe.instructions.map((step, i) => (
                 <li key={i} className="flex gap-4">
@@ -521,9 +533,9 @@ export default async function RecipePage({ params }: Props) {
 
           {/* Nutrition */}
           <div className="border-t border-slate-100 px-6 py-6">
-            <h3 className="mb-1 text-lg font-bold text-slate-900">
+            <h2 className="mb-1 text-lg font-bold text-slate-900">
               Nutrition Facts
-            </h3>
+            </h2>
             <p className="mb-4 text-xs text-slate-400">
               Per serving (approximate)
             </p>

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { ArrowLeft, Search, ChefHat } from "lucide-react";
 import type { Metadata } from "next";
 import SearchInput from "./SearchInput";
+import { siteConfig } from "@/lib/config";
+
+export const revalidate = 300;
 
 interface Props {
   searchParams: Promise<{ q?: string }>;
@@ -12,11 +15,15 @@ interface Props {
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
+  const title = query ? `Search results for "${query}" | ${siteConfig.name}` : `Search Recipes | ${siteConfig.name}`;
+  const description = query ? `Browse recipes matching "${query}".` : "Search through our full recipe collection.";
   return {
-    title: query ? `Search results for "${query}"` : "Search Recipes",
-    description: query
-      ? `Browse recipes matching "${query}".`
-      : "Search through our full recipe collection.",
+    title,
+    description,
+    metadataBase: new URL(siteConfig.url),
+    robots: { index: false, follow: true },
+    twitter: { card: "summary_large_image" },
+    alternates: { canonical: `${siteConfig.url}/search` },
   };
 }
 

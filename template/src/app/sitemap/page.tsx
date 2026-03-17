@@ -4,7 +4,7 @@ import { getAllRecipes } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
 import { FileText, Calendar } from "lucide-react";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Sitemap",

@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { getRecipeSlugsWithDates, getCategories } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
 
+// Revalidate every hour so the sitemap reflects newly published recipes promptly
+export const revalidate = 300;
+
 /**
  * Google requires a maximum of 50,000 URLs per sitemap file.
  * This limit ensures we never exceed it. If the site grows beyond it,

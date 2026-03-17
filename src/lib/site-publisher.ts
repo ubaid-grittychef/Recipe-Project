@@ -51,6 +51,7 @@ export async function publishRecipeToSite(
     image_search_term: recipe.image_search_term,
     image_url: recipe.image_url,
     word_count: recipe.word_count,
+    category: recipe.category,
     status: recipe.status,
     created_at: recipe.created_at,
     published_at: recipe.published_at,
@@ -128,6 +129,54 @@ export async function setupSiteSchema(projectId: string): Promise<{
   }
 
   log.info("Site schema created", { projectId });
+  return { success: true };
+}
+
+export async function resetSiteSchema(projectId: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const project = await getProject(projectId);
+  if (!project) return { success: false, error: "Project not found" };
+
+  if (!project.site_supabase_url || !project.site_supabase_service_key) {
+    return { success: false, error: "Site Supabase URL and Service Key are required" };
+  }
+
+  const siteDb = createClient(
+    project.site_supabase_url,
+    project.site_supabase_service_key
+  );
+
+  // Drop the table then recreate it fresh
+  const { error: dropError } = await siteDb.rpc("exec_sql", {
+    query: "DROP TABLE IF EXISTS recipes CASCADE;",
+  });
+
+  if (dropError) {
+    log.warn("RPC exec_sql not available for drop — trying direct delete", { projectId });
+    // Fallback: truncate all rows if we can't drop
+    const { error: truncateError } = await siteDb
+      .from("recipes")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+    if (truncateError) {
+      return { success: false, error: `Failed to clear table: ${truncateError.message}` };
+    }
+    log.info("Site recipes table truncated (fallback)", { projectId });
+    return { success: true };
+  }
+
+  // Recreate the schema
+  const { error: createError } = await siteDb.rpc("exec_sql", {
+    query: RECIPES_TABLE_SQL,
+  });
+
+  if (createError) {
+    return { success: false, error: `Table dropped but recreate failed: ${createError.message}` };
+  }
+
+  log.info("Site schema reset complete", { projectId });
   return { success: true };
 }
 
@@ -219,18 +268,26 @@ CREATE TABLE IF NOT EXISTS recipes (
   image_search_term TEXT,
   image_url TEXT,
   word_count INTEGER DEFAULT 0,
+  category TEXT,
   status TEXT NOT NULL DEFAULT 'published',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   published_at TIMESTAMPTZ
 );
 
+-- Add category column if table already existed without it
+ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_recipes_slug ON recipes(slug);
 CREATE INDEX IF NOT EXISTS idx_recipes_status ON recipes(status);
 CREATE INDEX IF NOT EXISTS idx_recipes_restaurant ON recipes(restaurant_name);
 CREATE INDEX IF NOT EXISTS idx_recipes_published ON recipes(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_recipes_category ON recipes(category);
 
 ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Public read access" ON recipes
-  FOR SELECT USING (status = 'published');
+DROP POLICY IF EXISTS "Public read access" ON recipes;
+CREATE POLICY "Public read access" ON recipes
+  FOR SELECT TO anon, authenticated USING (status = 'published');
+
+GRANT SELECT ON recipes TO anon, authenticated;
 `;

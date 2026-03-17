@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #fafaf8;
+    color: #3d3d3d;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif), Georgia, serif;
+    color: #111111;
+  }
+
+  * {
+    border-radius: 0 !important;
+  }
+}
+
+@layer components {
+  /* Red sweep underline — used on nav links and recipe cards */
+  .sweep-red {
+    position: relative;
+  }
+  .sweep-red::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: #c8000a;
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+    transform-origin: left;
+  }
+  .sweep-red:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Top-sweep — used on recipe cards (top edge) */
+  .sweep-top {
+    position: relative;
+    overflow: hidden;
+  }
+  .sweep-top::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: #c8000a;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+    transform-origin: left;
+    z-index: 1;
+  }
+  .sweep-top:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Section header rule */
+  .sec-hd {
+    @apply flex items-end justify-between pb-5 mb-8 border-b-2 border-ink;
+  }
+
+  .sec-eyebrow {
+    @apply text-[10px] font-extrabold uppercase tracking-[2px] text-red;
+  }
+
+  .sec-title {
+    @apply font-serif text-[26px] font-black text-ink tracking-[-0.5px] leading-tight;
+  }
+
+  .sec-link {
+    @apply text-[11px] font-extrabold text-red uppercase tracking-[0.5px] hover:text-red-dark transition-colors;
+  }
+
+  /* Buttons */
+  .btn-red {
+    @apply inline-block bg-red text-white px-5 py-2.5 text-[12px] font-extrabold uppercase tracking-[0.8px] hover:bg-red-dark transition-colors border-none cursor-pointer;
+  }
+
+  .btn-outline {
+    @apply inline-block bg-transparent text-ink border-[1.5px] border-ink px-5 py-2.5 text-[12px] font-extrabold uppercase tracking-[0.8px] hover:bg-ink hover:text-white transition-colors cursor-pointer;
+  }
+
+  /* Difficulty badges */
+  .badge-easy   { @apply bg-green-600 text-white text-[9px] font-extrabold uppercase tracking-[1px] px-2 py-0.5; }
+  .badge-medium { @apply bg-amber-600 text-white text-[9px] font-extrabold uppercase tracking-[1px] px-2 py-0.5; }
+  .badge-hard   { @apply bg-red text-white text-[9px] font-extrabold uppercase tracking-[1px] px-2 py-0.5; }
+}
+
+@layer utilities {
+  .font-serif { font-family: var(--font-serif), Georgia, serif; }
+  .font-sans  { font-family: var(--font-sans), system-ui, sans-serif; }
+}
+
+/* Print styles */
+@media print {
+  nav, footer, .no-print, .site-header { display: none !important; }
+  body { font-size: 12pt; color: #000; background: #fff; }
+  a[href]::after { content: none !important; }
+  .recipe-body { display: block !important; }
+}

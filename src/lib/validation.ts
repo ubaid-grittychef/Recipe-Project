@@ -45,6 +45,8 @@ export const CreateProjectSchema = z.object({
   site_supabase_url: z.string().url().or(z.literal("")).nullable().optional(),
   site_supabase_anon_key: z.string().max(500).nullable().optional(),
   site_supabase_service_key: z.string().max(500).nullable().optional(),
+  vercel_token: z.string().max(200).nullable().optional().default(null),
+  template_variant: z.enum(["default", "premium", "v3"]).optional().default("default"),
 });
 
 export const UpdateProjectSchema = CreateProjectSchema.partial();
@@ -107,6 +109,12 @@ export const UpdateRecipeSchema = z.object({
 export const BulkPublishSchema = z.object({
   /** Optional list of recipe IDs. If omitted, all drafts are published. */
   recipeIds: z.array(z.string().uuid()).optional(),
+});
+
+// ── Bulk delete ───────────────────────────────────────────────────────────────
+
+export const BulkDeleteSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1, "At least one ID required").max(200),
 });
 
 // ── Sheets validate ──────────────────────────────────────────────────────────

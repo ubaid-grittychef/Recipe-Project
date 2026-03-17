@@ -22,13 +22,20 @@ module.exports = {
           950: "#431407",
         },
         sidebar: {
-          DEFAULT: "#0f172a",
-          hover: "#1e293b",
-          active: "#1e293b",
-          border: "#1e293b",
+          DEFAULT: "#ffffff",
+          hover: "#f8fafc",
+          active: "#fff7ed",
+          border: "#e2e8f0",
         },
+      },
+      boxShadow: {
+        card: "0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)",
+        "card-hover": "0 4px 12px 0 rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.06)",
+      },
+      fontSize: {
+        "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
       },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/forms")({ strategy: "class" })],
 };

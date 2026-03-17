@@ -15,6 +15,7 @@ import {
   Trash2,
   Plus,
   GripVertical,
+  RefreshCw,
 } from "lucide-react";
 import { SkeletonRecipeEditor } from "@/components/Skeleton";
 import RecipePreview from "@/components/RecipePreview";
@@ -30,6 +31,7 @@ export default function RecipeEditorPage({ params }: Props) {
   const [savedRecipe, setSavedRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
   const [confirm, ConfirmDialog] = useConfirm();
   // Track whether there are unsaved changes
@@ -103,6 +105,27 @@ export default function RecipeEditorPage({ params }: Props) {
       if (!ok) return;
     }
     router.push(`/projects/${id}/recipes`);
+  }
+
+  async function handleRefresh() {
+    const ok = await confirm({
+      title: "Refresh AI content?",
+      description: "This will regenerate the intro text and SEO fields using fresh AI output. Your current edits will be replaced.",
+      confirmLabel: "Refresh content",
+      danger: false,
+    });
+    if (!ok) return;
+    setRefreshing(true);
+    try {
+      const result = await api.post<{ recipe: Recipe }>(`/api/projects/${id}/recipes/${recipeId}/refresh`);
+      setRecipe(result.recipe);
+      setSavedRecipe(result.recipe);
+      toast.success("Content refreshed with fresh AI output");
+    } catch {
+      toast.error("Refresh failed — check OpenAI configuration");
+    } finally {
+      setRefreshing(false);
+    }
   }
 
   async function handleDelete() {
@@ -197,6 +220,15 @@ export default function RecipeEditorPage({ params }: Props) {
               Preview
             </button>
           </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing || saving}
+            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+            title="Regenerate intro content and SEO fields with AI"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Refreshing..." : "AI Refresh"}
+          </button>
           {recipe.status === "draft" && (
             <button
               onClick={() => handleSave(true)}

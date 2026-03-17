@@ -37,6 +37,8 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
   const [expanded, setExpanded] = useState(false);
   // Track the keyword log count at run start so we only show new ones
   const runStartCountRef = useRef(0);
+  // Track logs that have been shown and dismissed so they don't reappear
+  const dismissedLogIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,19 +75,24 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
         }
 
         if (!running && mostRecent && (mostRecent.status === "completed" || mostRecent.status === "failed")) {
-          setJustFinished((prev) => {
-            if (!prev || prev.id !== mostRecent.id) {
-              onComplete?.();
-              // Show all keywords from the finished run (newest first)
-              const runStart = runStartCountRef.current;
-              const newKws = [...kwLogs.slice(runStart)].reverse();
-              setRecentKeywords(newKws.slice(0, 8));
-              runStartCountRef.current = 0;
-              return mostRecent;
-            }
-            return prev;
-          });
-          setTimeout(() => setJustFinished((prev) => (prev?.id === mostRecent.id ? null : prev)), 10000);
+          if (mostRecent.id !== dismissedLogIdRef.current) {
+            setJustFinished((prev) => {
+              if (!prev || prev.id !== mostRecent.id) {
+                onComplete?.();
+                // Show all keywords from the finished run (newest first)
+                const runStart = runStartCountRef.current;
+                const newKws = [...kwLogs.slice(runStart)].reverse();
+                setRecentKeywords(newKws.slice(0, 8));
+                runStartCountRef.current = 0;
+                return mostRecent;
+              }
+              return prev;
+            });
+            setTimeout(() => {
+              dismissedLogIdRef.current = mostRecent.id;
+              setJustFinished((prev) => (prev?.id === mostRecent.id ? null : prev));
+            }, 10000);
+          }
         }
       } catch {
         // Non-critical — silently ignore polling errors

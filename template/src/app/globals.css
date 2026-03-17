@@ -12,11 +12,83 @@
 }
 
 @layer base {
-  body {
-    @apply bg-white text-slate-900 antialiased;
+  html {
+    scroll-behavior: smooth;
   }
 
-  h1, h2, h3, h4 {
-    font-family: var(--font-heading), system-ui, sans-serif;
+  body {
+    @apply antialiased bg-white text-slate-900;
+    font-family: var(--font-body), var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  h1, h2, h3 {
+    font-family: var(--font-heading), Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --radius: 0.75rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+  }
+
+}
+
+@layer components {
+  /* ── Recipe content ── */
+  .recipe-step-number {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white shadow-sm;
+  }
+  .ingredient-row {
+    @apply flex items-center gap-3 py-2.5 border-b border-slate-100 last:border-0 transition-opacity;
+  }
+  .ingredient-row.checked {
+    @apply opacity-35 line-through;
+  }
+  .jump-to-recipe {
+    @apply inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-orange-600 transition-all hover:shadow-lg hover:-translate-y-px;
+  }
+
+  /* ── Section heading style ── */
+  .section-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-widest text-orange-500;
+  }
+  .section-heading {
+    @apply mt-1.5 text-2xl font-bold text-slate-900 sm:text-3xl;
+    font-family: var(--font-heading), Georgia, serif;
+  }
+}
+
+@media print {
+  header, footer, nav, .no-print { display: none !important; }
+  .recipe-content { max-width: 100% !important; }
+  a[href]::after { content: none !important; }
+  body { background: white !important; color: black !important; }
+  img { max-width: 300px !important; }
 }

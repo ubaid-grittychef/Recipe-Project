@@ -2,11 +2,11 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { Project, FONT_PRESETS, TONE_OPTIONS, COLOR_PRESETS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 import {
-  ArrowLeft,
   ChevronDown,
   ChevronRight,
   Globe,
@@ -32,7 +32,7 @@ import { useRouter } from "next/navigation";
 
 const EDITABLE_FIELDS = [
   "name", "niche", "domain", "country", "language", "status",
-  "logo_url", "primary_color", "font_preset", "tagline",
+  "logo_url", "primary_color", "font_preset", "tagline", "template_variant",
   "meta_description", "author_name", "target_audience", "site_category",
   "content_tone",
   "prompt_overrides",
@@ -40,6 +40,7 @@ const EDITABLE_FIELDS = [
   "recipes_per_day", "generation_time", "auto_pause_on_empty",
   "skimlinks_id", "amazon_associate_id", "hellofresh_url", "adsense_publisher_id", "ga_id",
   "site_supabase_url", "site_supabase_anon_key", "site_supabase_service_key",
+  "vercel_token",
 ] as const;
 
 interface Props {
@@ -55,7 +56,7 @@ const SECTIONS = [
   { id: "prompts", title: "AI Prompt Overrides", icon: Sparkles },
   { id: "schedule", title: "Schedule", icon: Calendar },
   { id: "monetization", title: "Monetization", icon: DollarSign },
-  { id: "database", title: "Site Database", icon: Database },
+  { id: "database", title: "Deployment & Database", icon: Database },
 ] as const;
 
 export default function ProjectSettingsPage({ params }: Props) {
@@ -67,6 +68,7 @@ export default function ProjectSettingsPage({ params }: Props) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["basic"]));
+  const [dirtyKeys, setDirtyKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     api
@@ -76,7 +78,6 @@ export default function ProjectSettingsPage({ params }: Props) {
         setForm(data);
       })
       .catch((err) => {
-        console.error("[Settings] fetch failed:", err);
         toast.error("Failed to load project settings");
         setProject(null);
       })
@@ -92,8 +93,25 @@ export default function ProjectSettingsPage({ params }: Props) {
     });
   }
 
+  const SECTION_FIELD_MAP: Record<string, string[]> = {
+    basic: ["name", "niche", "domain", "country", "language", "status"],
+    keywords: ["sheet_url", "sheet_keyword_column", "sheet_restaurant_column", "sheet_status_column"],
+    branding: ["logo_url", "primary_color", "font_preset", "tagline", "template_variant"],
+    seo: ["meta_description", "author_name", "target_audience", "site_category"],
+    ai: ["content_tone"],
+    prompts: ["prompt_overrides"],
+    schedule: ["recipes_per_day", "generation_time", "auto_pause_on_empty"],
+    monetization: ["skimlinks_id", "amazon_associate_id", "hellofresh_url", "adsense_publisher_id", "ga_id"],
+    database: ["site_supabase_url", "site_supabase_anon_key", "site_supabase_service_key", "vercel_token"],
+  };
+
   function update(fields: Partial<Project>) {
     setForm((prev) => ({ ...prev, ...fields }));
+  }
+
+  function updateSection(sectionId: string, fields: Partial<Project>) {
+    update(fields);
+    setDirtyKeys((prev) => new Set([...prev, sectionId]));
   }
 
   async function handleSave() {
@@ -105,13 +123,47 @@ export default function ProjectSettingsPage({ params }: Props) {
           payload[key] = form[key as keyof Project];
         }
       }
+      const prevTemplate = project?.template_variant;
       const updated = await api.put<Project>(`/api/projects/${id}`, payload);
       setProject(updated);
       setForm(updated);
+      setDirtyKeys(new Set());
+      if (updated.template_variant !== prevTemplate && updated.deployment_status === "deployed") {
+        localStorage.setItem(`needs_redeploy_${id}`, "1");
+      }
       toast.success("Settings saved successfully");
     } catch (err) {
       console.error("[Settings] save failed:", err);
       toast.error("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSaveSection(sectionId: string) {
+    setSaving(true);
+    try {
+      const sectionFields = SECTION_FIELD_MAP[sectionId] ?? [];
+      const payload: Record<string, unknown> = {};
+      for (const key of sectionFields) {
+        if (key in form) {
+          payload[key] = form[key as keyof Project];
+        }
+      }
+      const prevTemplate = project?.template_variant;
+      const updated = await api.put<Project>(`/api/projects/${id}`, payload);
+      setProject(updated);
+      setForm((prev) => ({ ...prev, ...updated }));
+      setDirtyKeys((prev) => { const next = new Set(prev); next.delete(sectionId); return next; });
+      if (sectionId === "branding" && updated.template_variant !== prevTemplate && updated.deployment_status === "deployed") {
+        localStorage.setItem(`needs_redeploy_${id}`, "1");
+        toast.success("Branding saved — redeploy your site to apply the new template");
+      } else {
+        toast.success(`${SECTIONS.find((s) => s.id === sectionId)?.title ?? "Section"} saved`);
+      }
+    } catch (err) {
+      console.error("[Settings] section save failed:", err);
+      toast.error("Failed to save section");
     } finally {
       setSaving(false);
     }
@@ -152,13 +204,11 @@ export default function ProjectSettingsPage({ params }: Props) {
 
   return (
     <div>
-      <Link
-        href={`/projects/${id}`}
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Project
-      </Link>
+      <Breadcrumbs items={[
+        { label: "All Projects", href: "/" },
+        { label: project.name, href: `/projects/${id}` },
+        { label: "Settings" },
+      ]} />
 
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -175,48 +225,75 @@ export default function ProjectSettingsPage({ params }: Props) {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          {saving ? "Saving..." : "Save"}
+          {saving ? "Saving..." : "Save All"}
         </button>
       </div>
 
-      <div className="space-y-3">
-        {SECTIONS.map(({ id: sectionId, title, icon: Icon }) => (
-          <CollapsibleCard
-            key={sectionId}
-            title={title}
-            icon={Icon}
-            expanded={expanded.has(sectionId)}
-            onToggle={() => toggleSection(sectionId)}
+      {/* Unsaved changes banner */}
+      {dirtyKeys.size > 0 && (
+        <div className="sticky top-16 z-30 mb-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-amber-500" />
+            <span className="text-sm font-medium text-amber-800">
+              Unsaved changes in {dirtyKeys.size} section{dirtyKeys.size !== 1 ? "s" : ""}
+            </span>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
           >
-            {sectionId === "basic" && (
-              <SectionBasicInfo form={form} update={update} />
-            )}
-            {sectionId === "keywords" && (
-              <SectionKeywords form={form} update={update} />
-            )}
-            {sectionId === "branding" && (
-              <SectionBranding form={form} update={update} />
-            )}
-            {sectionId === "seo" && (
-              <SectionSEO form={form} update={update} />
-            )}
-            {sectionId === "ai" && (
-              <SectionAITone form={form} update={update} />
-            )}
-            {sectionId === "prompts" && (
-              <SectionPrompts form={form} update={update} />
-            )}
-            {sectionId === "schedule" && (
-              <SectionSchedule form={form} update={update} />
-            )}
-            {sectionId === "monetization" && (
-              <SectionMonetization form={form} update={update} />
-            )}
-            {sectionId === "database" && (
-              <SectionSiteDatabase form={form} update={update} />
-            )}
-          </CollapsibleCard>
-        ))}
+            {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+            Save All
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {SECTIONS.map(({ id: sectionId, title, icon: Icon }) => {
+          const isDirty = dirtyKeys.has(sectionId);
+          const sectionUpdate = (fields: Partial<Project>) => updateSection(sectionId, fields);
+          return (
+            <CollapsibleCard
+              key={sectionId}
+              title={title}
+              icon={Icon}
+              expanded={expanded.has(sectionId)}
+              onToggle={() => toggleSection(sectionId)}
+              isDirty={isDirty}
+              onSave={() => handleSaveSection(sectionId)}
+              saving={saving}
+            >
+              {sectionId === "basic" && (
+                <SectionBasicInfo form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "keywords" && (
+                <SectionKeywords form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "branding" && (
+                <SectionBranding form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "seo" && (
+                <SectionSEO form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "ai" && (
+                <SectionAITone form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "prompts" && (
+                <SectionPrompts form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "schedule" && (
+                <SectionSchedule form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "monetization" && (
+                <SectionMonetization form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "database" && (
+                <SectionSiteDatabase form={form} update={sectionUpdate} />
+              )}
+            </CollapsibleCard>
+          );
+        })}
       </div>
 
       {/* Danger Zone */}
@@ -254,33 +331,59 @@ function CollapsibleCard({
   icon: Icon,
   expanded,
   onToggle,
+  isDirty,
+  onSave,
+  saving,
   children,
 }: {
   title: string;
   icon: React.ElementType;
   expanded: boolean;
   onToggle: () => void;
+  isDirty?: boolean;
+  onSave?: () => void;
+  saving?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-slate-50"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50">
-            <Icon className="h-4 w-4 text-brand-500" />
+    <div className={cn("overflow-hidden rounded-xl border bg-white", isDirty ? "border-amber-300" : "border-slate-200")}>
+      <div className="flex w-full items-center justify-between px-5 py-4">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex flex-1 items-center gap-3 text-left"
+        >
+          <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", isDirty ? "bg-amber-50" : "bg-brand-50")}>
+            <Icon className={cn("h-4 w-4", isDirty ? "text-amber-500" : "text-brand-500")} />
           </div>
-          <span className="font-medium text-slate-900">{title}</span>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-slate-900">{title}</span>
+            {isDirty && (
+              <span className="h-2 w-2 rounded-full bg-amber-500" title="Unsaved changes" />
+            )}
+          </div>
+        </button>
+        <div className="flex items-center gap-2">
+          {isDirty && onSave && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onSave(); }}
+              disabled={saving}
+              className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+              Save
+            </button>
+          )}
+          <button type="button" onClick={onToggle} className="text-slate-400 hover:text-slate-600">
+            {expanded ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </button>
         </div>
-        {expanded ? (
-          <ChevronDown className="h-5 w-5 text-slate-400" />
-        ) : (
-          <ChevronRight className="h-5 w-5 text-slate-400" />
-        )}
-      </button>
+      </div>
       {expanded && (
         <div className="border-t border-slate-100 px-5 py-4">
           {children}
@@ -296,7 +399,7 @@ function Field({
   children,
 }: {
   label: string;
-  hint?: string;
+  hint?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -666,6 +769,73 @@ function SectionBranding({
 }) {
   return (
     <div className="space-y-4">
+      <Field label="Site Template">
+        <div className="grid grid-cols-3 gap-3">
+          {([
+            {
+              id: "default" as const,
+              name: "Default",
+              desc: "Clean, fast, minimal design",
+              badge: null,
+              letter: "D",
+            },
+            {
+              id: "premium" as const,
+              name: "Premium",
+              desc: "Rich layout with hero images & enhanced SEO",
+              badge: "Popular",
+              letter: "P",
+            },
+            {
+              id: "v3" as const,
+              name: "Editorial",
+              desc: "NYT-inspired editorial design. Sharp, red accent, serif headlines.",
+              badge: "New",
+              letter: "V3",
+            },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => update({ template_variant: t.id })}
+              className={cn(
+                "relative rounded-xl border-2 p-4 text-left transition-all",
+                form.template_variant === t.id
+                  ? "border-brand-500 bg-brand-50"
+                  : "border-slate-200 bg-white hover:border-slate-300"
+              )}
+            >
+              {t.badge && (
+                <span className="absolute right-3 top-3 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                  {t.badge}
+                </span>
+              )}
+              <div className={cn(
+                "mb-2 flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold",
+                form.template_variant === t.id ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-500"
+              )}>
+                {t.letter}
+              </div>
+              <p className={cn("text-sm font-semibold", form.template_variant === t.id ? "text-brand-900" : "text-slate-900")}>
+                {t.name}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">{t.desc}</p>
+              {form.template_variant === t.id && (
+                <div className="absolute right-3 bottom-3 h-4 w-4 rounded-full bg-brand-500 flex items-center justify-center">
+                  <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+        {form.template_variant !== undefined && (
+          <p className="mt-2 text-xs text-amber-600">
+            Changing the template requires a redeployment to take effect.
+          </p>
+        )}
+      </Field>
       <Field label="Logo URL" hint="Optional">
         <TextInput
           value={form.logo_url ?? ""}
@@ -1099,8 +1269,43 @@ function SectionSiteDatabase({
   return (
     <div className="space-y-4">
       <p className="text-xs text-slate-500">
-        Each recipe site needs its own Supabase project. Generated recipes will be published here automatically.
+        Configure your Vercel account for deployment and your Supabase project for recipe storage.
       </p>
+
+      {/* Vercel Token */}
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Vercel Deployment</p>
+        <Field
+          label="Vercel API Token"
+          hint={
+            <span>
+              Required to deploy your site.{" "}
+              <a
+                href="https://vercel.com/account/tokens"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-500 hover:underline"
+              >
+                Get yours at vercel.com/account/tokens →
+              </a>
+            </span>
+          }
+        >
+          <TextInput
+            value={form.vercel_token ?? ""}
+            onChange={(v) => update({ vercel_token: v || null })}
+            placeholder="your-vercel-token"
+            type="password"
+          />
+        </Field>
+      </div>
+
+      {/* Supabase */}
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Site Supabase Database</p>
+        <p className="mb-3 text-xs text-slate-500">
+          Each recipe site needs its own Supabase project. Generated recipes are published here.
+        </p>
       <Field label="Site Supabase URL">
         <TextInput
           value={form.site_supabase_url ?? ""}
@@ -1186,6 +1391,7 @@ function SectionSiteDatabase({
           )}
         </div>
       )}
+      </div>{/* end Supabase wrapper */}
     </div>
   );
 }

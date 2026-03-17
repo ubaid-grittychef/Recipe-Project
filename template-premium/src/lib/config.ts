@@ -1,0 +1,15 @@
+export const siteConfig = {
+  name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Recipe Site",
+  tagline: process.env.NEXT_PUBLIC_SITE_TAGLINE ?? "",
+  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION ?? "",
+  author: process.env.NEXT_PUBLIC_SITE_AUTHOR ?? "",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://example.com",
+  primaryColor: process.env.NEXT_PUBLIC_PRIMARY_COLOR ?? "#f97316",
+  fontPreset: process.env.NEXT_PUBLIC_FONT_PRESET ?? "modern",
+  ogImage: process.env.NEXT_PUBLIC_OG_IMAGE ?? "",
+  skimlinksId: process.env.NEXT_PUBLIC_SKIMLINKS_ID ?? "",
+  amazonTag: process.env.NEXT_PUBLIC_AMAZON_TAG ?? "",
+  hellofreshUrl: process.env.NEXT_PUBLIC_HELLOFRESH_URL ?? "",
+  adsenseId: process.env.NEXT_PUBLIC_ADSENSE_ID ?? "",
+  gaId: process.env.NEXT_PUBLIC_GA_ID ?? "",
+};

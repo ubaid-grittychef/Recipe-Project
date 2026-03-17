@@ -8,6 +8,7 @@ import {
   createGenerationLog,
   updateGenerationLog,
   getRecipeByKeyword,
+  getRecipesByProject,
   getBuiltInKeywords,
   updateBuiltInKeyword,
   findOrCreateRestaurant,
@@ -73,6 +74,8 @@ async function _runGeneration(projectId: string): Promise<{
     status: "running",
   };
   await createGenerationLog(genLog);
+  // Non-critical — column may not exist on existing DBs; never block generation over this
+  updateProject(projectId, { generation_status: "running" }).catch(() => {});
 
   let succeeded = 0;
   let failed = 0;
@@ -85,6 +88,9 @@ async function _runGeneration(projectId: string): Promise<{
     row?: number;       // Google Sheets path
     builtInId?: string; // Built-in queue path
   };
+
+  // Ensure the log is always finalized even if we die before the keyword loop
+  let loopStarted = false;
 
   try {
     let keywords: PendingKw[];
@@ -119,12 +125,17 @@ async function _runGeneration(projectId: string): Promise<{
       source: project.sheet_url ? "sheets" : "builtin",
     });
 
+    // Fetch existing recipes once for internal link injection (updated as new ones are saved)
+    const existingRecipes = await getRecipesByProject(projectId);
+
     if (keywords.length === 0) {
       log.info("No pending keywords found", { project: project.name });
       if (project.auto_pause_on_empty) {
         await updateProject(projectId, {
           status: "paused",
           keywords_remaining: 0,
+          last_generation_at: new Date().toISOString(),
+          generation_status: "completed",
         });
         log.info("Auto-paused project (no keywords)", { project: project.name });
       }
@@ -136,6 +147,7 @@ async function _runGeneration(projectId: string): Promise<{
       return { processed: 0, succeeded: 0, failed: 0 };
     }
 
+    loopStarted = true;
     for (const kw of keywords) {
       log.info("Processing keyword", {
         keyword: kw.keyword,
@@ -214,8 +226,8 @@ async function _runGeneration(projectId: string): Promise<{
           }
         }
 
-        // Build a unique slug — append short ID suffix if title is duplicated
-        let slug = slugify(generated.title);
+        // Build a unique slug — use the raw keyword (the exact search query) for SEO-optimal URLs
+        let slug = slugify(kw.keyword);
         let recipe: Recipe = {
           id: generateId(),
           project_id: projectId,
@@ -226,7 +238,7 @@ async function _runGeneration(projectId: string): Promise<{
           title: generated.title,
           slug,
           description: generated.description,
-          intro_content: generated.intro_content,
+          intro_content: injectInternalLinks(generated.intro_content, existingRecipes, slug),
           ingredients: generated.ingredients,
           instructions: generated.instructions,
           prep_time: generated.prep_time,
@@ -270,6 +282,7 @@ async function _runGeneration(projectId: string): Promise<{
         }
 
         log.info("Recipe created as draft", { title: recipe.title, slug: recipe.slug });
+        existingRecipes.push(recipe);
 
         // BUG 3 FIX: auto-publish to site Supabase if credentials are configured.
         // Runs after the factory DB write so a site publish failure never loses the draft.
@@ -312,6 +325,12 @@ async function _runGeneration(projectId: string): Promise<{
         await createKeywordLog(kwLog);
 
         succeeded++;
+        // Increment log counters in real-time so the UI shows live progress
+        await updateGenerationLog(genLog.id, {
+          keywords_processed: succeeded + failed,
+          keywords_succeeded: succeeded,
+          keywords_failed: failed,
+        });
       } catch (error) {
         const errorMsg =
           error instanceof Error ? error.message : "Unknown error";
@@ -350,6 +369,12 @@ async function _runGeneration(projectId: string): Promise<{
         await createKeywordLog(kwLog);
 
         failed++;
+        // Increment log counters in real-time so the UI shows live progress
+        await updateGenerationLog(genLog.id, {
+          keywords_processed: succeeded + failed,
+          keywords_succeeded: succeeded,
+          keywords_failed: failed,
+        });
       }
     }
 
@@ -366,10 +391,10 @@ async function _runGeneration(projectId: string): Promise<{
     await updateProject(projectId, {
       keywords_remaining: remainingInSheet,
       keywords_failed: currentFailed + failed,
-      // recipes_published counter: increment by how many were auto-published to site
       recipes_published: currentPublished + autoPublished,
       last_generation_at: new Date().toISOString(),
     });
+    updateProject(projectId, { generation_status: "completed" }).catch(() => {});
 
     await updateGenerationLog(genLog.id, {
       completed_at: new Date().toISOString(),
@@ -398,6 +423,51 @@ async function _runGeneration(projectId: string): Promise<{
       keywords_failed: failed,
       status: "failed",
     });
+    // If we died before the loop even started, finalize the log here
+    if (!loopStarted) {
+      await updateGenerationLog(genLog.id, {
+        completed_at: new Date().toISOString(),
+        keywords_processed: 0,
+        keywords_succeeded: 0,
+        keywords_failed: 0,
+        status: "failed",
+      }).catch(() => {});
+    }
+    updateProject(projectId, { generation_status: "failed", last_generation_at: new Date().toISOString() }).catch(() => {});
     throw error;
   }
+}
+
+/**
+ * Inject internal markdown links ([text](/recipe/slug)) into intro_content.
+ * Scans existing recipe keywords against the text and wraps the first match
+ * for each recipe (up to maxLinks total). Longer keywords are matched first to
+ * prevent a shorter keyword from pre-empting a more specific one.
+ */
+export function injectInternalLinks(
+  intro: string,
+  recipes: Array<{ slug: string; keyword: string }>,
+  currentSlug: string,
+  maxLinks = 3
+): string {
+  let result = intro;
+  let linksAdded = 0;
+
+  const candidates = recipes
+    .filter((r) => r.slug !== currentSlug && r.keyword)
+    .sort((a, b) => b.keyword.length - a.keyword.length);
+
+  for (const r of candidates) {
+    if (linksAdded >= maxLinks) break;
+    // Skip if this slug is already linked
+    if (result.includes(`(/recipe/${r.slug})`)) continue;
+    const escaped = r.keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b(${escaped})\\b`, "i");
+    if (regex.test(result)) {
+      result = result.replace(regex, `[$1](/recipe/${r.slug})`);
+      linksAdded++;
+    }
+  }
+
+  return result;
 }

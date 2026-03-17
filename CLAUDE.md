@@ -1,8 +1,65 @@
-# CLAUDE.md — Recipe Project: Audit, Lessons & Fix Plan
+# CLAUDE.md
 
-> This file documents a full end-to-end workflow audit of the Recipe-Project.
-> It captures every confirmed bug, the root cause, and the exact fix required.
-> Use this as the authoritative source of truth before making any changes.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
+
+## Commands
+
+```bash
+npm run dev        # Start dev server (Next.js 15 + Turbopack) at http://localhost:3000
+npm run build      # Production build (runs tsc + next build)
+npm run lint       # ESLint via next lint
+npm run start      # Start production server (after build)
+```
+
+No test suite is configured. TypeScript strict mode is **not** enabled — type errors may be silent at runtime.
+
+---
+
+## Architecture
+
+### Stack
+- **Next.js 15 App Router** — all pages under `src/app/`, API routes under `src/app/api/`
+- **TypeScript + Tailwind CSS + lucide-react + sonner** (toasts)
+- **Supabase** for persistence (factory DB + one per deployed site); falls back to in-memory store (`globalThis.__recipe_factory_store__`) when env vars are absent
+- **OpenAI GPT-4o-mini** for recipe generation, **Pexels** for images, **Google Sheets API** for keyword input
+
+### Data Flow
+```
+Google Sheet keywords
+  → src/lib/generator.ts       (orchestrates a generation run)
+  → src/lib/openai.ts          (recipe JSON via GPT-4o-mini)
+  → src/lib/images.ts          (Pexels image fetch)
+  → src/lib/store.ts           (write recipe as "draft" to factory DB)
+  → [manual] bulk-publish      (src/lib/site-publisher.ts → site Supabase)
+  → [manual] deploy            (src/lib/deployer.ts → Vercel API → /template site)
+```
+
+### Key Patterns
+- **Server Components by default** — pages call store functions directly (no HTTP). Client interactivity lives in `*Client.tsx` siblings passed data as props.
+- **`await params`** — Next.js 15 route params are `Promise<{id}>` and must be awaited in every route handler and page.
+- **In-memory fallback** — `src/lib/store.ts` uses `globalThis.__recipe_factory_store__` when Supabase env vars are absent. Data resets on process restart.
+- **Structured logger** — always use `createLogger("Context")` from `src/lib/logger.ts`; never `console.log/error`.
+- **Retry utility** — `withRetry()` in `src/lib/utils.ts` wraps all external API calls (OpenAI, Pexels, Sheets, Vercel).
+- **Scheduler** — `node-cron` via `src/instrumentation.ts` works locally; on Vercel use `vercel.json` crons hitting `/api/cron/run-schedules`.
+- **Auth** — `FACTORY_PASSWORD` hashed with SHA-256 (no salt); middleware re-derives hash on every request to validate cookie.
+
+### Two Keyword Sources (mutually exclusive per project)
+| Source | When active | Files |
+|--------|-------------|-------|
+| Google Sheet | `project.sheet_url` is set | `src/lib/sheets.ts` |
+| Built-in queue | `project.sheet_url` is empty | `builtin_keywords` table, `src/app/projects/[id]/queue/` |
+
+### Template Site (`/template/`)
+A standalone Next.js app deployed to Vercel per project. It reads recipes from the **site's own Supabase** instance (not the factory DB). Env vars are injected by `deployer.ts` at deploy time. Do not import factory code into `/template/`.
+
+---
+
+## Audit Notes (Confirmed Bugs & Fixes)
+
+> This section documents a full end-to-end workflow audit.
+> All bugs listed below have been fixed. Kept for reference.
 
 ---
 

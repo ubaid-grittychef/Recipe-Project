@@ -179,6 +179,7 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
 }
 
 CRITICAL REQUIREMENTS:
+- The FIRST SENTENCE of intro_content MUST naturally include the exact keyword phrase: "${keyword}"
 - Include 8-15 ingredients with precise measurements
 - Write 8-14 detailed instruction steps with specific temperatures, times, and visual cues
 - Include exactly 4-6 FAQs that people would realistically search on Google about this recipe
@@ -273,6 +274,62 @@ CRITICAL REQUIREMENTS:
     faqCount: parsed.faqs.length,
     tipCount: parsed.tips.length,
   });
+
+  return parsed;
+}
+
+/**
+ * Lightweight content refresh — regenerates only intro_content and SEO fields
+ * for an existing recipe. Much cheaper than a full regeneration (~400 tokens vs ~3000).
+ */
+export async function refreshRecipeContent(
+  keyword: string,
+  title: string,
+  niche: string,
+  tone: string,
+  restaurantName?: string | null
+): Promise<{ intro_content: string; seo_title: string; seo_description: string; focus_keywords: string[] }> {
+  const restaurantCtx = restaurantName ? ` for ${restaurantName}` : "";
+
+  const prompt = `You are a professional food blogger writing fresh, engaging content.
+
+Rewrite the intro section and SEO metadata for this recipe:
+Title: "${title}"
+Keyword: "${keyword}"${restaurantCtx}
+Niche: ${niche}
+Tone: ${tone}
+
+Return ONLY this JSON object (no markdown, no code fences):
+{
+  "intro_content": "Fresh 300-400 word introduction with **bolded subheadings** covering what makes this dish special, its origin/backstory, and why this version is the best. Use a friendly, engaging ${tone} tone.",
+  "seo_title": "60-character max SEO title tag starting with the main keyword",
+  "seo_description": "155-character max meta description with keyword and a clear call to action",
+  "focus_keywords": ["primary keyword", "4 related long-tail SEO keywords"]
+}`;
+
+  const response = await withRetry(() =>
+    getClient().chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+      max_completion_tokens: 1200,
+      response_format: { type: "json_object" },
+    })
+  );
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw new Error("Empty response from OpenAI");
+
+  const parsed = JSON.parse(content.trim()) as {
+    intro_content: string;
+    seo_title: string;
+    seo_description: string;
+    focus_keywords: string[];
+  };
+
+  if (!parsed.intro_content || !parsed.seo_title || !parsed.seo_description) {
+    throw new Error("Incomplete refresh response from OpenAI");
+  }
 
   return parsed;
 }
