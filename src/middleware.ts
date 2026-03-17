@@ -23,8 +23,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow public paths
+  // If on a public auth path, check if user is already logged in → redirect to dashboard
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+    // Only check auth for login/signup (not /auth/ callbacks or /access-required)
+    if (pathname === "/login" || pathname === "/signup") {
+      let checkResponse = NextResponse.next({ request });
+      const checkSupabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() { return request.cookies.getAll(); },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+              checkResponse = NextResponse.next({ request });
+              cookiesToSet.forEach(({ name, value, options }) => checkResponse.cookies.set(name, value, options));
+            },
+          },
+        }
+      );
+      const { data: { user } } = await checkSupabase.auth.getUser();
+      if (user) return NextResponse.redirect(new URL("/", request.url));
+    }
     return NextResponse.next();
   }
 

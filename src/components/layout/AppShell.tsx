@@ -8,9 +8,10 @@ import Header from "./Header";
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isLogin = pathname === "/login";
+  const isAuthPage = pathname === "/login" || pathname === "/signup" ||
+    pathname.startsWith("/auth/") || pathname === "/access-required";
 
-  if (isLogin) {
+  if (isAuthPage) {
     return <>{children}</>;
   }
 
