@@ -356,15 +356,15 @@ end $$;
 create or replace function custom_jwt_claims(event jsonb)
 returns jsonb as $$
 declare
-  profile_row profiles;
+  profile_row public.profiles;
+  claims jsonb;
 begin
-  select * into profile_row from profiles where id = (event->>'user_id')::uuid;
-  return jsonb_set(
-    event, '{claims}',
-    (event->'claims') || jsonb_build_object(
-      'user_role', coalesce(profile_row.role, 'user'),
-      'subscription_status', coalesce(profile_row.subscription_status, 'inactive')
-    )
+  select * into profile_row from public.profiles where id = (event->>'user_id')::uuid;
+  claims := coalesce(event->'claims', '{}'::jsonb);
+  claims := claims || jsonb_build_object(
+    'user_role', coalesce(profile_row.role, 'user'),
+    'subscription_status', coalesce(profile_row.subscription_status, 'inactive')
   );
+  return jsonb_set(event, '{claims}', claims);
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
