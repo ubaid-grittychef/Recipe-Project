@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { Project } from "@/lib/types";
 import { api } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
 import ProjectCard from "@/components/dashboard/ProjectCard";
 import EmptyState from "@/components/dashboard/EmptyState";
 import { PlusCircle, Search, Pause, Play, Trash2, CheckSquare, X, LayoutDashboard, TrendingUp, BookOpen, KeyRound } from "lucide-react";
