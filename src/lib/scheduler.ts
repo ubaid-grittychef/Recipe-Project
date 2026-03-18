@@ -1,119 +1,90 @@
 import cron from "node-cron";
-import { getProjects, updateProject } from "./store";
-import { getActiveJobs } from "./scheduler-status";
+import {
+  getProjects,
+  getRecipesByProject,
+  updateRecipe,
+  updateProject,
+  getProject,
+} from "./store";
+import { publishRecipeToSite } from "./site-publisher";
 import { createLogger } from "./logger";
 
-const log = createLogger("Scheduler");
+const log = createLogger("PublishScheduler");
 
-function timeToCron(time: string): string {
-  const [hours, minutes] = time.split(":").map(Number);
-  return `${minutes} ${hours} * * *`;
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function parseDays(raw: string): number[] {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [1, 2, 3, 4, 5];
+  }
 }
 
-function nextRunAt(time: string): string {
+function calcNextPublishAt(time: string, days: number[]): string {
   const [hours, minutes] = time.split(":").map(Number);
   const now = new Date();
-  const next = new Date(now);
-  next.setHours(hours, minutes, 0, 0);
-  if (next <= now) {
-    next.setDate(next.getDate() + 1);
+  for (let i = 0; i < 8; i++) {
+    const c = new Date(now);
+    c.setDate(now.getDate() + i);
+    c.setHours(hours, minutes, 0, 0);
+    // getDay(): 0=Sun,1=Mon…6=Sat → ISO: Mon=1…Sun=7
+    const isoDay = c.getDay() === 0 ? 7 : c.getDay();
+    if (days.includes(isoDay) && c > now) return c.toISOString();
   }
-  return next.toISOString();
+  // Fallback: tomorrow same time
+  const fallback = new Date(now);
+  fallback.setDate(now.getDate() + 1);
+  fallback.setHours(hours, minutes, 0, 0);
+  return fallback.toISOString();
 }
 
-export function startScheduler() {
-  cron.schedule("*/5 * * * *", async () => {
-    try {
-      await syncProjectSchedules();
-    } catch (error) {
-      log.error("Failed to sync schedules", {}, error);
+// ── Core publish runner ───────────────────────────────────────────────────────
+
+async function runScheduledPublishForProject(projectId: string, count: number): Promise<void> {
+  const all = await getRecipesByProject(projectId);
+  const drafts = all
+    .filter((r) => r.status === "draft")
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .slice(0, count);
+
+  if (drafts.length === 0) {
+    log.info("Scheduled publish: no drafts available", { projectId });
+    return;
+  }
+
+  const ts = new Date().toISOString();
+  let published = 0;
+
+  for (const recipe of drafts) {
+    const updated = await updateRecipe(recipe.id, {
+      status: "published",
+      published_at: ts,
+    }).catch(() => null);
+
+    if (updated) {
+      await publishRecipeToSite(projectId, updated).catch((e: unknown) =>
+        log.warn("Failed to sync recipe to site DB", {
+          recipeId: recipe.id,
+          error: e instanceof Error ? e.message : String(e),
+        })
+      );
+      published++;
     }
+  }
+
+  const fresh = await getProject(projectId);
+  await updateProject(projectId, {
+    last_published_at: ts,
+    recipes_published: (fresh?.recipes_published ?? 0) + published,
   });
 
-  syncProjectSchedules();
-  log.info("Started — checking projects every 5 minutes");
+  log.info("Scheduled publish complete", { projectId, published });
 }
 
-async function syncProjectSchedules() {
-  const activeJobs = getActiveJobs();
-  const projects = await getProjects();
-  const activeProjectIds = new Set<string>();
+// ── Vercel Cron entry point (HTTP-callable) ───────────────────────────────────
 
-  for (const project of projects) {
-    if (project.status !== "active") {
-      if (activeJobs.has(project.id)) {
-        activeJobs.get(project.id)!.task.stop();
-        activeJobs.delete(project.id);
-        log.info("Stopped job (project not active)", { project: project.name });
-      }
-      continue;
-    }
-
-    activeProjectIds.add(project.id);
-    const cronExpr = timeToCron(project.generation_time);
-    const existing = activeJobs.get(project.id);
-
-    if (existing && existing.cronExpr === cronExpr) {
-      continue;
-    }
-
-    if (existing) {
-      existing.task.stop();
-      log.info("Rescheduling job (time changed)", {
-        project: project.name,
-        oldCron: existing.cronExpr,
-        newCron: cronExpr,
-      });
-    }
-
-    const task = cron.schedule(cronExpr, async () => {
-      log.info("Running generation", { project: project.name, id: project.id });
-      void updateProject(project.id, {
-        next_scheduled_at: nextRunAt(project.generation_time),
-      }).catch(() => { /* non-critical */ });
-      try {
-        const { runGenerationForProject } = await import("./generator");
-        const result = await runGenerationForProject(project.id);
-        log.info("Generation completed", {
-          project: project.name,
-          succeeded: result.succeeded,
-          failed: result.failed,
-        });
-      } catch (error) {
-        log.error("Generation failed", { project: project.name }, error);
-      }
-    });
-
-    activeJobs.set(project.id, { task, cronExpr });
-
-    void updateProject(project.id, {
-      next_scheduled_at: nextRunAt(project.generation_time),
-    }).catch(() => { /* non-critical */ });
-
-    log.info("Scheduled job", { project: project.name, time: project.generation_time, cron: cronExpr });
-  }
-
-  for (const [id] of activeJobs) {
-    if (!activeProjectIds.has(id)) {
-      activeJobs.get(id)!.task.stop();
-      activeJobs.delete(id);
-    }
-  }
-}
-
-export function stopScheduler() {
-  const activeJobs = getActiveJobs();
-  for (const [, entry] of activeJobs) {
-    entry.task.stop();
-  }
-  activeJobs.clear();
-  log.info("Stopped all jobs");
-}
-
-// BUG 2 FIX: HTTP-callable function for Vercel Cron Jobs.
-// Checks all active projects and triggers generation for any whose
-// generation_time falls within the current 5-minute window.
-export async function runDueProjects(): Promise<{
+export async function runDuePublishes(): Promise<{
   triggered: string[];
   skipped: string[];
 }> {
@@ -123,52 +94,62 @@ export async function runDueProjects(): Promise<{
   const now = new Date();
 
   for (const project of projects) {
-    if (project.status !== "active") {
+    if (project.status !== "active" || !project.publish_schedule_enabled) {
       skipped.push(project.id);
       continue;
     }
 
-    const [hours, minutes] = project.generation_time.split(":").map(Number);
-    const scheduledToday = new Date(now);
-    scheduledToday.setHours(hours, minutes, 0, 0);
+    const days = parseDays(project.publish_days ?? "[1,2,3,4,5]");
+    const isoDay = now.getDay() === 0 ? 7 : now.getDay();
 
-    // Fire if we're within a 5-minute window of the scheduled time
+    if (!days.includes(isoDay)) {
+      skipped.push(project.id);
+      continue;
+    }
+
+    const [h, m] = (project.publish_time ?? "09:00").split(":").map(Number);
+    const scheduledToday = new Date(now);
+    scheduledToday.setHours(h, m, 0, 0);
     const diffMs = now.getTime() - scheduledToday.getTime();
     const isDue = diffMs >= 0 && diffMs < 5 * 60 * 1000;
-
-    // Also fire if next_scheduled_at is in the past (missed run)
     const missedRun =
-      project.next_scheduled_at != null &&
-      new Date(project.next_scheduled_at) <= now;
+      project.next_publish_at != null &&
+      new Date(project.next_publish_at) <= now;
 
-    if (isDue || missedRun) {
-      triggered.push(project.id);
-      log.info("Triggering due project via HTTP cron", {
-        project: project.name,
-        generation_time: project.generation_time,
-        missed: missedRun && !isDue,
-      });
-      // Update next_scheduled_at synchronously BEFORE fire-and-forget to
-      // prevent the missedRun check from re-triggering on the next cron tick.
-      await updateProject(project.id, {
-        next_scheduled_at: nextRunAt(project.generation_time),
-      }).catch(() => { /* non-critical */ });
-      // Fire-and-forget — don't block the cron response
-      void (async () => {
-        try {
-          const { runGenerationForProject } = await import("./generator");
-          await runGenerationForProject(project.id);
-          log.info("HTTP cron generation completed", { project: project.name });
-        } catch (err) {
-          log.error("HTTP cron generation failed", { project: project.name }, err);
-        }
-      })();
-    } else {
+    if (!isDue && !missedRun) {
       skipped.push(project.id);
+      continue;
     }
+
+    triggered.push(project.id);
+
+    // Update next_publish_at BEFORE fire-and-forget to prevent double-fire on next tick
+    await updateProject(project.id, {
+      next_publish_at: calcNextPublishAt(project.publish_time ?? "09:00", days),
+    }).catch(() => {});
+
+    const count = project.publish_per_day ?? 3;
+    void runScheduledPublishForProject(project.id, count).catch((err) =>
+      log.error("Scheduled publish failed", { projectId: project.id }, err)
+    );
   }
 
   return { triggered, skipped };
 }
 
-export { getSchedulerStatus } from "./scheduler-status";
+// ── Local persistent scheduler (non-Vercel) ───────────────────────────────────
+
+export function startScheduler() {
+  cron.schedule("*/5 * * * *", async () => {
+    try {
+      await runDuePublishes();
+    } catch (error) {
+      log.error("Publish tick failed", {}, error);
+    }
+  });
+  log.info("Started — checking publish schedules every 5 minutes");
+}
+
+export function stopScheduler() {
+  log.info("Scheduler stop requested");
+}

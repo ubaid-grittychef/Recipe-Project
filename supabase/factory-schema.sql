@@ -67,7 +67,15 @@ create table if not exists projects (
   keywords_failed integer not null default 0,
   last_generation_at timestamptz,
   next_scheduled_at timestamptz,
-  generation_status text not null default 'idle'
+  generation_status text not null default 'idle',
+
+  -- Publish schedule
+  publish_schedule_enabled boolean not null default false,
+  publish_time text not null default '09:00',
+  publish_per_day integer not null default 3,
+  publish_days text not null default '[1,2,3,4,5]',
+  next_publish_at timestamptz,
+  last_published_at timestamptz
 );
 
 -- ── Restaurants (must be before recipes for FK reference) ────────────────────

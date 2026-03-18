@@ -20,6 +20,7 @@ export async function POST(
 
     // Parse optional body — empty body (Content-Length: 0) is fine
     let recipeIds: string[] | undefined;
+    let count: number | undefined;
     const contentType = request.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
       const raw = await request.json().catch(() => ({}));
@@ -31,6 +32,7 @@ export async function POST(
         );
       }
       recipeIds = parsed.data.recipeIds;
+      count = parsed.data.count;
     }
 
     const project = await getProject(projectId);
@@ -40,9 +42,15 @@ export async function POST(
 
     const all = await getRecipesByProject(projectId);
     // If specific IDs were provided, only publish those that are still drafts
-    const drafts = recipeIds
+    let drafts = recipeIds
       ? all.filter((r) => recipeIds!.includes(r.id) && r.status === "draft")
       : all.filter((r) => r.status === "draft");
+
+    // Sort oldest-first so scheduled partial publishing is chronological
+    drafts = drafts.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+    // If a count limit was provided (scheduled publish), take only the first N
+    if (count !== undefined) drafts = drafts.slice(0, count);
 
     if (drafts.length === 0) {
       return NextResponse.json({ published: 0, message: "No draft recipes to publish" });

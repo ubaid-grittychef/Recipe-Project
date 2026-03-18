@@ -60,10 +60,18 @@ export interface Project {
   sheet_restaurant_column: string;
   sheet_status_column: string;
 
-  // Schedule
+  // Schedule (legacy — kept for backward compat, no longer drives automation)
   recipes_per_day: number;
   generation_time: string;
   auto_pause_on_empty: boolean;
+
+  // Publish Schedule
+  publish_schedule_enabled: boolean;
+  publish_time: string;           // "HH:MM"
+  publish_per_day: number;        // 1–20, default 3
+  publish_days: string;           // JSON array string: "[1,2,3,4,5]" Mon=1…Sun=7
+  next_publish_at: string | null;
+  last_published_at: string | null;
 
   // Monetization
   skimlinks_id: string | null;

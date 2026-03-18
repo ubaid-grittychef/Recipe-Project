@@ -40,6 +40,7 @@ import {
   Settings2,
 } from "lucide-react";
 import GenerationProgressCard from "@/components/GenerationProgressCard";
+import { PublishSchedulePanel } from "@/components/projects/PublishSchedulePanel";
 
 interface Props {
   id: string;
@@ -99,6 +100,12 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
       setProject((p) => ({ ...p, status: project.status }));
       toast.error(`Failed to ${newStatus === "active" ? "activate" : "pause"} project`);
     }
+  }
+
+  async function fetchProject() {
+    const refreshed = await api.get<Project>(`/api/projects/${id}`);
+    setProject(refreshed);
+    setDraftCount(refreshed.draft_count ?? 0);
   }
 
   async function publishAllDrafts() {
@@ -461,36 +468,37 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
             </div>
           )}
 
-          {/* Drafts ready to publish */}
-          {!generationRunning && draftCount > 0 && (
-            <div className="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-              <div className="flex items-center gap-3">
-                <BookOpen className="h-5 w-5 text-amber-600" />
-                <div>
-                  <p className="text-sm font-medium text-amber-900">
-                    {draftCount} draft recipe{draftCount !== 1 ? "s" : ""} ready to publish
-                  </p>
-                  <p className="mt-0.5 text-xs text-amber-700">Not visible on your live site until published.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/projects/${id}/recipes`}
-                  className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
-                >
-                  Review
-                </Link>
-                <button
-                  onClick={publishAllDrafts}
-                  disabled={publishing}
-                  className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-600 disabled:opacity-50"
-                >
-                  {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                  {publishing ? "Publishing..." : "Publish All Now"}
-                </button>
-              </div>
+          {/* Publish queue + schedule panel */}
+          <div className="mb-6">
+            <PublishSchedulePanel
+              project={project}
+              draftCount={draftCount}
+              onPublished={fetchProject}
+            />
+          </div>
+
+          {/* Keyword queue widget */}
+          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-900">Keyword Queue</h3>
+              <Link href={`/projects/${id}/queue`} className="text-xs text-brand-600 hover:text-brand-700 font-medium">
+                Manage →
+              </Link>
             </div>
-          )}
+            <div className="flex gap-4 text-sm text-slate-500 mb-3">
+              <span><strong className="text-slate-900">{queueCounts.pending}</strong> pending</span>
+              <span><strong className="text-slate-900">{queueCounts.done}</strong> done</span>
+              {queueCounts.failed > 0 && (
+                <span><strong className="text-red-600">{queueCounts.failed}</strong> failed</span>
+              )}
+            </div>
+            <Link
+              href={`/projects/${id}/queue`}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600"
+            >
+              + Add Keywords
+            </Link>
+          </div>
 
           {/* Content quick links */}
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Manage Content</p>

@@ -227,6 +227,12 @@ export async function createProject(data: Partial<Project>): Promise<Project> {
     last_generation_at: null,
     next_scheduled_at: null,
     generation_status: "idle",
+    publish_schedule_enabled: data.publish_schedule_enabled ?? false,
+    publish_time: data.publish_time ?? "09:00",
+    publish_per_day: data.publish_per_day ?? 3,
+    publish_days: data.publish_days ?? "[1,2,3,4,5]",
+    next_publish_at: null,
+    last_published_at: null,
   };
 
   log.info("Creating project", { id: project.id, name: project.name });

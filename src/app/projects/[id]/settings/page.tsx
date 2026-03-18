@@ -14,7 +14,6 @@ import {
   Palette,
   Search,
   MessageSquare,
-  Calendar,
   DollarSign,
   Database,
   Save,
@@ -37,7 +36,6 @@ const EDITABLE_FIELDS = [
   "content_tone",
   "prompt_overrides",
   "sheet_url", "sheet_keyword_column", "sheet_restaurant_column", "sheet_status_column",
-  "recipes_per_day", "generation_time", "auto_pause_on_empty",
   "skimlinks_id", "amazon_associate_id", "hellofresh_url", "adsense_publisher_id", "ga_id",
   "site_supabase_url", "site_supabase_anon_key", "site_supabase_service_key",
   "vercel_token",
@@ -54,7 +52,6 @@ const SECTIONS = [
   { id: "seo", title: "SEO", icon: Search },
   { id: "ai", title: "AI Tone", icon: MessageSquare },
   { id: "prompts", title: "AI Prompt Overrides", icon: Sparkles },
-  { id: "schedule", title: "Schedule", icon: Calendar },
   { id: "monetization", title: "Monetization", icon: DollarSign },
   { id: "database", title: "Deployment & Database", icon: Database },
 ] as const;
@@ -100,7 +97,6 @@ export default function ProjectSettingsPage({ params }: Props) {
     seo: ["meta_description", "author_name", "target_audience", "site_category"],
     ai: ["content_tone"],
     prompts: ["prompt_overrides"],
-    schedule: ["recipes_per_day", "generation_time", "auto_pause_on_empty"],
     monetization: ["skimlinks_id", "amazon_associate_id", "hellofresh_url", "adsense_publisher_id", "ga_id"],
     database: ["site_supabase_url", "site_supabase_anon_key", "site_supabase_service_key", "vercel_token"],
   };
@@ -281,9 +277,6 @@ export default function ProjectSettingsPage({ params }: Props) {
               )}
               {sectionId === "prompts" && (
                 <SectionPrompts form={form} update={sectionUpdate} />
-              )}
-              {sectionId === "schedule" && (
-                <SectionSchedule form={form} update={sectionUpdate} />
               )}
               {sectionId === "monetization" && (
                 <SectionMonetization form={form} update={sectionUpdate} />
@@ -1074,49 +1067,6 @@ function PromptField({
         rows={3}
         className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
       />
-    </div>
-  );
-}
-
-function SectionSchedule({
-  form,
-  update,
-}: {
-  form: Partial<Project>;
-  update: (f: Partial<Project>) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <Field label="Recipes Per Day">
-        <input
-          type="number"
-          min={1}
-          max={50}
-          value={form.recipes_per_day ?? 5}
-          onChange={(e) =>
-            update({ recipes_per_day: parseInt(e.target.value, 10) || 5 })
-          }
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
-        />
-      </Field>
-      <Field label="Generation Time">
-        <TextInput
-          value={form.generation_time}
-          onChange={(v) => update({ generation_time: v })}
-          type="time"
-        />
-      </Field>
-      <label className="flex cursor-pointer items-center gap-3">
-        <input
-          type="checkbox"
-          checked={form.auto_pause_on_empty ?? true}
-          onChange={(e) => update({ auto_pause_on_empty: e.target.checked })}
-          className="rounded border-slate-300 text-brand-500 focus:ring-brand-500"
-        />
-        <span className="text-sm text-slate-700">
-          Auto-pause when no keywords remain
-        </span>
-      </label>
     </div>
   );
 }

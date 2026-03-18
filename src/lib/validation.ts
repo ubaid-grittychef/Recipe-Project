@@ -37,6 +37,12 @@ export const CreateProjectSchema = z.object({
   recipes_per_day: z.number().int().min(1).max(500).optional().default(5),
   generation_time: z.string().regex(/^\d{2}:\d{2}$/, "must be HH:MM").optional().default("08:00"),
   auto_pause_on_empty: z.boolean().optional().default(true),
+  publish_schedule_enabled: z.boolean().optional().default(false),
+  publish_time: z.string().regex(/^\d{2}:\d{2}$/, "must be HH:MM").optional().default("09:00"),
+  publish_per_day: z.number().int().min(1).max(20).optional().default(3),
+  publish_days: z.string().optional().default("[1,2,3,4,5]"),
+  next_publish_at: z.string().nullable().optional(),
+  last_published_at: z.string().nullable().optional(),
   skimlinks_id: z.string().max(50).nullable().optional(),
   amazon_associate_id: z.string().max(50).nullable().optional(),
   hellofresh_url: z.string().url().or(z.literal("")).nullable().optional(),
@@ -109,6 +115,8 @@ export const UpdateRecipeSchema = z.object({
 export const BulkPublishSchema = z.object({
   /** Optional list of recipe IDs. If omitted, all drafts are published. */
   recipeIds: z.array(z.string().uuid()).optional(),
+  /** Optional count limit. If provided, only the first N oldest drafts are published. */
+  count: z.number().int().min(1).max(100).optional(),
 });
 
 // ── Bulk delete ───────────────────────────────────────────────────────────────

@@ -66,7 +66,15 @@ CREATE TABLE IF NOT EXISTS projects (
   keywords_failed INTEGER NOT NULL DEFAULT 0,
   last_generation_at TIMESTAMPTZ,
   next_scheduled_at TIMESTAMPTZ,
-  generation_status TEXT NOT NULL DEFAULT 'idle'
+  generation_status TEXT NOT NULL DEFAULT 'idle',
+
+  -- Publish schedule
+  publish_schedule_enabled BOOLEAN NOT NULL DEFAULT false,
+  publish_time TEXT NOT NULL DEFAULT '09:00',
+  publish_per_day INTEGER NOT NULL DEFAULT 3,
+  publish_days TEXT NOT NULL DEFAULT '[1,2,3,4,5]',
+  next_publish_at TIMESTAMPTZ,
+  last_published_at TIMESTAMPTZ
 );
 
 -- Recipes table

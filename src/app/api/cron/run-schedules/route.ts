@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { runDueProjects } from "@/lib/scheduler";
+import { runDuePublishes } from "@/lib/scheduler";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("API:Cron");
@@ -21,8 +21,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    log.info("HTTP cron tick — checking for due projects");
-    const result = await runDueProjects();
+    log.info("HTTP cron tick — checking for due publish schedules");
+    const result = await runDuePublishes();
     log.info("HTTP cron tick complete", result);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
