@@ -33,7 +33,6 @@ import {
   Tag,
   Circle,
   Upload,
-  Map,
   Send,
   LayoutDashboard,
   FileText,
