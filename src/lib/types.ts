@@ -17,6 +17,9 @@ export interface Profile {
   stripe_subscription_id: string | null;
   subscription_plan: "free" | "pro";
   current_period_end: string | null;
+  monthly_recipe_quota: number;
+  recipes_generated_this_month: number;
+  quota_reset_at: string | null;
   created_at: string;
   updated_at: string;
 }

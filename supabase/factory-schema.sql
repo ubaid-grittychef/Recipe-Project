@@ -291,6 +291,9 @@ create table if not exists profiles (
   stripe_subscription_id text,
   subscription_plan text not null default 'free',
   current_period_end timestamptz,
+  monthly_recipe_quota integer not null default 200,
+  recipes_generated_this_month integer not null default 0,
+  quota_reset_at timestamptz,
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );
@@ -384,3 +387,8 @@ $$ language plpgsql security definer set search_path = public;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_plan TEXT NOT NULL DEFAULT 'free';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_period_end TIMESTAMPTZ;
+
+-- Market readiness: quota columns
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS monthly_recipe_quota INTEGER NOT NULL DEFAULT 200;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS recipes_generated_this_month INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS quota_reset_at TIMESTAMPTZ;
