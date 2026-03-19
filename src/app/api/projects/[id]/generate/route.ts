@@ -29,12 +29,13 @@ export async function POST(
   }
 
   // --- Auth & quota check ---
-  let profile: {
+  type QuotaProfile = {
     monthly_recipe_quota: number;
     recipes_generated_this_month: number;
     quota_reset_at: string | null;
     role: string;
-  } | null = null;
+  };
+  let profile: QuotaProfile | null = null;
   let userId: string | null = null;
   let supabaseService: ReturnType<typeof createClient> | null = null;
 
@@ -52,13 +53,14 @@ export async function POST(
         .select("monthly_recipe_quota, recipes_generated_this_month, quota_reset_at, role")
         .eq("id", user.id)
         .single();
-      profile = data;
+      profile = data as QuotaProfile | null;
 
       if (profile && profile.role !== "admin") {
         // Reset counter if billing period rolled over
         const now = new Date();
         if (!profile.quota_reset_at || new Date(profile.quota_reset_at) <= now) {
-          await supabaseService.from("profiles").update({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabaseService.from("profiles") as any).update({
             recipes_generated_this_month: 0,
             quota_reset_at: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
           }).eq("id", user.id);
@@ -104,7 +106,8 @@ export async function POST(
 
     // Increment quota counter after successful generation
     if (profile && profile.role !== "admin" && result.succeeded > 0 && supabaseService && userId) {
-      supabaseService.from("profiles").update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabaseService.from("profiles") as any).update({
         recipes_generated_this_month: profile.recipes_generated_this_month + result.succeeded,
       }).eq("id", userId).then(() => {
         log.info("Quota counter incremented", { userId, added: result.succeeded });

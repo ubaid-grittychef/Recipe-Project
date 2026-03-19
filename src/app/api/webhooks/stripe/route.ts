@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
         let periodEnd: string | null = null;
         if (subscriptionId) {
-          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          const sub = await stripe.subscriptions.retrieve(subscriptionId) as unknown as { current_period_end: number };
           periodEnd = new Date(sub.current_period_end * 1000).toISOString();
         }
 
@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
 
-        await supabase.from("profiles").update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from("profiles") as any).update({
           subscription_status: "active",
           subscription_plan: "pro",
           stripe_subscription_id: subscriptionId,
@@ -72,8 +73,7 @@ export async function POST(request: NextRequest) {
       }
 
       case "customer.subscription.updated": {
-        const sub = event.data.object;
-        // Look up user by stripe_customer_id
+        const sub = event.data.object as unknown as { customer: string; status: string; current_period_end: number };
         const customerId = String(sub.customer);
         const { data: profile } = await supabase
           .from("profiles")
@@ -83,7 +83,8 @@ export async function POST(request: NextRequest) {
         if (!profile) break;
 
         const isActive = sub.status === "active" || sub.status === "trialing";
-        await supabase.from("profiles").update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from("profiles") as any).update({
           subscription_status: isActive ? "active" : "inactive",
           current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
         }).eq("id", profile.id);
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       }
 
       case "customer.subscription.deleted": {
-        const sub = event.data.object;
+        const sub = event.data.object as unknown as { customer: string };
         const customerId = String(sub.customer);
         const { data: profile } = await supabase
           .from("profiles")
@@ -102,7 +103,8 @@ export async function POST(request: NextRequest) {
           .single();
         if (!profile) break;
 
-        await supabase.from("profiles").update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from("profiles") as any).update({
           subscription_status: "inactive",
           subscription_plan: "free",
           stripe_subscription_id: null,

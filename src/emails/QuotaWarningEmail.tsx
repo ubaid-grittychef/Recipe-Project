@@ -20,9 +20,7 @@ export function QuotaWarningEmail({ firstName, used, quota, billingUrl }: Props)
   return (
     <Html>
       <Head />
-      <Preview>
-        You have used {used} of {quota} recipes this month
-      </Preview>
+      <Preview>{`You have used ${used} of ${quota} recipes this month`}</Preview>
       <Body style={{ backgroundColor: "#f8fafc", fontFamily: "sans-serif" }}>
         <Container
           style={{
