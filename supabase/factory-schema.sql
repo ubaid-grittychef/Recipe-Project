@@ -288,6 +288,9 @@ create table if not exists profiles (
   role                 text not null default 'user' check (role in ('admin', 'user')),
   subscription_status  text not null default 'inactive' check (subscription_status in ('active', 'inactive')),
   stripe_customer_id   text,
+  stripe_subscription_id text,
+  subscription_plan text not null default 'free',
+  current_period_end timestamptz,
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );
@@ -376,3 +379,8 @@ begin
   return jsonb_set(event, '{claims}', claims);
 end;
 $$ language plpgsql security definer set search_path = public;
+
+-- Market readiness: billing columns
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_plan TEXT NOT NULL DEFAULT 'free';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_period_end TIMESTAMPTZ;

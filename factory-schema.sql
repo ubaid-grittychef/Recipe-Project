@@ -292,6 +292,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   role                 TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
   subscription_status  TEXT NOT NULL DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive')),
   stripe_customer_id   TEXT,
+  stripe_subscription_id TEXT,
+  subscription_plan TEXT NOT NULL DEFAULT 'free',
+  current_period_end TIMESTAMPTZ,
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -384,3 +387,8 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Market readiness: billing columns
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_plan TEXT NOT NULL DEFAULT 'free';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_period_end TIMESTAMPTZ;
