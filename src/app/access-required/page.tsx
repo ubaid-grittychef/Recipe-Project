@@ -1,48 +1,85 @@
 "use client";
 
-import { ChefHat, Lock, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { Sparkles, Check, Loader2 } from "lucide-react";
+import { api } from "@/lib/api-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function AccessRequiredPage() {
   const [loading, setLoading] = useState(false);
+  const [signOutLoading, setSignOutLoading] = useState(false);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@example.com";
+
+  async function handleUpgrade() {
+    setLoading(true);
+    try {
+      const { url } = await api.post<{ url: string }>("/api/billing/create-checkout", {});
+      window.location.href = url;
+    } catch {
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSignOut() {
-    setLoading(true);
+    setSignOutLoading(true);
     await supabase.auth.signOut();
     router.push("/login");
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
-          <Lock className="h-7 w-7 text-amber-600" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm max-w-md w-full p-8 text-center">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-brand-50 mb-4">
+          <Sparkles className="h-7 w-7 text-brand-600" />
         </div>
-        <div className="mt-3 mx-auto flex h-8 w-8 items-center justify-center">
-          <ChefHat className="h-5 w-5 text-slate-400" />
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">
+          Start Building Recipe Sites
+        </h1>
+        <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+          Get full access to Recipe Factory — AI generation, unlimited projects, and one-click Vercel deploys.
+        </p>
+
+        <ul className="text-left space-y-2 mb-8">
+          {[
+            "200 AI-generated recipes per month",
+            "Unlimited projects",
+            "One-click Vercel deployment",
+            "Built-in keyword queue",
+            "SEO-optimized templates",
+            "Scheduled auto-publishing",
+          ].map((f) => (
+            <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+              <Check className="h-4 w-4 text-green-500 shrink-0" />
+              {f}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mb-4">
+          <p className="text-3xl font-bold text-slate-900">$29<span className="text-base font-normal text-slate-500">/month</span></p>
+          <p className="text-xs text-slate-400 mt-1">Cancel anytime · No setup fee</p>
         </div>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">Subscription Required</h1>
-        <p className="mt-3 text-sm text-slate-600 leading-relaxed">
-          You need an active subscription to access the Recipe Factory dashboard.
-        </p>
-        <p className="mt-2 text-sm text-slate-500">
-          Contact{" "}
-          <a href={`mailto:${contactEmail}`} className="text-brand-600 hover:underline font-medium">
-            {contactEmail}
-          </a>{" "}
-          to get access.
-        </p>
+
+        <button
+          onClick={handleUpgrade}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {loading ? "Redirecting to checkout..." : "Upgrade to Pro — $29/month"}
+        </button>
+
         <button
           onClick={handleSignOut}
-          disabled={loading}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+          disabled={signOutLoading}
+          className="mt-3 w-full text-sm text-slate-400 hover:text-slate-600 py-2"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign Out"}
+          {signOutLoading ? "Signing out..." : "Sign out"}
         </button>
       </div>
     </div>
