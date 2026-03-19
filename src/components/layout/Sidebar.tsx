@@ -166,6 +166,12 @@ export default function Sidebar({ mobileOpen, onClose, userRole, userEmail, user
         )}
       </nav>
 
+      {/* Legal footer */}
+      <div className="mt-auto pt-4 border-t border-slate-100 text-xs text-slate-400 space-x-3 px-4 pb-4">
+        <a href="/terms" className="hover:text-slate-600">Terms</a>
+        <a href="/privacy" className="hover:text-slate-600">Privacy</a>
+      </div>
+
       {/* Footer — user profile + sign out */}
       <div className="border-t border-slate-100 p-3 space-y-1.5">
         {/* User profile card */}

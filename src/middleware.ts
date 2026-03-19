@@ -9,6 +9,9 @@ const PUBLIC_PATHS = [
   "/auth/",
   "/access-required",
   "/api/auth/",
+  "/terms",
+  "/privacy",
+  "/api/webhooks/",
 ];
 
 export async function middleware(request: NextRequest) {
