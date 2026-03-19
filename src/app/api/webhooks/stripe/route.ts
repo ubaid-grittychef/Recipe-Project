@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       case "customer.subscription.updated": {
         const sub = event.data.object;
         // Look up user by stripe_customer_id
-        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer;
+        const customerId = String(sub.customer);
         const { data: profile } = await supabase
           .from("profiles")
           .select("id")
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
       case "customer.subscription.deleted": {
         const sub = event.data.object;
-        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer;
+        const customerId = String(sub.customer);
         const { data: profile } = await supabase
           .from("profiles")
           .select("id")
