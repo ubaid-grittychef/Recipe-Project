@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { getProject } from "@/lib/store";
 import { runGenerationForProject } from "@/lib/generator";
 import { createLogger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/utils";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const log = createLogger("API:Generate");
 
@@ -24,6 +26,54 @@ export async function POST(
       { error: "Too many generation requests. Please wait a few minutes before trying again." },
       { status: 429 }
     );
+  }
+
+  // --- Auth & quota check ---
+  let profile: {
+    monthly_recipe_quota: number;
+    recipes_generated_this_month: number;
+    quota_reset_at: string | null;
+    role: string;
+  } | null = null;
+  let userId: string | null = null;
+  let supabaseService: ReturnType<typeof createClient> | null = null;
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      userId = user.id;
+      supabaseService = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      const { data } = await supabaseService
+        .from("profiles")
+        .select("monthly_recipe_quota, recipes_generated_this_month, quota_reset_at, role")
+        .eq("id", user.id)
+        .single();
+      profile = data;
+
+      if (profile && profile.role !== "admin") {
+        // Reset counter if billing period rolled over
+        const now = new Date();
+        if (!profile.quota_reset_at || new Date(profile.quota_reset_at) <= now) {
+          await supabaseService.from("profiles").update({
+            recipes_generated_this_month: 0,
+            quota_reset_at: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
+          }).eq("id", user.id);
+          profile.recipes_generated_this_month = 0;
+        }
+
+        if (profile.recipes_generated_this_month >= profile.monthly_recipe_quota) {
+          return NextResponse.json({
+            error: `Monthly quota reached (${profile.monthly_recipe_quota} recipes). Resets on the 1st of next month.`,
+          }, { status: 429 });
+        }
+      }
+    }
+  } catch (authErr) {
+    log.warn("Quota check skipped — auth unavailable", { projectId: id }, authErr);
   }
 
   const project = await getProject(id);
@@ -51,6 +101,17 @@ export async function POST(
   // Vercel (10s hobby / 60s pro). Progress is tracked via generation logs.
   void runGenerationForProject(id).then((result) => {
     log.info("Background generation completed", { project: project.name, ...result });
+
+    // Increment quota counter after successful generation
+    if (profile && profile.role !== "admin" && result.succeeded > 0 && supabaseService && userId) {
+      supabaseService.from("profiles").update({
+        recipes_generated_this_month: profile.recipes_generated_this_month + result.succeeded,
+      }).eq("id", userId).then(() => {
+        log.info("Quota counter incremented", { userId, added: result.succeeded });
+      }).catch((quotaErr: unknown) => {
+        log.warn("Failed to increment quota counter", { userId }, quotaErr);
+      });
+    }
   }).catch((err) => {
     log.error("Background generation failed", { project: project.name }, err);
   });
