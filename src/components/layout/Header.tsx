@@ -2,8 +2,14 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Search, ChefHat, LogOut } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const pageTitles: Record<string, { title: string; subtitle?: string }> = {
   "/": { title: "All Projects", subtitle: "Manage your recipe websites" },
@@ -50,19 +56,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const page = resolvePage(pathname);
   const isHome = pathname === "/";
   const [search, setSearch] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const supabase = createSupabaseBrowserClient();
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -120,26 +114,22 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         </form>
 
         {/* Avatar with dropdown */}
-        <div className="relative" ref={menuRef}>
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 shadow-sm hover:opacity-90 transition"
-            aria-label="User menu"
-          >
-            <ChefHat className="h-4 w-4 text-white" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-10 z-50 w-40 rounded-xl border border-border bg-popover py-1 shadow-lg">
-              <button
-                onClick={handleSignOut}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-destructive/10 transition"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </button>
-            </div>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 shadow-sm hover:opacity-90 transition"
+              aria-label="User menu"
+            >
+              <ChefHat className="h-4 w-4 text-white" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

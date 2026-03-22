@@ -148,7 +148,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
             <Calendar className="w-4 h-4 text-muted-foreground" />
             Auto-publish schedule
             {enabled && (
-              <span className="ml-1 px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold uppercase tracking-wide">
+              <span className="ml-1 px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-wide">
                 Active
               </span>
             )}
@@ -239,7 +239,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
                 )}
 
                 {/* SEO tip */}
-                <div className="flex gap-2 bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-700">
+                <div className="flex gap-2 bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-400">
                   <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                   <span>
                     <strong>SEO tip:</strong> Publishing 1–3 recipes per day at a consistent

@@ -162,16 +162,16 @@ export default function DashboardClient({ initialProjects }: Props) {
           label="Active Sites"
           value={activeCount}
           icon={<TrendingUp className="h-5 w-5" />}
-          iconBg="bg-emerald-50"
+          iconBg="bg-emerald-50 dark:bg-emerald-950/50"
           iconColor="text-emerald-600"
           borderColor="border-l-emerald-500"
-          badge={{ label: `${liveCount} live`, color: "bg-emerald-100 text-emerald-700" }}
+          badge={{ label: `${liveCount} live`, color: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400" }}
         />
         <StatCard
           label="Recipes Published"
           value={totalRecipes.toLocaleString()}
           icon={<BookOpen className="h-5 w-5" />}
-          iconBg="bg-orange-50"
+          iconBg="bg-orange-50 dark:bg-orange-950/50"
           iconColor="text-brand-600"
           borderColor="border-l-brand-500"
         />
@@ -179,7 +179,7 @@ export default function DashboardClient({ initialProjects }: Props) {
           label="Pending Keywords"
           value={totalPendingKeywords.toLocaleString()}
           icon={<KeyRound className="h-5 w-5" />}
-          iconBg="bg-blue-50"
+          iconBg="bg-blue-50 dark:bg-blue-950/50"
           iconColor="text-blue-600"
           borderColor="border-l-blue-500"
         />
@@ -273,7 +273,7 @@ export default function DashboardClient({ initialProjects }: Props) {
           </div>
           <button
             onClick={clearSelection}
-            className="rounded-lg p-1.5 text-brand-600 hover:bg-brand-100"
+            className="rounded-lg p-1.5 text-brand-600 hover:bg-brand-100 dark:hover:bg-brand-900/50"
             title="Clear selection"
           >
             <X className="h-4 w-4" />

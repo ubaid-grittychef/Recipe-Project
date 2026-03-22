@@ -227,10 +227,10 @@ export default function ProjectSettingsPage({ params }: Props) {
 
       {/* Unsaved changes banner */}
       {dirtyKeys.size > 0 && (
-        <div className="sticky top-16 z-30 mb-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 shadow-sm">
+        <div className="sticky top-16 z-30 mb-4 flex items-center justify-between rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-amber-500" />
-            <span className="text-sm font-medium text-amber-800">
+            <span className="text-sm font-medium text-amber-800 dark:text-amber-400">
               Unsaved changes in {dirtyKeys.size} section{dirtyKeys.size !== 1 ? "s" : ""}
             </span>
           </div>
@@ -290,9 +290,9 @@ export default function ProjectSettingsPage({ params }: Props) {
       </div>
 
       {/* Danger Zone */}
-      <div className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-card">
-        <div className="border-b border-red-100 bg-red-50 px-5 py-3">
-          <h3 className="text-sm font-semibold text-red-700">Danger Zone</h3>
+      <div className="mt-6 overflow-hidden rounded-xl border border-red-200 dark:border-red-800 bg-card">
+        <div className="border-b border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-950/50 px-5 py-3">
+          <h3 className="text-sm font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
         </div>
         <div className="flex items-center justify-between px-5 py-4">
           <div>
@@ -304,7 +304,7 @@ export default function ProjectSettingsPage({ params }: Props) {
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50"
           >
             {deleting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -346,7 +346,7 @@ function CollapsibleCard({
           onClick={onToggle}
           className="flex flex-1 items-center gap-3 text-left"
         >
-          <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", isDirty ? "bg-amber-50" : "bg-brand-50")}>
+          <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", isDirty ? "bg-amber-50 dark:bg-amber-950/50" : "bg-brand-50 dark:bg-brand-950/50")}>
             <Icon className={cn("h-4 w-4", isDirty ? "text-amber-500" : "text-brand-500")} />
           </div>
           <div className="flex items-center gap-2">
@@ -616,13 +616,13 @@ function SectionKeywords({
   return (
     <div className="space-y-4">
       {!form.sheet_url && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+        <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 px-4 py-3">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-2">
-              <ListChecks className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+              <ListChecks className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
               <div>
-                <p className="text-sm font-medium text-blue-800">Using Built-in Keyword Queue</p>
-                <p className="mt-0.5 text-xs text-blue-600">
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-400">Using Built-in Keyword Queue</p>
+                <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
                   {queueCounts !== null
                     ? `${queueCounts.pending} pending · ${queueCounts.done} done${queueCounts.failed > 0 ? ` · ${queueCounts.failed} failed` : ""}`
                     : "No Google Sheet configured — keywords are managed in-app."}
@@ -632,13 +632,13 @@ function SectionKeywords({
             {projectId && (
               <Link
                 href={`/projects/${projectId}/queue`}
-                className="shrink-0 rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                className="shrink-0 rounded-md bg-blue-100 dark:bg-blue-900/50 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50"
               >
                 Manage Queue →
               </Link>
             )}
           </div>
-          <p className="mt-2 text-xs text-blue-500">
+          <p className="mt-2 text-xs text-blue-500 dark:text-blue-400">
             To use Google Sheets instead, add your sheet URL below.
           </p>
         </div>
@@ -695,8 +695,8 @@ function SectionKeywords({
         <div className={cn(
           "rounded-lg border px-4 py-3 text-xs",
           sheetStatus.valid
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-            : "border-red-200 bg-red-50 text-red-600"
+            ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400"
+            : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400"
         )}>
           {sheetStatus.valid ? (
             <>
@@ -704,12 +704,12 @@ function SectionKeywords({
               {sheetStatus.preview.length > 0 && (
                 <ul className="mt-2 space-y-0.5">
                   {sheetStatus.preview.slice(0, 3).map((kw, i) => (
-                    <li key={i} className="text-emerald-600">
+                    <li key={i} className="text-emerald-600 dark:text-emerald-400">
                       &bull; {kw.keyword}{kw.restaurant ? ` (${kw.restaurant})` : ""}
                     </li>
                   ))}
                   {sheetStatus.preview.length > 3 && (
-                    <li className="text-emerald-500">…and {sheetStatus.preview.length - 3} more pending</li>
+                    <li className="text-emerald-500 dark:text-emerald-400">…and {sheetStatus.preview.length - 3} more pending</li>
                   )}
                 </ul>
               )}
@@ -745,7 +745,7 @@ function SectionKeywords({
             {importing ? "Importing..." : "Add to Sheet"}
           </button>
           {importResult && (
-            <span className="text-xs font-medium text-emerald-600">{importResult}</span>
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{importResult}</span>
           )}
         </div>
       </div>
@@ -794,12 +794,12 @@ function SectionBranding({
               className={cn(
                 "relative rounded-xl border-2 p-4 text-left transition-all",
                 form.template_variant === t.id
-                  ? "border-brand-500 bg-brand-50"
+                  ? "border-brand-500 bg-brand-50 dark:bg-brand-950/50"
                   : "border-border bg-card hover:border-border"
               )}
             >
               {t.badge && (
-                <span className="absolute right-3 top-3 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                <span className="absolute right-3 top-3 rounded-full bg-violet-100 dark:bg-violet-900/50 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:text-violet-400">
                   {t.badge}
                 </span>
               )}
@@ -809,7 +809,7 @@ function SectionBranding({
               )}>
                 {t.letter}
               </div>
-              <p className={cn("text-sm font-semibold", form.template_variant === t.id ? "text-brand-900" : "text-foreground")}>
+              <p className={cn("text-sm font-semibold", form.template_variant === t.id ? "text-brand-900 dark:text-brand-400" : "text-foreground")}>
                 {t.name}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">{t.desc}</p>
@@ -824,7 +824,7 @@ function SectionBranding({
           ))}
         </div>
         {form.template_variant !== undefined && (
-          <p className="mt-2 text-xs text-amber-600">
+          <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
             Changing the template requires a redeployment to take effect.
           </p>
         )}
@@ -937,7 +937,7 @@ function SectionAITone({
               className={cn(
                 "flex cursor-pointer gap-3 rounded-lg border p-4 transition-colors",
                 form.content_tone === opt.id
-                  ? "border-brand-500 bg-brand-50"
+                  ? "border-brand-500 bg-brand-50 dark:bg-brand-950/50"
                   : "border-border hover:border-border"
               )}
             >

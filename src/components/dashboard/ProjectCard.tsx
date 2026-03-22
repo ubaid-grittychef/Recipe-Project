@@ -19,12 +19,18 @@ import {
 } from "lucide-react";
 import { Project } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
-import { useState, useRef, useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const statusConfig = {
-  active: { label: "Active", dot: "bg-emerald-400", badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" },
-  paused: { label: "Paused", dot: "bg-amber-400", badge: "bg-amber-50 text-amber-700 ring-1 ring-amber-200" },
-  setup: { label: "Setup", dot: "bg-slate-300", badge: "bg-secondary text-muted-foreground ring-1 ring-slate-200" },
+  active: { label: "Active", dot: "bg-emerald-400", badge: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-800" },
+  paused: { label: "Paused", dot: "bg-amber-400", badge: "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800" },
+  setup: { label: "Setup", dot: "bg-muted-foreground/40", badge: "bg-secondary text-muted-foreground ring-1 ring-border" },
 };
 
 const deployConfig = {
@@ -51,21 +57,9 @@ export default function ProjectCard({
   isSelected = false,
   onSelect,
 }: ProjectCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const status = statusConfig[project.status];
   const deploy = deployConfig[project.deployment_status as keyof typeof deployConfig] ?? deployConfig.pending;
   const DeployIcon = deploy.icon;
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const successRate =
     project.recipes_published + project.keywords_failed > 0
@@ -93,7 +87,7 @@ export default function ProjectCard({
           >
             <div className={cn(
               "flex h-4 w-4 items-center justify-center rounded border-2 transition-colors",
-              isSelected ? "border-brand-500 bg-brand-500" : "border-slate-300 bg-card hover:border-primary"
+              isSelected ? "border-primary bg-primary" : "border-muted-foreground/30 bg-card hover:border-primary"
             )}>
               {isSelected && (
                 <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -140,42 +134,30 @@ export default function ProjectCard({
             </span>
 
             {/* Menu */}
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="rounded-lg p-1 text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-border bg-card py-1 shadow-lg ring-1 ring-black/5">
-                  <button
-                    onClick={() => { onToggleStatus(project.id); setMenuOpen(false); }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                  >
-                    {project.status === "active" ? <Pause className="h-4 w-4 text-muted-foreground" /> : <Play className="h-4 w-4 text-muted-foreground" />}
-                    {project.status === "active" ? "Pause project" : "Activate project"}
-                  </button>
-                  {onCopy && (
-                    <button
-                      onClick={() => { onCopy(project.id); setMenuOpen(false); }}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                    >
-                      <Copy className="h-4 w-4 text-muted-foreground" />
-                      Duplicate
-                    </button>
-                  )}
-                  <div className="my-1 border-t border-border/50" />
-                  <button
-                    onClick={() => { onDelete(project.id); setMenuOpen(false); }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-lg p-1 text-muted-foreground transition-all hover:bg-accent hover:text-foreground">
+                  <MoreVertical className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem onClick={() => onToggleStatus(project.id)}>
+                  {project.status === "active" ? <Pause className="h-4 w-4 text-muted-foreground" /> : <Play className="h-4 w-4 text-muted-foreground" />}
+                  {project.status === "active" ? "Pause project" : "Activate project"}
+                </DropdownMenuItem>
+                {onCopy && (
+                  <DropdownMenuItem onClick={() => onCopy(project.id)}>
+                    <Copy className="h-4 w-4 text-muted-foreground" />
+                    Duplicate
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onDelete(project.id)} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -190,7 +172,7 @@ export default function ProjectCard({
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mt-0.5">Pending</p>
           </div>
           <div className="rounded-lg bg-muted/50 px-3 py-2.5 text-center">
-            <p className={cn("text-lg font-bold", successRate !== null ? "text-foreground" : "text-slate-300")}>
+            <p className={cn("text-lg font-bold", successRate !== null ? "text-foreground" : "text-muted-foreground/40")}>
               {successRate !== null ? `${successRate}%` : "—"}
             </p>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mt-0.5">Success</p>
@@ -200,17 +182,17 @@ export default function ProjectCard({
         {/* Tags row */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {project.template_variant === "premium" && (
-            <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700 ring-1 ring-violet-200">
+            <span className="rounded-full bg-violet-50 dark:bg-violet-950/50 px-2 py-0.5 text-[11px] font-semibold text-violet-700 dark:text-violet-400 ring-1 ring-violet-200 dark:ring-violet-800">
               Premium
             </span>
           )}
           {(project.draft_count ?? 0) > 0 && (
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
+            <span className="rounded-full bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800">
               {project.draft_count} draft
             </span>
           )}
           {project.keywords_failed > 0 && (
-            <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-600 ring-1 ring-red-200">
+            <span className="flex items-center gap-0.5 rounded-full bg-red-50 dark:bg-red-950/50 px-2 py-0.5 text-[11px] font-semibold text-red-600 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-800">
               <AlertTriangle className="h-3 w-3" />
               {project.keywords_failed} failed
             </span>

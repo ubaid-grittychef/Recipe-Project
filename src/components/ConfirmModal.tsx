@@ -63,7 +63,7 @@ export function useConfirm(): [
         </button>
 
         {state.danger && (
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
             <AlertTriangle className="h-6 w-6 text-red-500" />
           </div>
         )}

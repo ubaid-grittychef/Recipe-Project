@@ -125,7 +125,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
   return (
     <div className={cn(
       "mb-6 overflow-hidden rounded-xl border",
-      isRunning ? "border-blue-200 bg-blue-50" : isCompleted ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"
+      isRunning ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50" : isCompleted ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50" : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50"
     )}>
       <div className="flex items-center gap-3 p-4">
         {isRunning ? (
@@ -138,13 +138,13 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
         <div className="flex-1">
           <p className={cn(
             "text-sm font-medium",
-            isRunning ? "text-blue-900" : isCompleted ? "text-emerald-900" : "text-red-900"
+            isRunning ? "text-blue-900 dark:text-blue-100" : isCompleted ? "text-emerald-900 dark:text-emerald-100" : "text-red-900 dark:text-red-100"
           )}>
             {isRunning ? "Generation in progress..." : isCompleted ? "Generation complete" : "Generation finished with errors"}
           </p>
           <p className={cn(
             "mt-0.5 text-xs",
-            isRunning ? "text-blue-700" : isCompleted ? "text-emerald-700" : "text-red-700"
+            isRunning ? "text-blue-700 dark:text-blue-400" : isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"
           )}>
             <span className="font-medium">{log.keywords_processed}</span> processed &nbsp;·&nbsp;
             <span className="font-medium text-emerald-600">{log.keywords_succeeded}</span> succeeded &nbsp;·&nbsp;
@@ -159,7 +159,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
         </div>
         <div className="flex items-center gap-2">
           {isRunning && (
-            <div className="flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700">
+            <div className="flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-900/50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
               <Zap className="h-3 w-3" />
               Live
             </div>
@@ -169,7 +169,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
               onClick={() => setExpanded((e) => !e)}
               className={cn(
                 "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-colors",
-                isRunning ? "text-blue-600 hover:bg-blue-100" : isCompleted ? "text-emerald-600 hover:bg-emerald-100" : "text-red-600 hover:bg-red-100"
+                isRunning ? "text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50" : isCompleted ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50" : "text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
               )}
             >
               {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
@@ -181,7 +181,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
 
       {isRunning && log.keywords_processed > 0 && (
         <div className="px-4 pb-1">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-200">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-200 dark:bg-blue-800">
             <div
               className="h-full rounded-full bg-blue-500 transition-all duration-500"
               style={{
@@ -200,7 +200,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
         <div className="border-t border-current/10 px-4 pb-3 pt-2">
           <p className={cn(
             "mb-2 text-xs font-medium",
-            isRunning ? "text-blue-700" : isCompleted ? "text-emerald-700" : "text-red-700"
+            isRunning ? "text-blue-700 dark:text-blue-400" : isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"
           )}>
             Recent keywords
           </p>
@@ -214,7 +214,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
                 )}
                 <span className={cn(
                   "truncate",
-                  isRunning ? "text-blue-800" : isCompleted ? "text-emerald-800" : "text-red-800"
+                  isRunning ? "text-blue-800 dark:text-blue-200" : isCompleted ? "text-emerald-800 dark:text-emerald-200" : "text-red-800 dark:text-red-200"
                 )}>
                   {kw.keyword}
                   {kw.restaurant_name ? <span className="opacity-60"> · {kw.restaurant_name}</span> : null}

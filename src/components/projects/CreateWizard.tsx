@@ -263,7 +263,7 @@ export default function CreateWizard() {
 
       <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
         <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
             <StepIcon className="h-5 w-5 text-brand-500" />
           </div>
           <div>
@@ -458,7 +458,7 @@ function StepBasicInfo({
         type="button"
         onClick={onFillAll}
         disabled={aiLoading === "all" || !form.name.trim()}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/50 px-4 py-2.5 text-sm font-medium text-violet-700 dark:text-violet-400 transition-colors hover:bg-violet-100 dark:hover:bg-violet-900/50 disabled:opacity-50"
       >
         {aiLoading === "all" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -554,18 +554,18 @@ function StepKeywords({
           className={cn(
             "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-colors",
             mode === "builtin"
-              ? "border-brand-400 bg-brand-50"
+              ? "border-brand-400 bg-brand-50 dark:bg-brand-950/50"
               : "border-border bg-card hover:border-border"
           )}
         >
           <div className={cn(
             "flex h-9 w-9 items-center justify-center rounded-lg",
-            mode === "builtin" ? "bg-brand-100" : "bg-secondary"
+            mode === "builtin" ? "bg-brand-100 dark:bg-brand-900/50" : "bg-secondary"
           )}>
-            <ListChecks className={cn("h-5 w-5", mode === "builtin" ? "text-brand-600" : "text-muted-foreground")} />
+            <ListChecks className={cn("h-5 w-5", mode === "builtin" ? "text-brand-600 dark:text-brand-400" : "text-muted-foreground")} />
           </div>
           <div>
-            <p className={cn("text-sm font-semibold", mode === "builtin" ? "text-brand-900" : "text-foreground")}>
+            <p className={cn("text-sm font-semibold", mode === "builtin" ? "text-brand-900 dark:text-brand-100" : "text-foreground")}>
               Built-in Queue
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -583,18 +583,18 @@ function StepKeywords({
           className={cn(
             "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-colors",
             mode === "sheets"
-              ? "border-brand-400 bg-brand-50"
+              ? "border-brand-400 bg-brand-50 dark:bg-brand-950/50"
               : "border-border bg-card hover:border-border"
           )}
         >
           <div className={cn(
             "flex h-9 w-9 items-center justify-center rounded-lg",
-            mode === "sheets" ? "bg-brand-100" : "bg-secondary"
+            mode === "sheets" ? "bg-brand-100 dark:bg-brand-900/50" : "bg-secondary"
           )}>
-            <FileSpreadsheet className={cn("h-5 w-5", mode === "sheets" ? "text-brand-600" : "text-muted-foreground")} />
+            <FileSpreadsheet className={cn("h-5 w-5", mode === "sheets" ? "text-brand-600 dark:text-brand-400" : "text-muted-foreground")} />
           </div>
           <div>
-            <p className={cn("text-sm font-semibold", mode === "sheets" ? "text-brand-900" : "text-foreground")}>
+            <p className={cn("text-sm font-semibold", mode === "sheets" ? "text-brand-900 dark:text-brand-100" : "text-foreground")}>
               Google Sheets
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -609,9 +609,9 @@ function StepKeywords({
 
       {/* Built-in queue info */}
       {mode === "builtin" && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-          <p className="text-sm font-medium text-blue-800">You&apos;re all set!</p>
-          <p className="mt-1 text-xs text-blue-600">
+        <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 px-4 py-3">
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">You&apos;re all set!</p>
+          <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
             After creating the project, go to <strong>Keyword Queue</strong> on your project dashboard to paste in your keywords. Generation will use them automatically.
           </p>
         </div>
@@ -632,17 +632,17 @@ function StepKeywords({
           </Field>
 
           {googleEmail ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
-              <p className="text-xs font-medium text-emerald-800">
+            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-3">
+              <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
                 Share your Google Sheet with this service account:
               </p>
-              <p className="mt-1 break-all font-mono text-xs text-emerald-700 select-all">
+              <p className="mt-1 break-all font-mono text-xs text-emerald-700 dark:text-emerald-400 select-all">
                 {googleEmail}
               </p>
             </div>
           ) : (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-xs text-amber-800">
+            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 px-4 py-3">
+              <p className="text-xs text-amber-800 dark:text-amber-300">
                 <strong>Google Sheets not configured.</strong> Add{" "}
                 <code className="font-mono">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> and{" "}
                 <code className="font-mono">GOOGLE_PRIVATE_KEY</code> to{" "}
@@ -679,7 +679,7 @@ function StepKeywords({
               type="button"
               onClick={onValidate}
               disabled={!form.sheet_url || sheetStatus === "validating"}
-              className="flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/50 px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/50 disabled:opacity-50"
             >
               {sheetStatus === "validating" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -707,9 +707,9 @@ function StepKeywords({
             )}
           </div>
           {sheetStatus === "invalid" && sheetError && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 px-4 py-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-              <p className="text-sm text-red-700">{sheetError}</p>
+              <p className="text-sm text-red-700 dark:text-red-400">{sheetError}</p>
             </div>
           )}
         </>
@@ -733,7 +733,7 @@ function AiButton({
       type="button"
       onClick={() => fillField(field)}
       disabled={!!aiLoading}
-      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 disabled:opacity-40"
+      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 disabled:opacity-40"
       title="Generate with AI"
     >
       {loading ? (

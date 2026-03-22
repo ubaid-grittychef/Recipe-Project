@@ -286,7 +286,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
 
       {/* Live site hero — shown only when deployed */}
       {project.deployment_status === "deployed" && project.vercel_deployment_url && (
-        <div className="mb-6 overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6">
+        <div className="mb-6 overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 dark:from-emerald-950/50 to-teal-50 dark:to-teal-950/50 p-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               {project.logo_url ? (
@@ -336,9 +336,9 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
           <div className="flex items-center gap-3">
             <div className={cn(
               "flex h-12 w-12 items-center justify-center rounded-xl",
-              project.deployment_status === "deployed" ? "bg-emerald-50"
-              : project.deployment_status === "deploying" ? "bg-blue-50"
-              : project.deployment_status === "failed" ? "bg-red-50"
+              project.deployment_status === "deployed" ? "bg-emerald-50 dark:bg-emerald-950/50"
+              : project.deployment_status === "deploying" ? "bg-blue-50 dark:bg-blue-950/50"
+              : project.deployment_status === "failed" ? "bg-red-50 dark:bg-red-950/50"
               : "bg-muted/50"
             )}>
               {project.deployment_status === "deployed" ? (
@@ -400,7 +400,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               <button
                 onClick={handleResetDeployment}
                 disabled={resetting}
-                className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 disabled:opacity-50"
               >
                 {resetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
                 Cancel
@@ -442,8 +442,8 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                 )}
                 <span className={cn(
                   check.ok ? "text-muted-foreground"
-                  : check.warning ? "text-amber-700"
-                  : "text-red-700"
+                  : check.warning ? "text-amber-700 dark:text-amber-400"
+                  : "text-red-700 dark:text-red-400"
                 )}>
                   {check.label}
                 </span>
@@ -452,7 +452,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
             ))}
           </ul>
           {blockingFailed && (
-            <p className="mt-3 text-xs text-red-600 font-medium">
+            <p className="mt-3 text-xs text-red-600 dark:text-red-400 font-medium">
               Fix the items above before deploying.
             </p>
           )}
@@ -478,16 +478,16 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               </div>
               <button
                 onClick={handleRemoveDomain}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
 
             {domainVerification && !domainVerification.configured && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <p className="text-sm font-medium text-amber-800">DNS verification required</p>
-                <p className="mt-1 text-xs text-amber-700">
+              <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 p-4">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">DNS verification required</p>
+                <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
                   Add these DNS records at your domain registrar:
                 </p>
                 {domainVerification.verification && Array.isArray(domainVerification.verification) && (
@@ -509,7 +509,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
             <p className="mb-3 text-sm text-muted-foreground">
               Connect your own domain to this recipe site.
               {project.deployment_status !== "deployed" && (
-                <span className="text-amber-600"> Deploy the site first.</span>
+                <span className="text-amber-600 dark:text-amber-400"> Deploy the site first.</span>
               )}
             </p>
             <div className="flex gap-2">
@@ -553,7 +553,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
             <button
               onClick={resetDatabase}
               disabled={resettingDb}
-              className="ml-auto flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+              className="ml-auto flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 disabled:opacity-50"
             >
               {resettingDb ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               Reset Site Database
@@ -604,9 +604,9 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                 </div>
                 <span className={cn(
                   "rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  dep.status === "ready" && "bg-emerald-100 text-emerald-700",
-                  (dep.status === "building" || dep.status === "queued") && "bg-blue-100 text-blue-700",
-                  dep.status === "error" && "bg-red-100 text-red-700",
+                  dep.status === "ready" && "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400",
+                  (dep.status === "building" || dep.status === "queued") && "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400",
+                  dep.status === "error" && "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400",
                   dep.status === "canceled" && "bg-secondary text-muted-foreground"
                 )}>
                   {dep.status}

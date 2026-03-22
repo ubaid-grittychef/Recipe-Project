@@ -250,17 +250,17 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
                 {project.deployment_status === "deployed" ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-950/50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     Live
                   </span>
                 ) : project.status === "active" ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-950/50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
                     Active
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-950/50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
                     Paused
                   </span>
@@ -298,8 +298,8 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
               className={cn(
                 "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-colors",
                 project.status === "active"
-                  ? "bg-secondary text-muted-foreground hover:bg-slate-200"
-                  : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                  ? "bg-secondary text-muted-foreground hover:bg-slate-200 dark:hover:bg-slate-800"
+                  : "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50"
               )}
             >
               {project.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -335,7 +335,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
               <Icon className="h-4 w-4" />
               {label}
               {key === "content" && draftCount > 0 && (
-                <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                <span className="ml-1 rounded-full bg-amber-100 dark:bg-amber-950/50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
                   {draftCount}
                 </span>
               )}
@@ -346,11 +346,11 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
 
       {/* Config warning — always visible */}
       {configStatus && !configStatus.openai && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 px-5 py-4">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
           <div>
-            <p className="text-sm font-semibold text-red-800">OpenAI API key missing — generation is disabled</p>
-            <p className="mt-1 text-xs text-red-600">
+            <p className="text-sm font-semibold text-red-800 dark:text-red-400">OpenAI API key missing — generation is disabled</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
               Add <code className="font-mono">OPENAI_API_KEY=sk-...</code> to <code className="font-mono">.env.local</code> and restart the server.
             </p>
           </div>
@@ -377,16 +377,16 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
 
           {/* Stats */}
           <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <StatCard icon={BookOpen} label="Recipes Published" value={project.recipes_published} color="text-brand-600" bg="bg-orange-50" />
+            <StatCard icon={BookOpen} label="Recipes Published" value={project.recipes_published} color="text-brand-600" bg="bg-orange-50 dark:bg-orange-950/50" />
             <StatCard
               icon={KeyRound}
               label="Keywords Remaining"
               value={!project.sheet_url ? queueCounts.pending : project.keywords_remaining}
               color="text-blue-600"
-              bg="bg-blue-50"
+              bg="bg-blue-50 dark:bg-blue-950/50"
             />
-            <StatCard icon={AlertCircle} label="Keywords Failed" value={project.keywords_failed} color="text-red-500" bg="bg-red-50" />
-            <StatCard icon={TrendingUp} label="Success Rate" value={`${successRate}%`} color="text-emerald-600" bg="bg-emerald-50" />
+            <StatCard icon={AlertCircle} label="Keywords Failed" value={project.keywords_failed} color="text-red-500" bg="bg-red-50 dark:bg-red-950/50" />
+            <StatCard icon={TrendingUp} label="Success Rate" value={`${successRate}%`} color="text-emerald-600" bg="bg-emerald-50 dark:bg-emerald-950/50" />
           </div>
 
           {/* Timing strip */}
@@ -444,14 +444,14 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
 
           {/* Keywords queued banner */}
           {!generationRunning && !generating && queueCounts.pending > 0 && !project.sheet_url && draftCount === 0 && (
-            <div className="mb-6 flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-5 py-4">
+            <div className="mb-6 flex items-center justify-between rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/50 px-5 py-4">
               <div className="flex items-center gap-3">
                 <ListChecks className="h-5 w-5 text-brand-600" />
                 <div>
-                  <p className="text-sm font-medium text-brand-900">
+                  <p className="text-sm font-medium text-brand-900 dark:text-brand-400">
                     {queueCounts.pending} keyword{queueCounts.pending !== 1 ? "s" : ""} queued
                   </p>
-                  <p className="mt-0.5 text-xs text-brand-700">
+                  <p className="mt-0.5 text-xs text-brand-700 dark:text-brand-400">
                     Ready to generate — runs up to {project.recipes_per_day} per batch.
                   </p>
                 </div>
@@ -517,7 +517,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
           {(project.deployment_status === "deployed" || project.deployment_status === "failed") && (
             <div className={cn(
               "mb-6 rounded-xl border p-4",
-              project.deployment_status === "deployed" ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"
+              project.deployment_status === "deployed" ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50" : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50"
             )}>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
@@ -527,12 +527,12 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
                     <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
                   )}
                   <div className="min-w-0">
-                    <p className={cn("text-sm font-semibold", project.deployment_status === "deployed" ? "text-emerald-900" : "text-red-900")}>
+                    <p className={cn("text-sm font-semibold", project.deployment_status === "deployed" ? "text-emerald-900 dark:text-emerald-400" : "text-red-900 dark:text-red-400")}>
                       {project.deployment_status === "deployed" ? "Site is live" : "Last deployment failed"}
                     </p>
                     {project.vercel_deployment_url && (
                       <a href={project.vercel_deployment_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-emerald-700 hover:underline truncate">
+                        className="flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400 hover:underline truncate">
                         {project.vercel_deployment_url}
                         <ExternalLink className="h-3 w-3 shrink-0" />
                       </a>
@@ -543,14 +543,14 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
                   {project.deployment_status === "deployed" && (
                     <>
                       <button onClick={checkSiteHealth} disabled={checkingHealth}
-                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-card px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-card px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 disabled:opacity-50">
                         {checkingHealth ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Activity className="h-3.5 w-3.5" />}
                         {healthCheck
                           ? healthCheck.healthy ? `Online · ${healthCheck.latency_ms}ms` : "Unreachable"
                           : checkingHealth ? "Checking…" : "Health"}
                       </button>
                       <button onClick={pingSitemap} disabled={pinging}
-                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-card px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-card px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 disabled:opacity-50">
                         {pinging ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                         {pinging ? "Pinging…" : "Ping"}
                       </button>
@@ -571,12 +571,12 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
 
           {/* Template changed — needs redeploy */}
           {needsRedeploy && project.deployment_status === "deployed" && (
-            <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-violet-200 bg-violet-50 px-5 py-4">
+            <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/50 px-5 py-4">
               <div className="flex items-center gap-3">
                 <Rocket className="h-5 w-5 shrink-0 text-violet-500" />
                 <div>
-                  <p className="text-sm font-semibold text-violet-900">Template changed — redeploy to apply</p>
-                  <p className="mt-0.5 text-xs text-violet-700">
+                  <p className="text-sm font-semibold text-violet-900 dark:text-violet-400">Template changed — redeploy to apply</p>
+                  <p className="mt-0.5 text-xs text-violet-700 dark:text-violet-400">
                     Your live site is still using the old template. Redeploy to switch it.
                   </p>
                 </div>
@@ -584,7 +584,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   onClick={() => { localStorage.removeItem(`needs_redeploy_${id}`); setNeedsRedeploy(false); }}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100"
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50"
                 >
                   Dismiss
                 </button>
@@ -675,7 +675,7 @@ function SetupChecklist({
           <div className="flex items-center gap-3">
             <ListChecks className="h-4 w-4 text-brand-500" />
             <span className="text-sm font-semibold text-foreground">Getting started</span>
-            <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700">
+            <span className="rounded-full bg-brand-100 dark:bg-brand-900/50 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:text-brand-400">
               {completedCount}/{steps.length} done
             </span>
             <span className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">

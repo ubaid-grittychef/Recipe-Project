@@ -213,10 +213,10 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
         <p className="mb-5 text-xs text-muted-foreground">Across {totalRecipes} recipe{totalRecipes !== 1 ? "s" : ""}</p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "With Images", value: `${pctWithImages}%`, sub: `${recipes.filter((r) => !!r.image_url).length} of ${totalRecipes}`, icon: ImageIcon, color: "text-blue-500", bg: "bg-blue-50" },
-            { label: "Avg Word Count", value: avgWordCount.toLocaleString(), sub: "words per recipe", icon: FileText, color: "text-violet-500", bg: "bg-violet-50" },
-            { label: "With FAQs", value: `${pctWithFAQs}%`, sub: `${recipes.filter((r) => r.faqs && r.faqs.length > 0).length} of ${totalRecipes}`, icon: HelpCircle, color: "text-amber-500", bg: "bg-amber-50" },
-            { label: "High Rating (≥4.5)", value: `${pctHighRating}%`, sub: `${recipes.filter((r) => r.rating >= 4.5).length} of ${totalRecipes}`, icon: Star, color: "text-emerald-500", bg: "bg-emerald-50" },
+            { label: "With Images", value: `${pctWithImages}%`, sub: `${recipes.filter((r) => !!r.image_url).length} of ${totalRecipes}`, icon: ImageIcon, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/50" },
+            { label: "Avg Word Count", value: avgWordCount.toLocaleString(), sub: "words per recipe", icon: FileText, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/50" },
+            { label: "With FAQs", value: `${pctWithFAQs}%`, sub: `${recipes.filter((r) => r.faqs && r.faqs.length > 0).length} of ${totalRecipes}`, icon: HelpCircle, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/50" },
+            { label: "High Rating (≥4.5)", value: `${pctHighRating}%`, sub: `${recipes.filter((r) => r.rating >= 4.5).length} of ${totalRecipes}`, icon: Star, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/50" },
           ].map((m) => (
             <div key={m.label} className="rounded-xl border border-border/50 bg-muted/50 p-4">
               <div className={cn("mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg", m.bg)}>
@@ -274,9 +274,9 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
                 ? Math.round((new Date(log.completed_at).getTime() - new Date(log.started_at).getTime()) / 1000)
                 : null;
               const statusConfig = {
-                running: { label: "Running", cls: "bg-blue-100 text-blue-700", Icon: Loader2 },
-                completed: { label: "Done", cls: "bg-emerald-100 text-emerald-700", Icon: CheckCircle2 },
-                failed: { label: "Failed", cls: "bg-red-100 text-red-700", Icon: XCircle },
+                running: { label: "Running", cls: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400", Icon: Loader2 },
+                completed: { label: "Done", cls: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400", Icon: CheckCircle2 },
+                failed: { label: "Failed", cls: "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400", Icon: XCircle },
               }[log.status];
               const StatusIcon = statusConfig.Icon;
               return (
@@ -308,7 +308,7 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
                 <TrendingUp className="h-4 w-4 text-brand-500" />
               </div>
               <div>
