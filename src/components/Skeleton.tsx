@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 
 export function SkeletonLine({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded bg-slate-100", className)} />
+    <div className={cn("animate-pulse rounded bg-muted", className)} />
   );
 }
 
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded-xl border border-slate-100 bg-slate-50 p-5", className)}>
+    <div className={cn("animate-pulse rounded-xl border border-border/50 bg-muted/50 p-5", className)}>
       <SkeletonLine className="mb-3 h-3 w-1/3" />
       <SkeletonLine className="h-7 w-1/2" />
     </div>
@@ -24,10 +24,10 @@ export function SkeletonCard({ className }: { className?: string }) {
 export function SkeletonRow({ cols = 5 }: { cols?: number }) {
   const widths = ["w-2/5", "w-1/4", "w-1/6", "w-1/6", "w-1/5"];
   return (
-    <tr className="border-b border-slate-100">
+    <tr className="border-b border-border/50">
       {Array.from({ length: cols }).map((_, i) => (
         <td key={i} className="px-6 py-4">
-          <div className={cn("animate-pulse rounded bg-slate-100 h-3", widths[i % widths.length])} />
+          <div className={cn("animate-pulse rounded bg-muted h-3", widths[i % widths.length])} />
         </td>
       ))}
     </tr>
@@ -37,7 +37,7 @@ export function SkeletonRow({ cols = 5 }: { cols?: number }) {
 /** A table with N placeholder rows */
 export function SkeletonTable({ rows = 8, cols = 5 }: { rows?: number; cols?: number }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       <table className="min-w-full">
         <tbody>
           {Array.from({ length: rows }).map((_, i) => (
@@ -54,9 +54,9 @@ export function SkeletonProjectGrid({ count = 6 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white p-5">
+        <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-slate-100" />
+            <div className="h-10 w-10 rounded-lg bg-muted" />
             <div className="flex-1">
               <SkeletonLine className="mb-2 h-4 w-1/2" />
               <SkeletonLine className="h-3 w-1/3" />
@@ -80,7 +80,7 @@ export function SkeletonProjectDetail() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-xl bg-slate-100" />
+          <div className="h-14 w-14 rounded-xl bg-muted" />
           <div>
             <SkeletonLine className="mb-2 h-6 w-48" />
             <SkeletonLine className="h-3 w-28" />
@@ -140,7 +140,7 @@ export function SkeletonLogsList({ rows = 5 }: { rows?: number }) {
       </div>
       <div className="space-y-3">
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white p-5">
+          <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-5">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <SkeletonLine className="h-5 w-5 rounded-full" />
@@ -197,7 +197,7 @@ export function SkeletonSettingsPage() {
       </div>
       <div className="space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+          <div key={i} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SkeletonLine className="h-4 w-4 rounded" />
@@ -248,7 +248,7 @@ export function SkeletonRecipeEditor() {
         </div>
       </div>
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="mb-4 rounded-xl border border-slate-100 p-5">
+        <div key={i} className="mb-4 rounded-xl border border-border/50 p-5">
           <SkeletonLine className="mb-4 h-4 w-32" />
           <SkeletonLine className="mb-2 h-10 rounded-lg" />
           <SkeletonLine className="h-10 rounded-lg" />

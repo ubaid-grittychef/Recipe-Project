@@ -75,12 +75,12 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-sm sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm sm:px-6 lg:px-8">
       {/* Left: hamburger + page title */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuToggle}
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 lg:hidden shrink-0"
+          className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground lg:hidden shrink-0"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -88,16 +88,16 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
         {isHome ? (
           <div className="min-w-0">
-            <p className="text-base font-bold text-slate-900 leading-tight">
-              {getGreeting()} 👋
+            <p className="text-base font-bold text-foreground leading-tight">
+              {getGreeting()}
             </p>
-            <p className="text-xs text-slate-400 leading-tight hidden sm:block">{formatHeaderDate()}</p>
+            <p className="text-xs text-muted-foreground leading-tight hidden sm:block">{formatHeaderDate()}</p>
           </div>
         ) : (
           <div className="min-w-0">
-            <h2 className="text-base font-bold text-slate-900 truncate">{page.title}</h2>
+            <h2 className="text-base font-bold text-foreground truncate">{page.title}</h2>
             {page.subtitle && (
-              <p className="text-xs text-slate-400 hidden sm:block">{page.subtitle}</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">{page.subtitle}</p>
             )}
           </div>
         )}
@@ -108,14 +108,14 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         {/* Search bar */}
         <form onSubmit={handleSearch} className="hidden sm:flex items-center">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search anything..."
-              className="w-52 rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-9 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100 transition-all"
+              className="w-52 rounded-lg border border-input bg-secondary py-1.5 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 transition-all"
             />
-            <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-400">/</kbd>
+            <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">/</kbd>
           </div>
         </form>
 
@@ -129,10 +129,10 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             <ChefHat className="h-4 w-4 text-white" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-10 z-50 w-40 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+            <div className="absolute right-0 top-10 z-50 w-40 rounded-xl border border-border bg-popover py-1 shadow-lg">
               <button
                 onClick={handleSignOut}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-destructive/10 transition"
               >
                 <LogOut className="h-4 w-4" />
                 Sign Out

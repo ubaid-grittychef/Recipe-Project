@@ -154,8 +154,8 @@ export default function DashboardClient({ initialProjects }: Props) {
           label="Total Projects"
           value={projects.length}
           icon={<LayoutDashboard className="h-5 w-5" />}
-          iconBg="bg-slate-100"
-          iconColor="text-slate-600"
+          iconBg="bg-secondary"
+          iconColor="text-muted-foreground"
           borderColor="border-l-slate-400"
         />
         <StatCard
@@ -190,18 +190,18 @@ export default function DashboardClient({ initialProjects }: Props) {
         <div className="flex items-center gap-2 flex-wrap">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search projects..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-52 rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100 shadow-sm"
+              className="w-52 rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20 shadow-sm"
             />
           </div>
 
           {/* Filter tabs */}
-          <div className="flex gap-0.5 rounded-lg bg-slate-100 p-1">
+          <div className="flex gap-0.5 rounded-lg bg-secondary p-1">
             {(["all", "active", "paused", "setup"] as const).map((f) => {
               const count = f === "all" ? projects.length : projects.filter((p) => p.status === f).length;
               return (
@@ -211,8 +211,8 @@ export default function DashboardClient({ initialProjects }: Props) {
                   className={cn(
                     "rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-all",
                     filter === f
-                      ? "bg-white text-slate-900 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {f === "all" ? `All (${count})` : `${f.charAt(0).toUpperCase() + f.slice(1)} (${count})`}
@@ -223,7 +223,7 @@ export default function DashboardClient({ initialProjects }: Props) {
 
           <button
             onClick={allSelected ? clearSelection : selectAll}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 shadow-sm"
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground hover:bg-accent shadow-sm"
           >
             <CheckSquare className="h-4 w-4" />
             <span className="hidden sm:inline">{allSelected ? "Deselect all" : "Select all"}</span>
@@ -241,7 +241,7 @@ export default function DashboardClient({ initialProjects }: Props) {
 
       {/* Bulk action bar — shown when any project is selected */}
       {hasSelection && (
-        <div className="mb-5 flex items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 px-5 py-3">
+        <div className="mb-5 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-5 py-3">
           <span className="text-sm font-medium text-brand-900">
             {selectedIds.size} project{selectedIds.size !== 1 ? "s" : ""} selected
           </span>
@@ -297,7 +297,7 @@ export default function DashboardClient({ initialProjects }: Props) {
       </div>
 
       {filtered.length === 0 && (
-        <p className="mt-8 text-center text-sm text-slate-400">
+        <p className="mt-8 text-center text-sm text-muted-foreground">
           No projects match &quot;{search}&quot;
         </p>
       )}
@@ -323,11 +323,11 @@ function StatCard({
   badge?: { label: string; color: string };
 }) {
   return (
-    <div className={`rounded-xl border border-slate-200 bg-white p-5 shadow-card border-l-4 ${borderColor}`}>
+    <div className={`rounded-xl border border-border bg-card p-5 shadow-card border-l-4 ${borderColor}`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900 leading-none">{value}</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-foreground leading-none">{value}</p>
         </div>
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconBg} ${iconColor}`}>
           {icon}

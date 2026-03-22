@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navigation = [
   { name: "All Projects", href: "/", icon: LayoutDashboard },
@@ -70,21 +71,21 @@ export default function Sidebar({ mobileOpen, onClose, userRole, userEmail, user
   const avatarLetter = (userFullName || userEmail || "U").charAt(0).toUpperCase();
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white border-r border-slate-200">
+    <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border">
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-5 border-b border-slate-100">
+      <div className="flex h-16 items-center justify-between px-5 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 shadow-sm">
-            <ChefHat className="h-4 w-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-sm">
+            <ChefHat className="h-4 w-4 text-primary-foreground" />
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900">Recipe Factory</p>
-            <p className="text-[10px] text-slate-400 font-medium">SEO Site Builder</p>
+            <p className="text-sm font-bold text-foreground">Recipe Factory</p>
+            <p className="text-[10px] text-muted-foreground font-medium">SEO Site Builder</p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="rounded-lg p-1 text-slate-400 hover:text-slate-600 lg:hidden"
+          className="rounded-lg p-1 text-muted-foreground hover:text-foreground lg:hidden"
         >
           <X className="h-4 w-4" />
         </button>
@@ -121,7 +122,7 @@ export default function Sidebar({ mobileOpen, onClose, userRole, userEmail, user
               <Link
                 href="/"
                 onClick={onClose}
-                className="text-[10px] font-medium text-slate-400 hover:text-slate-600 flex items-center gap-1"
+                className="text-[10px] font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
               >
                 <ArrowLeft className="h-3 w-3" />
                 Back
@@ -167,28 +168,29 @@ export default function Sidebar({ mobileOpen, onClose, userRole, userEmail, user
       </nav>
 
       {/* Legal footer */}
-      <div className="mt-auto pt-4 border-t border-slate-100 text-xs text-slate-400 space-x-3 px-4 pb-4">
-        <a href="/terms" className="hover:text-slate-600">Terms</a>
-        <a href="/privacy" className="hover:text-slate-600">Privacy</a>
+      <div className="mt-auto pt-4 border-t border-border/50 text-xs text-muted-foreground space-x-3 px-4 pb-4">
+        <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
+        <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
       </div>
 
       {/* Footer — user profile + sign out */}
-      <div className="border-t border-slate-100 p-3 space-y-1.5">
+      <div className="border-t border-border/50 p-3 space-y-1.5">
         {/* User profile card */}
-        <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 shrink-0">
-            <span className="text-xs font-bold text-brand-600">{avatarLetter}</span>
+        <div className="flex items-center gap-2.5 rounded-lg bg-accent px-3 py-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+            <span className="text-xs font-bold text-primary">{avatarLetter}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-slate-700 truncate">
+            <p className="text-xs font-semibold text-foreground truncate">
               {userFullName || "My Account"}
             </p>
-            <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{userEmail}</p>
           </div>
+          <ThemeToggle />
           {userRole === "admin" && (
             <div className="flex items-center gap-1 shrink-0">
               <Shield className="h-3 w-3 text-purple-500" />
-              <span className="rounded-full bg-purple-100 px-1.5 py-0.5 text-[9px] font-bold text-purple-600 uppercase tracking-wide">
+              <span className="rounded-full bg-purple-100 dark:bg-purple-950/50 px-1.5 py-0.5 text-[9px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">
                 Admin
               </span>
             </div>
@@ -198,7 +200,7 @@ export default function Sidebar({ mobileOpen, onClose, userRole, userEmail, user
         {/* Sign out */}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
         >
           <LogOut className="h-4 w-4" />
           Sign Out
