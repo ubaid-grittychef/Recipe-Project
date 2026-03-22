@@ -218,7 +218,7 @@ export default function GuidePage() {
                 onClick={() => toggle(step.id)}
                 className="flex w-full items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-accent"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
                   <Icon className="h-4.5 w-4.5 text-brand-500" />
                 </div>
                 <div className="flex-1">
@@ -243,12 +243,12 @@ export default function GuidePage() {
         })}
       </div>
 
-      <div className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+      <div className="mt-8 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 p-5">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
           <div>
-            <h3 className="font-semibold text-emerald-900">After setup</h3>
-            <p className="mt-1 text-sm text-emerald-700">
+            <h3 className="font-semibold text-emerald-900 dark:text-emerald-100">After setup</h3>
+            <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
               Once deployed, your site generates recipes on autopilot. Add more
               keywords to the Google Sheet at any time. The factory will keep
               generating and publishing until the sheet is empty (then auto-pause

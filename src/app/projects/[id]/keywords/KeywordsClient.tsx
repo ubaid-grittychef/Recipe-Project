@@ -79,7 +79,7 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
           <button
             onClick={handleRetryAll}
             disabled={retrying}
-            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50"
           >
             <RefreshCw className={cn("h-4 w-4", retrying && "animate-spin")} />
             {retrying ? "Retrying..." : `Retry ${failedCount} failed`}
@@ -115,7 +115,7 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-8 py-20">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-950/50">
               <KeyRound className="h-8 w-8 text-brand-500" />
             </div>
             <h3 className="mt-6 text-lg font-semibold text-foreground">
@@ -191,9 +191,9 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
 
 function StatusBadge({ status }: { status: KeywordStatus }) {
   const config = {
-    pending: { icon: Clock, className: "bg-amber-100 text-amber-700" },
-    done: { icon: CheckCircle, className: "bg-emerald-100 text-emerald-700" },
-    failed: { icon: XCircle, className: "bg-red-100 text-red-700" },
+    pending: { icon: Clock, className: "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400" },
+    done: { icon: CheckCircle, className: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400" },
+    failed: { icon: XCircle, className: "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400" },
   };
   const { icon: Icon, className } = config[status];
   return (

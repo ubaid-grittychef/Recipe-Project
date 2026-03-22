@@ -58,7 +58,7 @@ function LoginForm() {
         </div>
 
         {message === "password_updated" && (
-          <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+          <div className="mb-4 rounded-lg bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-700 dark:text-green-400">
             Password updated — please sign in.
           </div>
         )}
