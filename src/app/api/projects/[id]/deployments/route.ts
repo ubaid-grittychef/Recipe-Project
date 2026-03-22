@@ -19,6 +19,16 @@ export async function GET(
 
     // BUG 6 FIX: refresh any "building" deployments from Vercel's API
     for (const dep of deployments) {
+      // Guard: mark stuck deployments with no Vercel ID as errors
+      if (dep.status === "building" && !dep.vercel_deployment_id) {
+        await updateDeployment(dep.id, {
+          status: "error",
+          error_message: "Deployment record missing Vercel ID — likely failed before upload",
+          completed_at: new Date().toISOString(),
+        });
+        dep.status = "error";
+        continue;
+      }
       if (dep.vercel_deployment_id && dep.status === "building") {
         try {
           const { state } = await getDeploymentStatus(dep.vercel_deployment_id);

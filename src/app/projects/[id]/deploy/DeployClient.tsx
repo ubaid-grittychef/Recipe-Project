@@ -132,14 +132,17 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
         setDeployments(Array.isArray(deps) ? deps : []);
 
         const done = proj.deployment_status === "deployed" || proj.deployment_status === "failed";
-        if (done || attempts >= 75) {
+        if (done || attempts >= 180) {
           if (pollRef.current) clearInterval(pollRef.current);
           pollRef.current = null;
           setDeploying(false);
           if (proj.deployment_status === "deployed") {
             toast.success("Site is live!");
           } else if (proj.deployment_status === "failed") {
-            toast.error("Deployment failed — check the history below");
+            // Show the error from the latest deployment if available
+            const latest = Array.isArray(deps) ? deps[0] : null;
+            const errMsg = latest?.error_message;
+            toast.error(errMsg ? `Deployment failed: ${errMsg}` : "Deployment failed — check the history below");
           }
         }
       } catch { /* ignore transient errors */ }

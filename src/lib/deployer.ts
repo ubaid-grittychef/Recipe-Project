@@ -162,7 +162,7 @@ export function buildSiteEnvVars(project: {
   tagline: string;
   meta_description: string;
   author_name: string;
-  domain: string;
+  domain: string | null;
   primary_color: string;
   font_preset: string;
   site_supabase_url: string | null;
@@ -247,7 +247,8 @@ async function uploadFile(
 ): Promise<void> {
   const token = getVercelToken(projectToken);
   const teamId = getVercelTeamId();
-  const fullPath = path.join(templateDir, filePath);
+  // filePath uses forward slashes (Vercel format) — convert to OS path for fs
+  const fullPath = path.join(templateDir, ...filePath.split("/"));
   const content = fs.readFileSync(fullPath);
   const sha = crypto.createHash("sha1").update(content).digest("hex");
 
@@ -304,6 +305,27 @@ export async function deployToVercel(projectId: string): Promise<Deployment> {
       vercelProjectId = await createVercelProject(projectId);
     }
 
+    // Validate Supabase credentials are reachable before deploying
+    if (project.site_supabase_url && project.site_supabase_anon_key) {
+      try {
+        const healthRes = await fetch(
+          `${project.site_supabase_url}/rest/v1/`,
+          {
+            method: "HEAD",
+            headers: { apikey: project.site_supabase_anon_key },
+          }
+        );
+        if (healthRes.status === 401 || healthRes.status === 403) {
+          throw new Error(
+            `Site Supabase anon key is invalid (${healthRes.status}). Check your credentials in Project Settings.`
+          );
+        }
+      } catch (err) {
+        if (err instanceof Error && err.message.includes("Site Supabase")) throw err;
+        log.warn("Could not validate Supabase credentials — deploying anyway", { projectId }, err);
+      }
+    }
+
     const envVars = buildSiteEnvVars(project);
     await setVercelEnvVars(projectId, envVars);
 
@@ -325,6 +347,17 @@ export async function deployToVercel(projectId: string): Promise<Deployment> {
     }
     if (resolvedTemplateDir !== templateDir) {
       log.warn("Template variant not found, falling back to default", { variant, templateDirName });
+    }
+
+    // Validate template has required files before uploading
+    const requiredFiles = ["package.json", "src/app/layout.tsx"];
+    for (const reqFile of requiredFiles) {
+      const reqPath = path.join(resolvedTemplateDir, ...reqFile.split("/"));
+      if (!fs.existsSync(reqPath)) {
+        throw new Error(
+          `Template validation failed: missing ${reqFile}. The template directory must be a complete Next.js app.`
+        );
+      }
     }
 
     log.info("Collecting template files", { templateDir: resolvedTemplateDir, variant });
@@ -382,8 +415,14 @@ export async function deployToVercel(projectId: string): Promise<Deployment> {
         result.readyState === "READY" ? new Date().toISOString() : null,
     };
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    log.error("Deployment failed", { projectId }, error);
+    const rawMsg = error instanceof Error ? error.message : "Unknown error";
+    // Add context prefix for common failure modes
+    const msg = rawMsg.includes("Template") ? `Template error: ${rawMsg}`
+      : rawMsg.includes("Supabase") ? `Database error: ${rawMsg}`
+      : rawMsg.includes("Vercel API") ? `Vercel API error: ${rawMsg}`
+      : rawMsg.includes("File upload") ? `Upload error: ${rawMsg}`
+      : rawMsg;
+    log.error("Deployment failed", { projectId, errorContext: msg }, error);
 
     await updateDeployment(deployment.id, {
       status: "error",
