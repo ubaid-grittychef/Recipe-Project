@@ -199,7 +199,7 @@ export default function RestaurantsPage({ params }: Props) {
 
       {/* Add / Edit Form */}
       {(adding || editingId) && (
-        <div className="mb-6 rounded-xl border border-brand-200 bg-card p-6 shadow-sm">
+        <div className="mb-6 rounded-xl border border-brand-200 dark:border-brand-800 bg-card p-6 shadow-sm">
           <h2 className="mb-5 text-base font-semibold text-foreground">
             {adding ? "Add Restaurant" : "Edit Restaurant"}
           </h2>
@@ -367,7 +367,7 @@ export default function RestaurantsPage({ params }: Props) {
                       <button
                         onClick={() => handleGenerateBio(r.id)}
                         disabled={generatingBioId === r.id || editingId === r.id || adding}
-                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-purple-50 hover:text-purple-500 disabled:opacity-40"
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-purple-50 dark:hover:bg-purple-950/50 hover:text-purple-500 disabled:opacity-40"
                         title="Auto-generate description with AI"
                       >
                         {generatingBioId === r.id ? (
@@ -387,7 +387,7 @@ export default function RestaurantsPage({ params }: Props) {
                       <button
                         onClick={() => handleDelete(r.id, r.name)}
                         disabled={deletingId === r.id}
-                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-500 disabled:opacity-40"
                         title="Delete"
                       >
                         {deletingId === r.id ? (

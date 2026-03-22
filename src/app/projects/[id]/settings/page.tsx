@@ -1054,7 +1054,7 @@ function PromptField({
       <div className="mb-1.5 flex items-start justify-between gap-2">
         <label className="text-sm font-medium text-foreground">{label}</label>
         {value && (
-          <span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+          <span className="shrink-0 rounded bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
             Custom
           </span>
         )}
@@ -1298,7 +1298,7 @@ function SectionSiteDatabase({
           type="button"
           onClick={setupDatabase}
           disabled={settingUp}
-          className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm transition-colors hover:bg-emerald-100 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 shadow-sm transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-900/50 disabled:opacity-50"
         >
           {settingUp ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -1327,15 +1327,15 @@ function SectionSiteDatabase({
           className={cn(
             "rounded-lg border px-4 py-3 text-xs",
             connStatus.connected && connStatus.hasTable
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-red-200 bg-red-50 text-red-600"
+              ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400"
+              : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400"
           )}
         >
           {connStatus.connected && connStatus.hasTable
             ? `Connected — ${connStatus.recipeCount} recipes in database`
             : connStatus.error ?? "Not connected"}
           {connStatus.connected && !connStatus.hasTable && (
-            <p className="mt-1 text-red-500">
+            <p className="mt-1 text-red-500 dark:text-red-400">
               Click &quot;Setup Database&quot; to create the recipes table, or &quot;Copy SQL&quot; to run it manually in Supabase.
             </p>
           )}

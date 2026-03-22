@@ -82,8 +82,8 @@ export default function RecipePreviewPage({ params }: Props) {
           className={cn(
             "rounded-full px-3 py-1 text-xs font-medium",
             recipe.status === "published"
-              ? "bg-emerald-100 text-emerald-700"
-              : "bg-amber-100 text-amber-700"
+              ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400"
+              : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
           )}
         >
           {recipe.status}
@@ -103,7 +103,7 @@ export default function RecipePreviewPage({ params }: Props) {
       {/* Title + meta */}
       <div className="mb-6">
         {recipe.category && (
-          <span className="mb-3 inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-600">
+          <span className="mb-3 inline-block rounded-full bg-brand-50 dark:bg-brand-950/50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
             {recipe.category}
           </span>
         )}
@@ -211,11 +211,11 @@ export default function RecipePreviewPage({ params }: Props) {
 
       {/* Tips */}
       {recipe.tips.length > 0 && (
-        <div className="mb-10 rounded-xl border border-amber-100 bg-amber-50 p-6">
-          <h2 className="mb-4 text-lg font-bold text-amber-900">Pro Tips</h2>
+        <div className="mb-10 rounded-xl border border-amber-100 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/50 p-6">
+          <h2 className="mb-4 text-lg font-bold text-amber-900 dark:text-amber-100">Pro Tips</h2>
           <ul className="space-y-2">
             {recipe.tips.map((tip, i) => (
-              <li key={i} className="flex gap-2 text-sm text-amber-800">
+              <li key={i} className="flex gap-2 text-sm text-amber-800 dark:text-amber-200">
                 <span className="mt-0.5 shrink-0 text-amber-400">✦</span>
                 {tip}
               </li>

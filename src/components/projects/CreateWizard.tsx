@@ -796,7 +796,7 @@ function StepBranding({
               className={cn(
                 "flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-all",
                 form.font_preset === preset.id
-                  ? "border-brand-500 bg-brand-50"
+                  ? "border-brand-500 bg-brand-50 dark:bg-brand-950/50"
                   : "border-border hover:border-border"
               )}
             >
@@ -944,7 +944,7 @@ function StepTone({ form, update }: StepProps) {
             className={cn(
               "w-full rounded-lg border p-4 text-left transition-all",
               form.content_tone === tone.id
-                ? "border-brand-500 bg-brand-50"
+                ? "border-brand-500 bg-brand-50 dark:bg-brand-950/50"
                 : "border-border hover:border-border"
             )}
           >

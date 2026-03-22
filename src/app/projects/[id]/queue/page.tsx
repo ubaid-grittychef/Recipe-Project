@@ -150,14 +150,14 @@ export default function QueuePage() {
           </p>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-700">
+          <span className="rounded-full bg-amber-100 dark:bg-amber-900/50 px-3 py-1 font-medium text-amber-700 dark:text-amber-400">
             {counts.pending} pending
           </span>
-          <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-700">
+          <span className="rounded-full bg-green-100 dark:bg-green-900/50 px-3 py-1 font-medium text-green-700 dark:text-green-400">
             {counts.done} done
           </span>
           {counts.failed > 0 && (
-            <span className="rounded-full bg-red-100 px-3 py-1 font-medium text-red-700">
+            <span className="rounded-full bg-red-100 dark:bg-red-900/50 px-3 py-1 font-medium text-red-700 dark:text-red-400">
               {counts.failed} failed
             </span>
           )}
@@ -209,7 +209,7 @@ export default function QueuePage() {
                 onClick={() => setFilter(f)}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
                   filter === f
-                    ? "bg-brand-50 text-brand-700"
+                    ? "bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-400"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -221,7 +221,7 @@ export default function QueuePage() {
             {counts.failed > 0 && (
               <button
                 onClick={handleResetFailed}
-                className="flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                className="flex items-center gap-1.5 rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50"
               >
                 <RefreshCw className="h-3 w-3" />
                 Reset Failed
@@ -238,7 +238,7 @@ export default function QueuePage() {
             {counts.pending > 0 && (
               <button
                 onClick={handleClearPending}
-                className="rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                className="rounded-md border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50"
               >
                 Clear Pending
               </button>
@@ -291,7 +291,7 @@ export default function QueuePage() {
                   <td className="px-4 py-3">
                     <button
                       onClick={() => handleDelete(kw.id)}
-                      className="rounded p-1 text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                      className="rounded p-1 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50"
                       title="Remove"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -310,7 +310,7 @@ export default function QueuePage() {
 function StatusBadge({ status }: { status: BuiltInKeyword["status"] }) {
   if (status === "done") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/50 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
         <CheckCircle2 className="h-3 w-3" />
         done
       </span>
@@ -318,14 +318,14 @@ function StatusBadge({ status }: { status: BuiltInKeyword["status"] }) {
   }
   if (status === "failed") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/50 px-2 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">
         <XCircle className="h-3 w-3" />
         failed
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
       <Clock className="h-3 w-3" />
       pending
     </span>

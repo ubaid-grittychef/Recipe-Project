@@ -286,7 +286,7 @@ export default function RecipesClient({ id, projectName, initialRecipes, initial
             <button
               onClick={handleRefreshAll}
               disabled={refreshingAll}
-              className="flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 shadow-sm transition-colors hover:bg-violet-100 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/50 px-4 py-2 text-sm font-medium text-violet-700 dark:text-violet-400 shadow-sm transition-colors hover:bg-violet-100 dark:hover:bg-violet-900/50 disabled:opacity-50"
             >
               {refreshingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               {refreshingAll ? "Refreshing..." : `AI Refresh Drafts (${draftCount})`}
@@ -306,13 +306,13 @@ export default function RecipesClient({ id, projectName, initialRecipes, initial
       </div>
 
       {draftCount > 0 && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 px-4 py-3">
           <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-amber-900">
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
               {draftCount} recipe{draftCount !== 1 ? "s" : ""} ready to publish
             </p>
-            <p className="mt-0.5 text-xs text-amber-700">
+            <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
               These recipes are saved but won&apos;t appear on your live site until published. Click{" "}
               <span className="font-medium">Publish All Drafts</span> above to push them live.
             </p>
@@ -364,8 +364,8 @@ export default function RecipesClient({ id, projectName, initialRecipes, initial
 
       {/* Bulk selection action banner */}
       {selectedIds.size > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5">
-          <span className="mr-1 text-sm font-semibold text-brand-700">
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/50 px-4 py-2.5">
+          <span className="mr-1 text-sm font-semibold text-brand-700 dark:text-brand-400">
             {selectedIds.size} recipe{selectedIds.size !== 1 ? "s" : ""} selected
           </span>
           <button
@@ -444,7 +444,7 @@ export default function RecipesClient({ id, projectName, initialRecipes, initial
                     key={recipe.id}
                     className={cn(
                       "cursor-pointer transition-colors hover:bg-accent",
-                      selectedIds.has(recipe.id) && "bg-brand-50 hover:bg-brand-50"
+                      selectedIds.has(recipe.id) && "bg-brand-50 dark:bg-brand-950/50 hover:bg-brand-50 dark:hover:bg-brand-950/50"
                     )}
                     onClick={() => (window.location.href = `/projects/${id}/recipes/${recipe.id}`)}
                   >
@@ -477,7 +477,7 @@ export default function RecipesClient({ id, projectName, initialRecipes, initial
                     <td className="whitespace-nowrap px-4 py-4">
                       <span className={cn(
                         "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        recipe.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                        recipe.status === "published" ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400" : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
                       )}>
                         {recipe.status}
                       </span>
@@ -549,7 +549,7 @@ function EmptyState({ hasSearch, projectId }: { hasSearch: boolean; projectId: s
   }
   return (
     <div className="flex flex-col items-center justify-center px-8 py-20">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-950/50">
         <BookOpen className="h-8 w-8 text-brand-500" />
       </div>
       <h3 className="mt-6 text-lg font-semibold text-foreground">No recipes yet</h3>

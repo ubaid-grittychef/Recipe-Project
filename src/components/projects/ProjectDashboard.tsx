@@ -728,7 +728,7 @@ function SetupChecklist({
             {step.done ? (
               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
             ) : (
-              <Circle className="h-4 w-4 shrink-0 text-slate-300" />
+              <Circle className="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" />
             )}
             <div className="flex-1 min-w-0">
               <span className={cn("text-sm font-medium", step.done ? "text-muted-foreground line-through" : "text-foreground")}>
@@ -770,12 +770,12 @@ function PipelineBar({ id, project, draftCount, generationRunning }: { id: strin
   const deployStatus: StageStatus = project.deployment_status === "deployed" ? "done" : project.deployment_status === "deploying" ? "active" : "pending";
 
   const stageColor = (s: StageStatus) =>
-    s === "done" ? "text-emerald-600 bg-emerald-50 border-emerald-200" :
-    s === "active" ? "text-blue-600 bg-blue-50 border-blue-200" :
+    s === "done" ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800" :
+    s === "active" ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800" :
     "text-muted-foreground bg-muted/50 border-border";
 
   const dotColor = (s: StageStatus) =>
-    s === "done" ? "bg-emerald-400" : s === "active" ? "bg-blue-400 animate-pulse" : "bg-slate-200";
+    s === "done" ? "bg-emerald-400" : s === "active" ? "bg-blue-400 animate-pulse" : "bg-slate-200 dark:bg-slate-700";
 
   return (
     <div className="mb-6 flex items-stretch gap-0 overflow-hidden rounded-xl border border-border bg-card text-sm">
@@ -846,8 +846,8 @@ function StatCard({ icon: Icon, label, value, color, bg }: { icon: React.Element
 
 function QuickLink({ href, icon: Icon, title, description }: { href: string; icon: React.ElementType; title: string; description: string }) {
   return (
-    <Link href={href} className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-card transition-all duration-150 hover:border-brand-200 hover:shadow-card-hover hover:-translate-y-0.5">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 group-hover:bg-brand-100 transition-colors">
+    <Link href={href} className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-card transition-all duration-150 hover:border-brand-200 dark:hover:border-brand-800 hover:shadow-card-hover hover:-translate-y-0.5">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 dark:bg-orange-950/50 group-hover:bg-brand-100 dark:group-hover:bg-brand-900/50 transition-colors">
         <Icon className="h-4 w-4 text-brand-500" />
       </div>
       <div className="min-w-0">
@@ -870,10 +870,10 @@ function ContentHealthCard({ recipes }: { recipes: Recipe[] }) {
   const totalWords = recipes.reduce((s, r) => s + (r.word_count || 0), 0);
 
   const metrics = [
-    { label: "With Images", value: `${Math.round((withImages / total) * 100)}%`, sub: `${withImages} of ${total}`, color: "text-blue-500", bg: "bg-blue-50" },
-    { label: "Avg Word Count", value: avgWords.toLocaleString(), sub: "words per recipe", color: "text-violet-500", bg: "bg-violet-50" },
-    { label: "With FAQs", value: `${Math.round((withFAQs / total) * 100)}%`, sub: `${withFAQs} of ${total}`, color: "text-amber-500", bg: "bg-amber-50" },
-    { label: "Total Words", value: `${(totalWords / 1000).toFixed(1)}k`, sub: "across all recipes", color: "text-emerald-500", bg: "bg-emerald-50" },
+    { label: "With Images", value: `${Math.round((withImages / total) * 100)}%`, sub: `${withImages} of ${total}`, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/50" },
+    { label: "Avg Word Count", value: avgWords.toLocaleString(), sub: "words per recipe", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/50" },
+    { label: "With FAQs", value: `${Math.round((withFAQs / total) * 100)}%`, sub: `${withFAQs} of ${total}`, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/50" },
+    { label: "Total Words", value: `${(totalWords / 1000).toFixed(1)}k`, sub: "across all recipes", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/50" },
   ];
 
   return (

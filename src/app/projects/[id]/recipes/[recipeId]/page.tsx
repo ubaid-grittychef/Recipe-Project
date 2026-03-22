@@ -190,7 +190,7 @@ export default function RecipeEditorPage({ params }: Props) {
               {recipe.status}
             </span>
             {isDirty && (
-              <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+              <span className="ml-2 rounded-full bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
                 Unsaved changes
               </span>
             )}
@@ -243,7 +243,7 @@ export default function RecipeEditorPage({ params }: Props) {
             <button
               onClick={() => handleSave(false)}
               disabled={saving}
-              className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700 shadow-sm transition-colors hover:bg-amber-100 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 px-4 py-2.5 text-sm font-medium text-amber-700 dark:text-amber-400 shadow-sm transition-colors hover:bg-amber-100 dark:hover:bg-amber-900/50 disabled:opacity-50"
             >
               Unpublish
             </button>
@@ -262,7 +262,7 @@ export default function RecipeEditorPage({ params }: Props) {
           </button>
           <button
             onClick={handleDelete}
-            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 shadow-sm transition-colors hover:bg-red-100"
+            className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 shadow-sm transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
             title="Delete recipe"
           >
             <Trash2 className="h-4 w-4" />
@@ -501,7 +501,7 @@ export default function RecipeEditorPage({ params }: Props) {
                   const updated = recipe.ingredients.filter((_, j) => j !== i);
                   update({ ingredients: updated });
                 }}
-                className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
+                className="rounded p-1 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -527,7 +527,7 @@ export default function RecipeEditorPage({ params }: Props) {
         <Section title="Instructions">
           {recipe.instructions.map((step, i) => (
             <div key={i} className="flex items-start gap-2">
-              <span className="mt-2.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+              <span className="mt-2.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/50 text-xs font-bold text-brand-700 dark:text-brand-400">
                 {i + 1}
               </span>
               <textarea
@@ -656,7 +656,7 @@ export default function RecipeEditorPage({ params }: Props) {
                     );
                     update({ faqs: updated });
                   }}
-                  className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
+                  className="rounded p-1 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-500"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
