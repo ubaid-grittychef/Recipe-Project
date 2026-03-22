@@ -96,7 +96,7 @@ function LoginForm() {
             </label>
 
             {error && <p className="text-sm text-red-500">{error}</p>}
-            {resetSent && <p className="text-sm text-green-600">Password reset email sent — check your inbox.</p>}
+            {resetSent && <p className="text-sm text-green-600 dark:text-green-400">Password reset email sent — check your inbox.</p>}
 
             <button
               type="submit"

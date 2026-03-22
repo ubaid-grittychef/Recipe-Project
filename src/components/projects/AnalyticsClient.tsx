@@ -194,7 +194,7 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
               </div>
               <div className="flex gap-5 text-sm">
                 <div className="text-center">
-                  <p className="font-bold text-emerald-600">{totalKwDone}</p>
+                  <p className="font-bold text-emerald-600 dark:text-emerald-400">{totalKwDone}</p>
                   <p className="text-xs text-muted-foreground">Succeeded</p>
                 </div>
                 <div className="text-center">
@@ -288,7 +288,7 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
                     </p>
                   </div>
                   <p className="text-center font-semibold text-foreground">{log.keywords_processed}</p>
-                  <p className="text-center font-semibold text-emerald-600">{log.keywords_succeeded}</p>
+                  <p className="text-center font-semibold text-emerald-600 dark:text-emerald-400">{log.keywords_succeeded}</p>
                   <p className="text-center font-semibold text-red-500">{log.keywords_failed}</p>
                   <div className="flex justify-center">
                     <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", statusConfig.cls)}>

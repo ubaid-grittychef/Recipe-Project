@@ -304,13 +304,13 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                 </div>
               )}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Your website is live</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Your website is live</p>
                 <p className="mt-0.5 text-lg font-bold text-foreground">{project.name}</p>
                 <a
                   href={project.domain ? `https://${project.domain}` : project.vercel_deployment_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700"
+                  className="flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                 >
                   {project.domain ?? project.vercel_deployment_url}
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -377,7 +377,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               )}
               {project.template_variant && (
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Template: <span className={cn("font-medium", project.template_variant === "premium" ? "text-violet-600" : "text-muted-foreground")}>
+                  Template: <span className={cn("font-medium", project.template_variant === "premium" ? "text-violet-600 dark:text-violet-400" : "text-muted-foreground")}>
                     {project.template_variant === "premium" ? "Premium" : "Default"}
                   </span>
                 </p>

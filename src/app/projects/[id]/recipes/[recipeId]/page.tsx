@@ -183,8 +183,8 @@ export default function RecipeEditorPage({ params }: Props) {
             <span
               className={
                 recipe.status === "published"
-                  ? "font-medium text-emerald-600"
-                  : "font-medium text-amber-600"
+                  ? "font-medium text-emerald-600 dark:text-emerald-400"
+                  : "font-medium text-amber-600 dark:text-amber-400"
               }
             >
               {recipe.status}

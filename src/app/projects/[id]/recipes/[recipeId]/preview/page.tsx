@@ -141,8 +141,8 @@ export default function RecipePreviewPage({ params }: Props) {
         <span className="text-muted-foreground">Difficulty:</span>
         <span className={cn(
           "font-medium",
-          recipe.difficulty === "Easy" ? "text-emerald-600" :
-          recipe.difficulty === "Hard" ? "text-red-600" : "text-amber-600"
+          recipe.difficulty === "Easy" ? "text-emerald-600 dark:text-emerald-400" :
+          recipe.difficulty === "Hard" ? "text-red-600 dark:text-red-400" : "text-amber-600 dark:text-amber-400"
         )}>
           {recipe.difficulty}
         </span>
@@ -259,7 +259,7 @@ export default function RecipePreviewPage({ params }: Props) {
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           SEO Preview
         </h3>
-        <p className="text-sm font-medium text-blue-600">{recipe.seo_title || recipe.title}</p>
+        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">{recipe.seo_title || recipe.title}</p>
         <p className="mt-1 text-xs text-muted-foreground">{recipe.seo_description || recipe.description?.slice(0, 155)}</p>
         {recipe.focus_keywords.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">

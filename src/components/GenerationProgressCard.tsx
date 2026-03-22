@@ -147,7 +147,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
             isRunning ? "text-blue-700 dark:text-blue-400" : isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"
           )}>
             <span className="font-medium">{log.keywords_processed}</span> processed &nbsp;·&nbsp;
-            <span className="font-medium text-emerald-600">{log.keywords_succeeded}</span> succeeded &nbsp;·&nbsp;
+            <span className="font-medium text-emerald-600 dark:text-emerald-400">{log.keywords_succeeded}</span> succeeded &nbsp;·&nbsp;
             <span className="font-medium text-red-500">{log.keywords_failed}</span> failed
             {!isRunning && log.keywords_succeeded > 0 && (
               <span className="ml-2 inline-flex items-center gap-0.5 text-muted-foreground">

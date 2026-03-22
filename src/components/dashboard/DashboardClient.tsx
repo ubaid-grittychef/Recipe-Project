@@ -163,7 +163,7 @@ export default function DashboardClient({ initialProjects }: Props) {
           value={activeCount}
           icon={<TrendingUp className="h-5 w-5" />}
           iconBg="bg-emerald-50 dark:bg-emerald-950/50"
-          iconColor="text-emerald-600"
+          iconColor="text-emerald-600 dark:text-emerald-400"
           borderColor="border-l-emerald-500"
           badge={{ label: `${liveCount} live`, color: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400" }}
         />
@@ -180,7 +180,7 @@ export default function DashboardClient({ initialProjects }: Props) {
           value={totalPendingKeywords.toLocaleString()}
           icon={<KeyRound className="h-5 w-5" />}
           iconBg="bg-blue-50 dark:bg-blue-950/50"
-          iconColor="text-blue-600"
+          iconColor="text-blue-600 dark:text-blue-400"
           borderColor="border-l-blue-500"
         />
       </div>
