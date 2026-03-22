@@ -8,6 +8,7 @@ import {
 import { publishRecipeToSite } from "@/lib/site-publisher";
 import { createLogger } from "@/lib/logger";
 import { BulkPublishSchema } from "@/lib/validation";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:BulkPublish");
 
@@ -35,10 +36,9 @@ export async function POST(
       count = parsed.data.count;
     }
 
-    const project = await getProject(projectId);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const auth = await requireProjectAccess(projectId);
+    if (!auth.ok) return auth.response;
+    const { project } = auth;
 
     const all = await getRecipesByProject(projectId);
     // If specific IDs were provided, only publish those that are still drafts

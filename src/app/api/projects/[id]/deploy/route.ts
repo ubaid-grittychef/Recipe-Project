@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getProject } from "@/lib/store";
 import { deployToVercel } from "@/lib/deployer";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("API:Deploy");
@@ -10,10 +10,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const project = await getProject(id);
-  if (!project) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+  const { project } = auth;
 
   log.info("Deploy requested (async)", { project: project.name, id });
 

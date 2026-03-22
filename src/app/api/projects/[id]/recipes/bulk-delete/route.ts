@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getProject, getRecipe, deleteRecipe } from "@/lib/store";
+import { getRecipe, deleteRecipe } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
 import { BulkDeleteSchema } from "@/lib/validation";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:BulkDelete");
 
@@ -12,10 +13,8 @@ export async function DELETE(
   try {
     const { id: projectId } = await params;
 
-    const project = await getProject(projectId);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const auth = await requireProjectAccess(projectId);
+    if (!auth.ok) return auth.response;
 
     const raw = await request.json().catch(() => ({}));
     const parsed = BulkDeleteSchema.safeParse(raw);

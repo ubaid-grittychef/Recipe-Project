@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getProject, updateProject, deleteProject } from "@/lib/store";
+import { updateProject, deleteProject } from "@/lib/store";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { createLogger } from "@/lib/logger";
 import { UpdateProjectSchema } from "@/lib/validation";
 
@@ -11,10 +12,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const project = await getProject(id);
-    if (!project) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+    const { project } = auth;
     return NextResponse.json(project);
   } catch (error) {
     log.error("GET /api/projects/[id] failed", {}, error);
@@ -31,6 +31,9 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     const raw = await request.json();
     const parsed = UpdateProjectSchema.safeParse(raw);
     if (!parsed.success) {
@@ -61,6 +64,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     log.info("Deleting project", { id });
     await deleteProject(id);
     return NextResponse.json({ success: true });

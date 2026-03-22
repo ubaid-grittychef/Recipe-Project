@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateProject, deleteProject } from "@/lib/store";
+import { updateProject, deleteProject, getProject } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { requireAuth } from "@/lib/auth-guard";
 
 const log = createLogger("API:BulkProjects");
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
+
     const { ids, action } = (await req.json()) as {
       ids: string[];
       action: "pause" | "resume" | "delete";
@@ -21,6 +25,12 @@ export async function POST(req: NextRequest) {
     let updated = 0;
     for (const id of ids) {
       try {
+        // Verify ownership before modifying
+        const project = await getProject(id);
+        if (!project || (project.user_id && project.user_id !== auth.userId)) {
+          log.warn("Bulk action skipped — not owner", { projectId: id, action });
+          continue;
+        }
         if (action === "delete") {
           await deleteProject(id);
         } else {

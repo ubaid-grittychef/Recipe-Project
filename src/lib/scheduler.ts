@@ -15,7 +15,11 @@ const log = createLogger("PublishScheduler");
 
 function parseDays(raw: string): number[] {
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.every((n: unknown) => typeof n === "number")) {
+      return [1, 2, 3, 4, 5];
+    }
+    return parsed;
   } catch {
     return [1, 2, 3, 4, 5];
   }

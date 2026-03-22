@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRecipesByProject } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Recipes");
 
@@ -11,6 +12,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url);
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProject, getRecipesByProject, updateRecipe } from "@/lib/store";
+import { getRecipesByProject, updateRecipe } from "@/lib/store";
 import { refreshRecipeContent } from "@/lib/openai";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { z } from "zod";
 
 const log = createLogger("API:RefreshAll");
@@ -14,8 +15,9 @@ export async function POST(req: NextRequest, { params }: Props) {
   const { id } = await params;
 
   try {
-    const project = await getProject(id);
-    if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+    const { project } = auth;
 
     const rawBody = await req.json().catch(() => ({}));
     const bodyParsed = z.object({

@@ -5,6 +5,7 @@ import {
   resetSiteSchema,
   RECIPES_TABLE_SQL,
 } from "@/lib/site-publisher";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 export async function GET(
   _request: Request,
@@ -12,6 +13,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     const status = await testSiteConnection(id);
     return NextResponse.json(status);
   } catch (error) {
@@ -28,6 +32,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     const { action } = await request.json();
 
     if (action === "setup-schema") {

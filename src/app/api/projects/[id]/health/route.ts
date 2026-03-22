@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProject } from "@/lib/store";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("API:Health");
@@ -25,10 +25,9 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const project = await getProject(id);
-  if (!project) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+  const { project } = auth;
 
   const url = project.vercel_deployment_url;
   if (!url) {

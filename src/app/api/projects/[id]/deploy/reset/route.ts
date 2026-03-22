@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { updateProject, getDeployments, updateDeployment } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:DeployReset");
 
@@ -9,6 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
   try {
     // Reset project deployment_status
     await updateProject(id, { deployment_status: "not_deployed" });

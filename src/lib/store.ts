@@ -114,13 +114,17 @@ function stripImmutableFields(data: Partial<Project>): Partial<Project> {
 
 // --- Projects ---
 
-export async function getProjects(): Promise<Project[]> {
+export async function getProjects(userId?: string): Promise<Project[]> {
   if (hasSupabase()) {
     const { supabase } = await import("./supabase");
-    const { data, error } = await supabase
+    let query = supabase
       .from("projects")
       .select("*")
       .order("created_at", { ascending: false });
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
+    const { data, error } = await query;
     if (error) {
       log.error("Failed to fetch projects from Supabase", {}, error);
       throw error;
@@ -183,6 +187,7 @@ export async function createProject(data: Partial<Project>): Promise<Project> {
   const now = new Date().toISOString();
   const project: Project = {
     id: generateId(),
+    user_id: data.user_id ?? null,
     name: data.name ?? "",
     niche: data.niche ?? "",
     domain: data.domain ?? "",

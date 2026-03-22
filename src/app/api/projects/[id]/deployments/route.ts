@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDeployments, updateDeployment, updateProject } from "@/lib/store";
 import { getDeploymentStatus } from "@/lib/deployer";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("API:Deployments");
@@ -10,6 +11,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
 
   try {
     const deployments = await getDeployments(id);

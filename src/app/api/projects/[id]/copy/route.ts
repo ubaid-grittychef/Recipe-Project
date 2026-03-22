@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getProject, createProject } from "@/lib/store";
+import { createProject } from "@/lib/store";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("API:ProjectCopy");
@@ -17,10 +18,9 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  const source = await getProject(id);
-  if (!source) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
-  }
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+  const source = auth.project;
 
   log.info("Duplicating project", { sourceId: id, sourceName: source.name });
 

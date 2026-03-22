@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getProject, getKeywordLogs } from "@/lib/store";
+import { getKeywordLogs } from "@/lib/store";
 import { resetKeywordsToPending } from "@/lib/sheets";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:KeywordsRetry");
 
@@ -19,10 +20,9 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  const project = await getProject(id);
-  if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
-  }
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+  const { project } = auth;
 
   if (!project.sheet_url) {
     return NextResponse.json(

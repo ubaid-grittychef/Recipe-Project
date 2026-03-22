@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getBuiltInKeywords, createBuiltInKeywords, deleteBuiltInKeywords } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Queue");
 
@@ -9,6 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status") as "pending" | "done" | "failed" | null;
 
@@ -32,6 +35,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
 
   try {
     const { text } = await request.json();
@@ -79,6 +84,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status") as "pending" | "done" | "failed" | null;
 

@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { getProject } from "@/lib/store";
 import {
   getRestaurantsByProject,
   createRestaurant,
 } from "@/lib/store";
 import { Restaurant } from "@/lib/types";
 import { generateId, slugify } from "@/lib/utils";
-// Restaurant type used in return value
 import { createLogger } from "@/lib/logger";
 import { CreateRestaurantSchema } from "@/lib/validation";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Restaurants");
 
@@ -18,10 +17,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const project = await getProject(id);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
     const restaurants = await getRestaurantsByProject(id);
     return NextResponse.json(restaurants);
   } catch (error) {
@@ -36,10 +33,8 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const project = await getProject(id);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
 
     const raw = await request.json();
     const parsed = CreateRestaurantSchema.safeParse(raw);

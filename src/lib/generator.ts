@@ -75,7 +75,9 @@ async function _runGeneration(projectId: string): Promise<{
   };
   await createGenerationLog(genLog);
   // Non-critical — column may not exist on existing DBs; never block generation over this
-  updateProject(projectId, { generation_status: "running" }).catch(() => {});
+  updateProject(projectId, { generation_status: "running" }).catch((err) => {
+    log.warn("Failed to update generation_status to running", { projectId }, err);
+  });
 
   let succeeded = 0;
   let failed = 0;
@@ -381,8 +383,12 @@ async function _runGeneration(projectId: string): Promise<{
     const totalProcessed = succeeded + failed;
 
     const freshProject = await getProject(projectId);
-    const currentFailed = freshProject?.keywords_failed ?? project.keywords_failed;
-    const currentPublished = freshProject?.recipes_published ?? project.recipes_published;
+    if (!freshProject) {
+      log.error("Project deleted during generation", { projectId });
+      throw new Error("Project deleted during generation");
+    }
+    const currentFailed = freshProject.keywords_failed;
+    const currentPublished = freshProject.recipes_published;
 
     // BUG 4 FIX: subtract the full batch (keywords.length), not just succeeded.
     // Both succeeded AND failed keywords are removed from "pending".
@@ -394,7 +400,9 @@ async function _runGeneration(projectId: string): Promise<{
       recipes_published: currentPublished + autoPublished,
       last_generation_at: new Date().toISOString(),
     });
-    updateProject(projectId, { generation_status: "completed" }).catch(() => {});
+    updateProject(projectId, { generation_status: "completed" }).catch((err) => {
+      log.warn("Failed to update generation_status to completed", { projectId }, err);
+    });
 
     await updateGenerationLog(genLog.id, {
       completed_at: new Date().toISOString(),
@@ -462,8 +470,10 @@ export function injectInternalLinks(
     // Skip if this slug is already linked
     if (result.includes(`(/recipe/${r.slug})`)) continue;
     const escaped = r.keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(`\\b(${escaped})\\b`, "i");
+    const regex = new RegExp(`\\b(${escaped})\\b`, "gi");
     if (regex.test(result)) {
+      // Reset lastIndex after test() since global flag advances it
+      regex.lastIndex = 0;
       result = result.replace(regex, `[$1](/recipe/${r.slug})`);
       linksAdded++;
     }

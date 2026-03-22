@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getProject, getRestaurant, updateRestaurant } from "@/lib/store";
+import { getRestaurant, updateRestaurant } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import OpenAI from "openai";
 
 const log = createLogger("API:RestaurantBio");
@@ -17,13 +18,13 @@ export async function POST(
 ) {
   const { id, rid } = await params;
 
-  const [project, restaurant] = await Promise.all([
-    getProject(id),
-    getRestaurant(rid),
-  ]);
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+  const { project } = auth;
 
-  if (!project || !restaurant) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const restaurant = await getRestaurant(rid);
+  if (!restaurant) {
+    return NextResponse.json({ error: "Restaurant not found" }, { status: 404 });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;

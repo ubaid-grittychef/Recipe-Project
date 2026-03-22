@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getProject } from "@/lib/store";
 import { addDomain, removeDomain, checkDomainStatus } from "@/lib/deployer";
+import { requireProjectAccess } from "@/lib/auth-guard";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("API:Domain");
@@ -20,10 +20,18 @@ export async function POST(
       );
     }
 
-    const project = await getProject(id);
-    if (!project) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    // Validate domain format — prevent SSRF / DNS injection
+    const DOMAIN_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+    if (!DOMAIN_RE.test(domain) || /^(localhost|127\.|0\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(domain)) {
+      return NextResponse.json(
+        { error: "Invalid domain format" },
+        { status: 400 }
+      );
     }
+
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+    const { project } = auth;
 
     log.info("Adding domain", { project: project.name, domain });
     const result = await addDomain(id, domain);
@@ -47,6 +55,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     const { searchParams } = new URL(request.url);
     const domain = searchParams.get("domain");
 
@@ -74,6 +85,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     const { domain } = await request.json();
 
     if (!domain) {

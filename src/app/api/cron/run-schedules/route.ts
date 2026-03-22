@@ -12,12 +12,14 @@ const log = createLogger("API:Cron");
 // cron-triggered requests. We verify it here so random callers can't fire generation.
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      log.warn("Cron request rejected — invalid or missing CRON_SECRET");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!cronSecret) {
+    log.error("CRON_SECRET not configured — rejecting cron request");
+    return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    log.warn("Cron request rejected — invalid or missing CRON_SECRET");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

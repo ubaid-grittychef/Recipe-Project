@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { getProject } from "@/lib/store";
 import { runGenerationForProject } from "@/lib/generator";
 import { createLogger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Generate");
 
@@ -78,10 +78,9 @@ export async function POST(
     log.warn("Quota check skipped — auth unavailable", { projectId: id }, authErr);
   }
 
-  const project = await getProject(id);
-  if (!project) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
+  const { project } = auth;
 
   log.info("Manual generation triggered (async)", { project: project.name, id });
 

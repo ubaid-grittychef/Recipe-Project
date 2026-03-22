@@ -26,6 +26,7 @@ export interface Profile {
 
 export interface Project {
   id: string;
+  user_id: string | null;
   name: string;
   niche: string;
   domain: string;

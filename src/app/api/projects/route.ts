@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { getProjects, createProject } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
 import { CreateProjectSchema } from "@/lib/validation";
+import { requireAuth } from "@/lib/auth-guard";
 
 const log = createLogger("API:Projects");
 
 export async function GET() {
   try {
-    const projects = await getProjects();
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
+
+    const projects = await getProjects(auth.userId);
     return NextResponse.json(projects);
   } catch (error) {
     log.error("GET /api/projects failed", {}, error);
@@ -20,6 +24,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
+
     const raw = await request.json();
     const parsed = CreateProjectSchema.safeParse(raw);
     if (!parsed.success) {
@@ -30,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     log.info("Creating project", { name: parsed.data.name });
-    const project = await createProject(parsed.data);
+    const project = await createProject({ ...parsed.data, user_id: auth.userId });
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     log.error("POST /api/projects failed", {}, error);

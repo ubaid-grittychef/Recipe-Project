@@ -6,6 +6,7 @@ import {
 } from "@/lib/store";
 import { slugify } from "@/lib/utils";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Restaurant");
 
@@ -14,7 +15,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string; rid: string }> }
 ) {
   try {
-    const { rid } = await params;
+    const { id, rid } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
     const restaurant = await getRestaurant(rid);
     if (!restaurant) {
       return NextResponse.json({ error: "Restaurant not found" }, { status: 404 });
@@ -56,7 +59,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; rid: string }> }
 ) {
   try {
-    const { rid } = await params;
+    const { id, rid } = await params;
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
     const restaurant = await getRestaurant(rid);
     if (!restaurant) {
       return NextResponse.json({ error: "Restaurant not found" }, { status: 404 });

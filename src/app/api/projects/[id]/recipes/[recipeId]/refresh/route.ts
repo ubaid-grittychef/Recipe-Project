@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProject, getRecipe, updateRecipe } from "@/lib/store";
+import { getRecipe, updateRecipe } from "@/lib/store";
 import { refreshRecipeContent } from "@/lib/openai";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:RecipeRefresh");
 
@@ -13,9 +14,11 @@ export async function POST(_req: NextRequest, { params }: Props) {
   const { id, recipeId } = await params;
 
   try {
-    const [project, recipe] = await Promise.all([getProject(id), getRecipe(recipeId)]);
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+    const { project } = auth;
 
-    if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    const recipe = await getRecipe(recipeId);
     if (!recipe) return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
     if (recipe.project_id !== id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

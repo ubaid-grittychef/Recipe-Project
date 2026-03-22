@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRecipesByProject, updateRecipe } from "@/lib/store";
 import { injectInternalLinks } from "@/lib/generator";
 import { createLogger } from "@/lib/logger";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Relink");
 
@@ -11,6 +12,9 @@ interface Props {
 
 export async function POST(_req: NextRequest, { params }: Props) {
   const { id } = await params;
+
+  const auth = await requireProjectAccess(id);
+  if (!auth.ok) return auth.response;
 
   try {
     const recipes = await getRecipesByProject(id);

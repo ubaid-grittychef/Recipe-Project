@@ -3,6 +3,7 @@ import { getRecipe, updateRecipe, deleteRecipe, getProject, updateProject } from
 import { publishRecipeToSite } from "@/lib/site-publisher";
 import { createLogger } from "@/lib/logger";
 import { UpdateRecipeSchema } from "@/lib/validation";
+import { requireProjectAccess } from "@/lib/auth-guard";
 
 const log = createLogger("API:Recipe");
 
@@ -11,7 +12,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string; recipeId: string }> }
 ) {
   try {
-    const { recipeId } = await params;
+    const { id, recipeId } = await params;
+
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     const recipe = await getRecipe(recipeId);
     if (!recipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
@@ -32,6 +37,10 @@ export async function PUT(
 ) {
   try {
     const { id: projectId, recipeId } = await params;
+
+    const auth = await requireProjectAccess(projectId);
+    if (!auth.ok) return auth.response;
+
     const raw = await request.json();
 
     // Strip read-only fields the client must not set
@@ -103,7 +112,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; recipeId: string }> }
 ) {
   try {
-    const { recipeId } = await params;
+    const { id, recipeId } = await params;
+
+    const auth = await requireProjectAccess(id);
+    if (!auth.ok) return auth.response;
+
     await deleteRecipe(recipeId);
     return NextResponse.json({ success: true });
   } catch (error) {
