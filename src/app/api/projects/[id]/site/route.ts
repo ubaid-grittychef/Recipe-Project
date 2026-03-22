@@ -38,11 +38,24 @@ export async function POST(
     const { action } = await request.json();
 
     if (action === "setup-schema") {
+      // Verify site credentials are configured before running heavy setup
+      if (!auth.project.site_supabase_url || !auth.project.site_supabase_service_key) {
+        return NextResponse.json(
+          { error: "Site Supabase credentials are not configured for this project" },
+          { status: 400 }
+        );
+      }
       const result = await setupSiteSchema(id);
       return NextResponse.json(result);
     }
 
     if (action === "reset-schema") {
+      if (!auth.project.site_supabase_url || !auth.project.site_supabase_service_key) {
+        return NextResponse.json(
+          { error: "Site Supabase credentials are not configured for this project" },
+          { status: 400 }
+        );
+      }
       const result = await resetSiteSchema(id);
       return NextResponse.json(result);
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, Users, ChefHat } from "lucide-react";
@@ -7,6 +8,7 @@ import { Recipe } from "@/lib/types";
 import { slugifyCategory } from "@/lib/utils";
 
 export default function RecipeCard({ recipe }: { recipe: Recipe }) {
+  const [imgError, setImgError] = useState(false);
   const totalTime = recipe.total_time || recipe.cook_time || recipe.prep_time;
 
   const difficultyConfig: Record<string, { label: string; cls: string }> = {
@@ -23,13 +25,14 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
     >
       {/* Image */}
       <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f0e8]">
-        {recipe.image_url ? (
+        {recipe.image_url && !imgError ? (
           <Image
             src={recipe.image_url}
             alt={`${recipe.title} recipe`}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="flex h-full items-center justify-center">

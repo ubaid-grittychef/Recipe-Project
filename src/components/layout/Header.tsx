@@ -47,7 +47,6 @@ function formatHeaderDate() {
 
 interface HeaderProps {
   onMenuToggle: () => void;
-  userRole?: string;
 }
 
 export default function Header({ onMenuToggle }: HeaderProps) {

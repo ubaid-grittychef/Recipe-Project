@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Recipe } from "./types";
 import { getProject } from "./store";
 import { createLogger } from "./logger";
+import { withRetry } from "./utils";
 
 const log = createLogger("SitePublisher");
 
@@ -57,19 +58,40 @@ export async function publishRecipeToSite(
     published_at: recipe.published_at,
   };
 
-  const { error } = await siteDb
-    .from("recipes")
-    .upsert(siteRecipe, { onConflict: "id" });
+  // Wrap in retry for transient network/Supabase errors
+  await withRetry(async () => {
+    const { error } = await siteDb
+      .from("recipes")
+      .upsert(siteRecipe, { onConflict: "id" });
 
-  if (error) {
-    log.error("Failed to publish recipe to site", {
-      projectId,
-      recipe: recipe.title,
-      errorCode: error.code,
-      errorMsg: error.message,
-    });
-    throw new Error(`Site publish failed: ${error.message}`);
-  }
+    if (error) {
+      // Slug collision: another recipe already has this slug on the site
+      const isSlugConflict =
+        error.code === "23505" && error.message?.includes("slug");
+      if (isSlugConflict) {
+        const suffixed = { ...siteRecipe, slug: `${siteRecipe.slug}-${siteRecipe.id.slice(0, 6)}` };
+        const { error: retryErr } = await siteDb
+          .from("recipes")
+          .upsert(suffixed, { onConflict: "id" });
+        if (retryErr) {
+          throw new Error(`Site publish failed after slug fix: ${retryErr.message}`);
+        }
+        log.warn("Slug collision on site resolved with suffix", {
+          original: siteRecipe.slug,
+          fixed: suffixed.slug,
+        });
+        return;
+      }
+
+      log.error("Failed to publish recipe to site", {
+        projectId,
+        recipe: recipe.title,
+        errorCode: error.code,
+        errorMsg: error.message,
+      });
+      throw new Error(`Site publish failed: ${error.message}`);
+    }
+  }, 3, 1000, 15000);
 
   log.info("Recipe published to site", {
     projectId,
@@ -288,6 +310,10 @@ ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public read access" ON recipes;
 CREATE POLICY "Public read access" ON recipes
   FOR SELECT TO anon, authenticated USING (status = 'published');
+
+DROP POLICY IF EXISTS "Service role write access" ON recipes;
+CREATE POLICY "Service role write access" ON recipes
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 GRANT SELECT ON recipes TO anon, authenticated;
 `;

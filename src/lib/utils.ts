@@ -64,11 +64,17 @@ export function checkRateLimit(key: string, maxHits: number, windowMs: number): 
 export async function withRetry<T>(
   fn: () => Promise<T>,
   maxAttempts = 3,
-  baseDelayMs = 1000
+  baseDelayMs = 1000,
+  timeoutMs = 30000
 ): Promise<T> {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      return await fn();
+      return await Promise.race([
+        fn(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Request timeout after ${timeoutMs}ms`)), timeoutMs)
+        ),
+      ]);
     } catch (err) {
       if (attempt === maxAttempts) throw err;
       await new Promise((r) =>

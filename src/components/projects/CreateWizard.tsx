@@ -206,6 +206,16 @@ export default function CreateWizard() {
       setStep(0);
       return;
     }
+    if (!form.niche.trim()) {
+      toast.error("Niche is required");
+      setStep(0);
+      return;
+    }
+    if (form.sheet_url.trim() && !form.sheet_url.trim().startsWith("http")) {
+      toast.error("Google Sheet URL must start with http");
+      setStep(1);
+      return;
+    }
     setSubmitting(true);
     try {
       const restaurantCategory = form.restaurant_category?.trim();

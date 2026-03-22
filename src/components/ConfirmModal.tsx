@@ -46,14 +46,20 @@ export function useConfirm(): [
   }
 
   const dialog = state ? (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") answer(false);
+        if (e.key === "Enter") answer(true);
+      }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={() => answer(false)}
       />
       {/* Modal */}
-      <div className="relative w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl">
+      <div className="relative w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl" role="dialog" aria-modal="true">
         <button
           onClick={() => answer(false)}
           className="absolute right-4 top-4 rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -75,6 +81,7 @@ export function useConfirm(): [
 
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
+            autoFocus
             onClick={() => answer(false)}
             className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent"
           >

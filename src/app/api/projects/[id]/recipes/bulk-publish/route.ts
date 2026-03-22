@@ -108,7 +108,7 @@ export async function POST(
   } catch (error) {
     log.error("Bulk publish failed", {}, error);
     return NextResponse.json(
-      { error: "Bulk publish failed", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Bulk publish failed" },
       { status: 500 }
     );
   }

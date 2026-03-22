@@ -241,7 +241,9 @@ export default function RecipesClient({ id, projectName, initialRecipes, initial
     const a = document.createElement("a");
     a.href = url;
     a.download = `recipes-${id}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success(`Exported ${selected.length} recipes`);
   }

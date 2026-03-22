@@ -60,6 +60,14 @@ export async function POST(
         restaurant_name = separatorMatch[2].trim() || null;
       }
 
+      // Enforce per-keyword length limit
+      if (keyword.length > 200) {
+        keyword = keyword.slice(0, 200);
+      }
+      if (restaurant_name && restaurant_name.length > 200) {
+        restaurant_name = restaurant_name.slice(0, 200);
+      }
+
       if (keyword) {
         rows.push({ keyword, restaurant_name });
       }
@@ -67,6 +75,14 @@ export async function POST(
 
     if (rows.length === 0) {
       return NextResponse.json({ error: "No valid keywords found" }, { status: 400 });
+    }
+
+    // Enforce max keywords per request to prevent abuse
+    if (rows.length > 500) {
+      return NextResponse.json(
+        { error: "Too many keywords. Maximum 500 per request." },
+        { status: 400 }
+      );
     }
 
     const created = await createBuiltInKeywords(id, rows);

@@ -134,7 +134,7 @@ export async function generateRecipe(
 
 ${toneInstructions[tone]}
 
-Create a COMPLETE, SEO-OPTIMIZED recipe article for: "${keyword}"
+Create a COMPLETE, SEO-OPTIMIZED recipe article for: "${keyword.replace(/[\\"]/g, "")}"
 ${restaurantContext}
 Niche: ${niche}
 
@@ -237,13 +237,22 @@ CRITICAL REQUIREMENTS:
     .replace(/```\n?/g, "")
     .trim();
 
+  if (!cleaned.startsWith("{")) {
+    log.error("Invalid response from OpenAI — not JSON", {
+      keyword,
+      responseLength: cleaned.length,
+      firstChars: cleaned.slice(0, 500),
+    });
+    throw new Error(`Invalid response from OpenAI for "${keyword}" — expected JSON object`);
+  }
+
   let rawParsed: unknown;
   try {
     rawParsed = JSON.parse(cleaned);
   } catch (parseErr) {
     log.error(
       "Failed to parse OpenAI JSON response",
-      { keyword, responsePreview: cleaned.slice(0, 200) },
+      { keyword, responseLength: cleaned.length, responsePreview: cleaned.slice(0, 500) },
       parseErr
     );
     throw new Error(`Failed to parse recipe JSON for "${keyword}"`);

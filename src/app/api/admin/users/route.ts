@@ -2,20 +2,21 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAllProfiles } from "@/lib/store";
 import { createLogger } from "@/lib/logger";
+import { requireAuth } from "@/lib/auth-guard";
 
 const log = createLogger("API:AdminUsers");
 
 export async function GET() {
   try {
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
+
+    // Additional admin role check
     const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
+      .eq("id", auth.userId)
       .single();
     if (profile?.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

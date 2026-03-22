@@ -31,7 +31,7 @@ export default function AppShellClient({ children, userRole, userEmail, userFull
         userFullName={userFullName}
       />
       <div className="lg:pl-64">
-        <Header onMenuToggle={() => setMobileOpen(true)} userRole={userRole} />
+        <Header onMenuToggle={() => setMobileOpen(true)} />
         <main className="min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </>

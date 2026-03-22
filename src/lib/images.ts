@@ -80,13 +80,27 @@ export async function fetchRecipeImage(
     }
 
     const photo = data.photos[0];
+    const imageUrl = photo.src.large;
+
+    // Validate URL before returning
+    try {
+      const parsed = new URL(imageUrl);
+      if (!parsed.protocol.startsWith("http")) {
+        log.warn("Invalid image URL protocol", { imageUrl });
+        return null;
+      }
+    } catch {
+      log.warn("Malformed image URL from Pexels", { imageUrl });
+      return null;
+    }
+
     log.info("Image found", {
       searchTerm,
       photoId: photo.id,
       photographer: photo.photographer,
     });
 
-    return photo.src.large;
+    return imageUrl;
   } catch (err) {
     log.error("Image fetch failed", {
       searchTerm,

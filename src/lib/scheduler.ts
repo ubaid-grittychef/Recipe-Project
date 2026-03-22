@@ -19,7 +19,9 @@ function parseDays(raw: string): number[] {
     if (!Array.isArray(parsed) || !parsed.every((n: unknown) => typeof n === "number")) {
       return [1, 2, 3, 4, 5];
     }
-    return parsed;
+    // Validate ISO day range: 1 (Mon) – 7 (Sun)
+    const valid = parsed.filter((n: number) => n >= 1 && n <= 7);
+    return valid.length > 0 ? valid : [1, 2, 3, 4, 5];
   } catch {
     return [1, 2, 3, 4, 5];
   }

@@ -21,11 +21,19 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [recipes, categories, restaurants] = await Promise.all([
-    getAllRecipes(),
-    getCategories(),
-    getRestaurantNames(),
-  ]);
+  let recipes: Awaited<ReturnType<typeof getAllRecipes>> = [];
+  let categories: Awaited<ReturnType<typeof getCategories>> = [];
+  let restaurants: Awaited<ReturnType<typeof getRestaurantNames>> = [];
+
+  try {
+    [recipes, categories, restaurants] = await Promise.all([
+      getAllRecipes(),
+      getCategories(),
+      getRestaurantNames(),
+    ]);
+  } catch {
+    // Supabase unavailable — fall through with empty arrays to show "coming soon" state
+  }
 
   const featured = recipes.slice(0, 3);
   const latest = recipes.slice(3, 15);

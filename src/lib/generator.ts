@@ -101,9 +101,10 @@ async function _runGeneration(projectId: string): Promise<{
     if (!project.sheet_url) {
       // --- Built-in queue path ---
       const all = await getBuiltInKeywords(projectId, "pending");
-      totalPending = all.length;
-      keywords = all.slice(0, project.recipes_per_day).map((k) => ({
-        keyword: k.keyword,
+      const validAll = all.filter((k) => k.keyword && k.keyword.trim());
+      totalPending = validAll.length;
+      keywords = validAll.slice(0, project.recipes_per_day).map((k) => ({
+        keyword: k.keyword.trim(),
         restaurant: k.restaurant_name,
         builtInId: k.id,
       }));
@@ -169,7 +170,7 @@ async function _runGeneration(projectId: string): Promise<{
           if (kw.builtInId) {
             await updateBuiltInKeyword(kw.builtInId, { status: "done", processed_at: new Date().toISOString() });
           } else {
-            await markKeywordDone(project.sheet_url!, project.sheet_status_column, kw.row!, "done");
+            if (project.sheet_url) await markKeywordDone(project.sheet_url, project.sheet_status_column, kw.row!, "done");
           }
           const kwLog: KeywordLog = {
             id: generateId(),
@@ -345,8 +346,8 @@ async function _runGeneration(projectId: string): Promise<{
           if (kw.builtInId) {
             await updateBuiltInKeyword(kw.builtInId, { status: "failed", error_reason: errorMsg, processed_at: new Date().toISOString() });
           } else {
-            await markKeywordDone(
-              project.sheet_url!,
+            if (project.sheet_url) await markKeywordDone(
+              project.sheet_url,
               project.sheet_status_column,
               kw.row!,
               "failed",
