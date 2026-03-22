@@ -32,15 +32,15 @@ export default function AccessRequiredPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm max-w-md w-full p-8 text-center">
+    <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4">
+      <div className="bg-card rounded-2xl border border-border shadow-sm max-w-md w-full p-8 text-center">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-brand-50 mb-4">
           <Sparkles className="h-7 w-7 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
           Start Building Recipe Sites
         </h1>
-        <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+        <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
           Get full access to Recipe Factory — AI generation, unlimited projects, and one-click Vercel deploys.
         </p>
 
@@ -53,7 +53,7 @@ export default function AccessRequiredPage() {
             "SEO-optimized templates",
             "Scheduled auto-publishing",
           ].map((f) => (
-            <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+            <li key={f} className="flex items-center gap-2 text-sm text-foreground">
               <Check className="h-4 w-4 text-green-500 shrink-0" />
               {f}
             </li>
@@ -61,8 +61,8 @@ export default function AccessRequiredPage() {
         </ul>
 
         <div className="mb-4">
-          <p className="text-3xl font-bold text-slate-900">$29<span className="text-base font-normal text-slate-500">/month</span></p>
-          <p className="text-xs text-slate-400 mt-1">Cancel anytime · No setup fee</p>
+          <p className="text-3xl font-bold text-foreground">$29<span className="text-base font-normal text-muted-foreground">/month</span></p>
+          <p className="text-xs text-muted-foreground mt-1">Cancel anytime · No setup fee</p>
         </div>
 
         <button
@@ -77,7 +77,7 @@ export default function AccessRequiredPage() {
         <button
           onClick={handleSignOut}
           disabled={signOutLoading}
-          className="mt-3 w-full text-sm text-slate-400 hover:text-slate-600 py-2"
+          className="mt-3 w-full text-sm text-muted-foreground hover:text-foreground py-2"
         >
           {signOutLoading ? "Signing out..." : "Sign out"}
         </button>

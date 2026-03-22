@@ -278,8 +278,8 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
       ]} />
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Deploy & Domains</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-foreground">Deploy & Domains</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Deploy <span className="font-medium">{project.name}</span> as a live website and connect your custom domain
         </p>
       </div>
@@ -293,7 +293,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                 <img
                   src={project.logo_url}
                   alt={project.name}
-                  className="h-14 w-14 shrink-0 rounded-xl object-contain border border-slate-200 bg-white p-1"
+                  className="h-14 w-14 shrink-0 rounded-xl object-contain border border-border bg-card p-1"
                 />
               ) : (
                 <div
@@ -305,7 +305,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               )}
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Your website is live</p>
-                <p className="mt-0.5 text-lg font-bold text-slate-900">{project.name}</p>
+                <p className="mt-0.5 text-lg font-bold text-foreground">{project.name}</p>
                 <a
                   href={project.domain ? `https://${project.domain}` : project.vercel_deployment_url}
                   target="_blank"
@@ -331,7 +331,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
       )}
 
       {/* Deployment Status Card */}
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
+      <div className="mb-6 rounded-xl border border-border bg-card p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -339,7 +339,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               project.deployment_status === "deployed" ? "bg-emerald-50"
               : project.deployment_status === "deploying" ? "bg-blue-50"
               : project.deployment_status === "failed" ? "bg-red-50"
-              : "bg-slate-50"
+              : "bg-muted/50"
             )}>
               {project.deployment_status === "deployed" ? (
                 <CheckCircle2 className="h-6 w-6 text-emerald-500" />
@@ -348,11 +348,11 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               ) : project.deployment_status === "failed" ? (
                 <XCircle className="h-6 w-6 text-red-500" />
               ) : (
-                <Server className="h-6 w-6 text-slate-400" />
+                <Server className="h-6 w-6 text-muted-foreground" />
               )}
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900">
+              <h3 className="font-semibold text-foreground">
                 {project.deployment_status === "deployed" ? "Site is Live"
                 : project.deployment_status === "deploying" ? "Deploying…"
                 : project.deployment_status === "failed" ? "Deployment Failed"
@@ -369,15 +369,15 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                   <ExternalLink className="h-3 w-3" />
                 </a>
               ) : (
-                <p className="mt-0.5 text-sm text-slate-400">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {project.deployment_status === "deploying"
                     ? "Uploading files and building…"
                     : "Click deploy to publish your recipe site"}
                 </p>
               )}
               {project.template_variant && (
-                <p className="mt-0.5 text-xs text-slate-400">
-                  Template: <span className={cn("font-medium", project.template_variant === "premium" ? "text-violet-600" : "text-slate-500")}>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Template: <span className={cn("font-medium", project.template_variant === "premium" ? "text-violet-600" : "text-muted-foreground")}>
                     {project.template_variant === "premium" ? "Premium" : "Default"}
                   </span>
                 </p>
@@ -390,7 +390,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
               <button
                 onClick={handleDeploy}
                 disabled={deploying}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50"
               >
                 <RefreshCw className={cn("h-4 w-4", deploying && "animate-spin")} />
                 Redeploy
@@ -426,13 +426,13 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
         </div>
 
         {/* Pre-deploy checklist — always visible */}
-        <div className="mt-6 rounded-lg border border-slate-100 bg-slate-50 p-4">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Deployment Checklist</p>
+        <div className="mt-6 rounded-lg border border-border/50 bg-muted/50 p-4">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deployment Checklist</p>
           <ul className="space-y-2">
             {checks.map((check) => (
               <li key={check.label} className="flex items-center gap-2 text-sm">
                 {check.loading ? (
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-400" />
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
                 ) : check.ok ? (
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                 ) : check.warning ? (
@@ -441,7 +441,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                   <XCircle className="h-4 w-4 shrink-0 text-red-400" />
                 )}
                 <span className={cn(
-                  check.ok ? "text-slate-600"
+                  check.ok ? "text-muted-foreground"
                   : check.warning ? "text-amber-700"
                   : "text-red-700"
                 )}>
@@ -460,25 +460,25 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
       </div>
 
       {/* Custom Domain */}
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
+      <div className="mb-6 rounded-xl border border-border bg-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Globe className="h-5 w-5 text-brand-500" />
-          <h3 className="font-semibold text-slate-900">Custom Domain</h3>
+          <h3 className="font-semibold text-foreground">Custom Domain</h3>
         </div>
 
         {project.domain ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+            <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
               <div className="flex items-center gap-3">
                 <Shield className="h-5 w-5 text-emerald-500" />
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{project.domain}</p>
-                  <p className="text-xs text-slate-400">Custom domain</p>
+                  <p className="text-sm font-medium text-foreground">{project.domain}</p>
+                  <p className="text-xs text-muted-foreground">Custom domain</p>
                 </div>
               </div>
               <button
                 onClick={handleRemoveDomain}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -493,10 +493,10 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                 {domainVerification.verification && Array.isArray(domainVerification.verification) && (
                   <div className="mt-3 space-y-2">
                     {domainVerification.verification.map((v, i) => (
-                      <div key={i} className="rounded-md bg-white p-3 text-xs font-mono">
-                        <p className="text-slate-500">Type: <span className="text-slate-900">{v.type}</span></p>
-                        <p className="text-slate-500">Name: <span className="text-slate-900">{v.domain}</span></p>
-                        <p className="text-slate-500">Value: <span className="text-slate-900 break-all">{v.value}</span></p>
+                      <div key={i} className="rounded-md bg-card p-3 text-xs font-mono">
+                        <p className="text-muted-foreground">Type: <span className="text-foreground">{v.type}</span></p>
+                        <p className="text-muted-foreground">Name: <span className="text-foreground">{v.domain}</span></p>
+                        <p className="text-muted-foreground">Value: <span className="text-foreground break-all">{v.value}</span></p>
                       </div>
                     ))}
                   </div>
@@ -506,7 +506,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
           </div>
         ) : (
           <div>
-            <p className="mb-3 text-sm text-slate-500">
+            <p className="mb-3 text-sm text-muted-foreground">
               Connect your own domain to this recipe site.
               {project.deployment_status !== "deployed" && (
                 <span className="text-amber-600"> Deploy the site first.</span>
@@ -519,7 +519,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                 onChange={(e) => setDomainInput(e.target.value)}
                 placeholder="e.g. copycatkitchen.com"
                 disabled={project.deployment_status !== "deployed"}
-                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
+                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20 disabled:opacity-50"
               />
               <button
                 onClick={handleAddDomain}
@@ -536,17 +536,17 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
 
       {/* Site Database Management */}
       {project.site_supabase_url && (
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div className="mb-6 rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-2 mb-1">
-            <Database className="h-5 w-5 text-slate-500" />
-            <h3 className="font-semibold text-slate-900">Site Database</h3>
+            <Database className="h-5 w-5 text-muted-foreground" />
+            <h3 className="font-semibold text-foreground">Site Database</h3>
           </div>
-          <p className="mb-4 text-sm text-slate-500">
+          <p className="mb-4 text-sm text-muted-foreground">
             Reusing this Supabase project for a new website? Reset the database to wipe all recipes and start fresh — your credentials stay the same.
           </p>
           <div className="flex items-center gap-3">
             {siteStatus && (
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-muted-foreground">
                 {siteStatus.hasTable ? `${siteStatus.recipeCount} recipe${siteStatus.recipeCount !== 1 ? "s" : ""} in site DB` : "No table yet"}
               </span>
             )}
@@ -563,16 +563,16 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
       )}
 
       {/* Deployment History */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <h3 className="mb-4 font-semibold text-slate-900">Deployment History</h3>
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="mb-4 font-semibold text-foreground">Deployment History</h3>
         {deployments.length === 0 ? (
-          <p className="text-sm text-slate-400">No deployments yet. Click Deploy to publish your site.</p>
+          <p className="text-sm text-muted-foreground">No deployments yet. Click Deploy to publish your site.</p>
         ) : (
           <div className="space-y-3">
             {deployments.map((dep) => (
               <div
                 key={dep.id}
-                className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3"
+                className="flex items-center justify-between rounded-lg border border-border/50 px-4 py-3"
               >
                 <div className="flex items-center gap-3">
                   {dep.status === "ready" ? (
@@ -583,7 +583,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                     <XCircle className="h-4 w-4 text-red-500" />
                   )}
                   <div>
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-foreground">
                       {dep.url ? (
                         <a
                           href={dep.url}
@@ -594,12 +594,12 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                           {dep.url}
                         </a>
                       ) : (
-                        <span className="text-slate-400">
+                        <span className="text-muted-foreground">
                           {dep.status === "error" ? dep.error_message || "Failed" : "Building…"}
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-slate-400">{formatDate(dep.created_at)}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(dep.created_at)}</p>
                   </div>
                 </div>
                 <span className={cn(
@@ -607,7 +607,7 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
                   dep.status === "ready" && "bg-emerald-100 text-emerald-700",
                   (dep.status === "building" || dep.status === "queued") && "bg-blue-100 text-blue-700",
                   dep.status === "error" && "bg-red-100 text-red-700",
-                  dep.status === "canceled" && "bg-slate-100 text-slate-500"
+                  dep.status === "canceled" && "bg-secondary text-muted-foreground"
                 )}>
                   {dep.status}
                 </span>

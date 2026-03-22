@@ -44,35 +44,35 @@ export default function AdminUsersClient({ profiles: initial, currentUserId }: P
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Users</h1>
-          <p className="text-sm text-slate-500 mt-1">{profiles.length} total user{profiles.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-2xl font-bold text-foreground">Users</h1>
+          <p className="text-sm text-muted-foreground mt-1">{profiles.length} total user{profiles.length !== 1 ? "s" : ""}</p>
         </div>
         <input
           type="text"
           placeholder="Search by email or name…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100 w-64"
+          className="rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20 w-64"
         />
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-muted/50 border-b border-border">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-slate-600">User</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-600">Role</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-600">Subscription</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-600">Joined</th>
-              <th className="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">User</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Role</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Subscription</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Joined</th>
+              <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border/50">
             {filtered.map((profile) => (
-              <tr key={profile.id} className="hover:bg-slate-50 transition-colors">
+              <tr key={profile.id} className="hover:bg-accent transition-colors">
                 <td className="px-4 py-3">
-                  <div className="font-medium text-slate-900">{profile.full_name || "—"}</div>
-                  <div className="text-slate-500 text-xs">{profile.email}</div>
+                  <div className="font-medium text-foreground">{profile.full_name || "—"}</div>
+                  <div className="text-muted-foreground text-xs">{profile.email}</div>
                   {profile.id === currentUserId && (
                     <span className="text-xs text-brand-500 font-medium">You</span>
                   )}
@@ -81,7 +81,7 @@ export default function AdminUsersClient({ profiles: initial, currentUserId }: P
                   <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                     profile.role === "admin"
                       ? "bg-purple-100 text-purple-700"
-                      : "bg-slate-100 text-slate-600"
+                      : "bg-secondary text-muted-foreground"
                   }`}>
                     {profile.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
                     {profile.role}
@@ -99,12 +99,12 @@ export default function AdminUsersClient({ profiles: initial, currentUserId }: P
                     {profile.subscription_status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-500 text-xs">
+                <td className="px-4 py-3 text-muted-foreground text-xs">
                   {new Date(profile.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-right">
                   {loading === profile.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-400 ml-auto" />
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-auto" />
                   ) : (
                     <div className="flex items-center justify-end gap-3">
                       <button
@@ -122,7 +122,7 @@ export default function AdminUsersClient({ profiles: initial, currentUserId }: P
                           onClick={() => patch(profile.id, {
                             role: profile.role === "admin" ? "user" : "admin",
                           })}
-                          className="text-xs text-slate-500 hover:underline"
+                          className="text-xs text-muted-foreground hover:underline"
                         >
                           {profile.role === "admin" ? "Remove admin" : "Make admin"}
                         </button>
@@ -134,7 +134,7 @@ export default function AdminUsersClient({ profiles: initial, currentUserId }: P
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-400 text-sm">
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground text-sm">
                   {search ? "No users match your search" : "No users yet"}
                 </td>
               </tr>

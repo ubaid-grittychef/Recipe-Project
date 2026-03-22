@@ -31,7 +31,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                       "border-2 border-brand-500 bg-brand-50 text-brand-600",
                     !isComplete &&
                       !isCurrent &&
-                      "border-2 border-slate-200 bg-white text-slate-400"
+                      "border-2 border-border bg-card text-muted-foreground"
                   )}
                 >
                   {isComplete ? (
@@ -43,7 +43,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                 <span
                   className={cn(
                     "hidden text-xs font-medium lg:block",
-                    isCurrent ? "text-brand-600" : "text-slate-400"
+                    isCurrent ? "text-brand-600" : "text-muted-foreground"
                   )}
                 >
                   {label}
@@ -53,7 +53,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                 <div
                   className={cn(
                     "mx-3 h-0.5 flex-1",
-                    isComplete ? "bg-brand-500" : "bg-slate-200"
+                    isComplete ? "bg-brand-500" : "bg-border"
                   )}
                 />
               )}

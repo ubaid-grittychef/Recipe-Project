@@ -24,9 +24,9 @@ const STEPS = [
     title: "1. Configure API Keys",
     description: "Set up the environment variables that power the factory.",
     content: (
-      <div className="space-y-3 text-sm text-slate-600">
+      <div className="space-y-3 text-sm text-muted-foreground">
         <p>
-          Create a <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">.env.local</code> file in
+          Create a <code className="rounded bg-secondary px-1.5 py-0.5 text-xs">.env.local</code> file in
           the project root with these keys:
         </p>
         <EnvBlock
@@ -46,7 +46,7 @@ const STEPS = [
             "NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key",
           ]}
         />
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-muted-foreground">
           Get keys from:{" "}
           <ExtLink href="https://platform.openai.com/api-keys">OpenAI</ExtLink>
           {" · "}
@@ -72,7 +72,7 @@ const STEPS = [
     title: "3. Create a Recipe Site Project",
     description: "Use the wizard to configure your new recipe website.",
     content: (
-      <div className="space-y-3 text-sm text-slate-600">
+      <div className="space-y-3 text-sm text-muted-foreground">
         <p>
           Go to{" "}
           <Link href="/projects/new" className="text-brand-500 hover:text-brand-600">
@@ -97,25 +97,25 @@ const STEPS = [
     title: "4. Set Up Your Google Sheet",
     description: "Create a Google Sheet with your target keywords.",
     content: (
-      <div className="space-y-3 text-sm text-slate-600">
+      <div className="space-y-3 text-sm text-muted-foreground">
         <p>Create a Google Sheet with 3 columns:</p>
-        <div className="overflow-hidden rounded-lg border border-slate-200">
+        <div className="overflow-hidden rounded-lg border border-border">
           <table className="w-full text-xs">
-            <thead className="bg-slate-50">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-3 py-2 text-left font-medium text-slate-500">A — Keyword</th>
-                <th className="px-3 py-2 text-left font-medium text-slate-500">B — Restaurant</th>
-                <th className="px-3 py-2 text-left font-medium text-slate-500">C — Status</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">A — Keyword</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">B — Restaurant</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">C — Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              <tr><td className="px-3 py-2">big mac recipe</td><td className="px-3 py-2">McDonald&apos;s</td><td className="px-3 py-2 text-slate-400">pending</td></tr>
-              <tr><td className="px-3 py-2">crunchwrap supreme</td><td className="px-3 py-2">Taco Bell</td><td className="px-3 py-2 text-slate-400">pending</td></tr>
-              <tr><td className="px-3 py-2">chicken sandwich recipe</td><td className="px-3 py-2">Chick-fil-A</td><td className="px-3 py-2 text-slate-400">pending</td></tr>
+            <tbody className="divide-y divide-border/50">
+              <tr><td className="px-3 py-2">big mac recipe</td><td className="px-3 py-2">McDonald&apos;s</td><td className="px-3 py-2 text-muted-foreground">pending</td></tr>
+              <tr><td className="px-3 py-2">crunchwrap supreme</td><td className="px-3 py-2">Taco Bell</td><td className="px-3 py-2 text-muted-foreground">pending</td></tr>
+              <tr><td className="px-3 py-2">chicken sandwich recipe</td><td className="px-3 py-2">Chick-fil-A</td><td className="px-3 py-2 text-muted-foreground">pending</td></tr>
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-muted-foreground">
           Share the sheet with your Google service account email. Leave status blank or &quot;pending&quot; — the factory will update it to &quot;done&quot; after generation.
         </p>
       </div>
@@ -134,7 +134,7 @@ const STEPS = [
     title: "6. Generate Recipes",
     description: "Run the AI generation engine to create recipe content.",
     content: (
-      <div className="space-y-3 text-sm text-slate-600">
+      <div className="space-y-3 text-sm text-muted-foreground">
         <p>From the project detail page, click <strong>Manual Run</strong> or set the project status to <strong>Active</strong> for automated daily generation.</p>
         <p>Each run will:</p>
         <ol className="list-decimal space-y-1 pl-5">
@@ -153,11 +153,11 @@ const STEPS = [
     title: "7. Deploy Your Site",
     description: "Deploy the recipe website to Vercel with one click.",
     content: (
-      <div className="space-y-3 text-sm text-slate-600">
+      <div className="space-y-3 text-sm text-muted-foreground">
         <p>From the project detail page, go to <strong>Deploy & Domains</strong>:</p>
         <ol className="list-decimal space-y-1 pl-5">
           <li>Click <strong>Deploy to Vercel</strong> — uploads the template and builds the site</li>
-          <li>Vercel assigns a <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">.vercel.app</code> URL automatically</li>
+          <li>Vercel assigns a <code className="rounded bg-secondary px-1.5 py-0.5 text-xs">.vercel.app</code> URL automatically</li>
           <li>Your recipes are already in the site database — the site is live!</li>
         </ol>
       </div>
@@ -169,14 +169,14 @@ const STEPS = [
     title: "8. Connect Your Domain",
     description: "Point your custom domain to the deployed site.",
     content: (
-      <div className="space-y-3 text-sm text-slate-600">
+      <div className="space-y-3 text-sm text-muted-foreground">
         <p>After deploying, add your custom domain in the Deploy & Domains page:</p>
         <ol className="list-decimal space-y-1 pl-5">
           <li>Enter your domain (e.g. copycatkitchen.com)</li>
           <li>Add the DNS records shown to your domain registrar</li>
           <li>SSL certificate is automatic</li>
         </ol>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-muted-foreground">
           Vercel handles HTTPS, CDN caching, and edge distribution automatically.
         </p>
       </div>
@@ -199,8 +199,8 @@ export default function GuidePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Setup Guide</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-foreground">Setup Guide</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Complete these steps to go from zero to a live recipe SEO site
         </p>
       </div>
@@ -212,29 +212,29 @@ export default function GuidePage() {
           return (
             <div
               key={step.id}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+              className="overflow-hidden rounded-xl border border-border bg-card"
             >
               <button
                 onClick={() => toggle(step.id)}
-                className="flex w-full items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50"
+                className="flex w-full items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-accent"
               >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50">
                   <Icon className="h-4.5 w-4.5 text-brand-500" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900">{step.title}</h3>
-                  <p className="mt-0.5 text-sm text-slate-500">
+                  <h3 className="font-semibold text-foreground">{step.title}</h3>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {step.description}
                   </p>
                 </div>
                 <ArrowRight
-                  className={`mt-1 h-4 w-4 shrink-0 text-slate-400 transition-transform ${
+                  className={`mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
                     open ? "rotate-90" : ""
                   }`}
                 />
               </button>
               {open && (
-                <div className="border-t border-slate-100 px-5 py-4 pl-[4.25rem]">
+                <div className="border-t border-border/50 px-5 py-4 pl-[4.25rem]">
                   {step.content}
                 </div>
               )}
@@ -272,7 +272,7 @@ function FactoryDbStep() {
   }
 
   return (
-    <div className="space-y-3 text-sm text-slate-600">
+    <div className="space-y-3 text-sm text-muted-foreground">
       <p>
         Without Supabase, project data lives in memory and resets on server restart.
         To persist data permanently, set up the factory database:
@@ -283,16 +283,16 @@ function FactoryDbStep() {
           <ExtLink href="https://supabase.com/dashboard">supabase.com</ExtLink>
         </li>
         <li>
-          Copy your project URL and Anon Key into <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">.env.local</code>
-          {" "}as <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>
+          Copy your project URL and Anon Key into <code className="rounded bg-secondary px-1.5 py-0.5 text-xs">.env.local</code>
+          {" "}as <code className="rounded bg-secondary px-1.5 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+          <code className="rounded bg-secondary px-1.5 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>
         </li>
         <li>Open the SQL Editor in Supabase and run this migration:</li>
       </ol>
       <div className="relative">
         <button
           onClick={copySql}
-          className="absolute right-2 top-2 flex items-center gap-1.5 rounded-md bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-sm hover:bg-white"
+          className="absolute right-2 top-2 flex items-center gap-1.5 rounded-md bg-card/80 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm hover:bg-card"
         >
           {copied ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
@@ -305,8 +305,8 @@ function FactoryDbStep() {
           {FACTORY_SQL}
         </pre>
       </div>
-      <p className="text-xs text-slate-400">
-        The full migration file is also available as <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">factory-schema.sql</code> in the project root.
+      <p className="text-xs text-muted-foreground">
+        The full migration file is also available as <code className="rounded bg-secondary px-1.5 py-0.5 text-xs">factory-schema.sql</code> in the project root.
       </p>
     </div>
   );
@@ -323,7 +323,7 @@ function SiteDbStep() {
   }
 
   return (
-    <div className="space-y-3 text-sm text-slate-600">
+    <div className="space-y-3 text-sm text-muted-foreground">
       <ol className="list-decimal space-y-1 pl-5">
         <li>
           Go to{" "}
@@ -341,7 +341,7 @@ function SiteDbStep() {
       <div className="relative">
         <button
           onClick={copySql}
-          className="absolute right-2 top-2 flex items-center gap-1.5 rounded-md bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-sm hover:bg-white"
+          className="absolute right-2 top-2 flex items-center gap-1.5 rounded-md bg-card/80 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm hover:bg-card"
         >
           {copied ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
@@ -369,7 +369,7 @@ function EnvBlock({ lines }: { lines: string[] }) {
           toast.success("Copied to clipboard");
           setTimeout(() => setCopied(false), 2000);
         }}
-        className="absolute right-2 top-2 flex items-center gap-1.5 rounded-md bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-sm hover:bg-white"
+        className="absolute right-2 top-2 flex items-center gap-1.5 rounded-md bg-card/80 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm hover:bg-card"
       >
         {copied ? (
           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />

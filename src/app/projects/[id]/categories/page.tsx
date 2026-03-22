@@ -23,11 +23,11 @@ export default async function CategoriesPage({ params }: Props) {
 
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
             <Tag className="h-6 w-6 text-brand-500" />
             Categories
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Auto-created from AI-generated recipe categories.{" "}
             {totalRecipes > 0 && `${totalRecipes} recipes across ${categories.length} categories.`}
           </p>
@@ -41,9 +41,9 @@ export default async function CategoriesPage({ params }: Props) {
           description="Categories are created automatically when recipes are generated."
         />
       ) : (
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-border bg-card shadow-sm">
         {true ? (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border/50">
             {categories.map((cat) => (
               <div key={cat.id} className="flex items-center justify-between px-5 py-4">
                 <div className="flex items-center gap-3">
@@ -51,18 +51,18 @@ export default async function CategoriesPage({ params }: Props) {
                     <Tag className="h-4 w-4 text-brand-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{cat.name}</p>
-                    <p className="text-xs text-slate-400">/{cat.slug}</p>
+                    <p className="text-sm font-semibold text-foreground">{cat.name}</p>
+                    <p className="text-xs text-muted-foreground">/{cat.slug}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5 text-sm text-slate-500">
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <BookOpen className="h-4 w-4" />
                     {cat.recipe_count} recipe{cat.recipe_count !== 1 ? "s" : ""}
                   </span>
                   <Link
                     href={`/projects/${id}/recipes?category=${encodeURIComponent(cat.name)}`}
-                    className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent"
                   >
                     View Recipes
                   </Link>

@@ -141,11 +141,11 @@ export default function QueuePage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
             <ListChecks className="h-6 w-6 text-brand-500" />
             Keyword Queue
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Keywords are processed in order when you run generation.
           </p>
         </div>
@@ -165,19 +165,19 @@ export default function QueuePage() {
       </div>
 
       {/* Add keywords */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">Add Keywords</h2>
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold text-foreground">Add Keywords</h2>
         <textarea
           value={pasteText}
           onChange={(e) => setPasteText(e.target.value)}
           rows={6}
           placeholder={`Paste keywords here — one per line.\nTo include a restaurant, use:\n  Big Mac copycat, McDonald's\n  KFC Original Chicken | KFC`}
-          className="w-full rounded-lg border border-slate-200 p-3 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100 resize-y"
+          className="w-full rounded-lg border border-border p-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20 resize-y"
         />
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-sm text-slate-500">
+          <span className="text-sm text-muted-foreground">
             {parsedCount > 0 ? (
-              <span className="font-medium text-slate-700">{parsedCount} keyword{parsedCount !== 1 ? "s" : ""}</span>
+              <span className="font-medium text-foreground">{parsedCount} keyword{parsedCount !== 1 ? "s" : ""}</span>
             ) : (
               "Paste keywords above"
             )}{" "}
@@ -199,9 +199,9 @@ export default function QueuePage() {
       </div>
 
       {/* Queue table */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-border bg-card shadow-sm">
         {/* Filters + actions toolbar */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+        <div className="flex items-center justify-between border-b border-border/50 px-5 py-3">
           <div className="flex gap-1">
             {(["all", "pending", "done", "failed"] as Filter[]).map((f) => (
               <button
@@ -210,7 +210,7 @@ export default function QueuePage() {
                 className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
                   filter === f
                     ? "bg-brand-50 text-brand-700"
-                    : "text-slate-500 hover:text-slate-700"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {f === "all" ? `All (${total})` : f === "pending" ? `Pending (${counts.pending})` : f === "done" ? `Done (${counts.done})` : `Failed (${counts.failed})`}
@@ -230,7 +230,7 @@ export default function QueuePage() {
             {counts.done > 0 && (
               <button
                 onClick={handleClearDone}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent"
               >
                 Clear Done
               </button>
@@ -248,12 +248,12 @@ export default function QueuePage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : keywords.length === 0 ? (
           <div className="py-12 text-center">
             <ListChecks className="mx-auto mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               {filter === "all"
                 ? "No keywords yet. Paste some above to get started."
                 : `No ${filter} keywords.`}
@@ -262,7 +262,7 @@ export default function QueuePage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-xs font-medium text-slate-500">
+              <tr className="border-b border-border/50 text-left text-xs font-medium text-muted-foreground">
                 <th className="px-5 py-3">Keyword</th>
                 <th className="px-4 py-3">Restaurant</th>
                 <th className="px-4 py-3">Status</th>
@@ -270,11 +270,11 @@ export default function QueuePage() {
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-border/50">
               {keywords.map((kw) => (
-                <tr key={kw.id} className="hover:bg-slate-50/50">
-                  <td className="px-5 py-3 font-medium text-slate-800">{kw.keyword}</td>
-                  <td className="px-4 py-3 text-slate-500">
+                <tr key={kw.id} className="hover:bg-accent/50">
+                  <td className="px-5 py-3 font-medium text-foreground">{kw.keyword}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
                     {kw.restaurant_name ?? <span className="text-slate-300">—</span>}
                   </td>
                   <td className="px-4 py-3">
@@ -285,13 +285,13 @@ export default function QueuePage() {
                       </p>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-400 text-xs">
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
                     {new Date(kw.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => handleDelete(kw.id)}
-                      className="rounded p-1 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                      className="rounded p-1 text-muted-foreground hover:text-red-500 hover:bg-red-50"
                       title="Remove"
                     >
                       <Trash2 className="h-4 w-4" />

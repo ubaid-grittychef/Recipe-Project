@@ -106,11 +106,11 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
       {/* Header */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-900">Publish Queue</h3>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <h3 className="text-sm font-semibold text-foreground">Publish Queue</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">
           {draftCount > 0
             ? `${draftCount} recipe${draftCount !== 1 ? "s" : ""} ready to publish`
             : "No draft recipes"}
@@ -131,7 +131,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
           <button
             onClick={() => handlePublishNow(perDay)}
             disabled={publishing}
-            className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 border border-border text-foreground rounded-lg text-sm font-medium hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             Publish {perDay} Now
           </button>
@@ -139,13 +139,13 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
       </div>
 
       {/* Schedule toggle row */}
-      <div className="border-t border-slate-100 pt-3">
+      <div className="border-t border-border/50 pt-3">
         <button
           onClick={() => setScheduleOpen((v) => !v)}
-          className="flex items-center justify-between w-full text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
+          className="flex items-center justify-between w-full text-sm font-medium text-foreground hover:text-foreground transition-colors"
         >
           <span className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-slate-400" />
+            <Calendar className="w-4 h-4 text-muted-foreground" />
             Auto-publish schedule
             {enabled && (
               <span className="ml-1 px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold uppercase tracking-wide">
@@ -154,9 +154,9 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
             )}
           </span>
           {scheduleOpen ? (
-            <ChevronUp className="w-4 h-4 text-slate-400" />
+            <ChevronUp className="w-4 h-4 text-muted-foreground" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
           )}
         </button>
 
@@ -170,40 +170,40 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
                 onChange={(e) => setEnabled(e.target.checked)}
                 className="w-4 h-4 rounded border-slate-300 text-brand-500 focus:ring-brand-300"
               />
-              <span className="text-sm text-slate-700">Enable scheduled publishing</span>
+              <span className="text-sm text-foreground">Enable scheduled publishing</span>
             </label>
 
             {enabled && (
               <>
                 {/* Time picker */}
                 <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-slate-400 shrink-0" />
-                  <label className="text-sm text-slate-600 w-28 shrink-0">Publish at</label>
+                  <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <label className="text-sm text-muted-foreground w-28 shrink-0">Publish at</label>
                   <input
                     type="time"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                    className="border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
                   />
                 </div>
 
                 {/* Quantity stepper */}
                 <div className="flex items-center gap-3">
                   <span className="w-4 shrink-0" />
-                  <label className="text-sm text-slate-600 w-28 shrink-0">Recipes / run</label>
+                  <label className="text-sm text-muted-foreground w-28 shrink-0">Recipes / run</label>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setPerDay((v) => Math.max(1, v - 1))}
-                      className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 text-base leading-none"
+                      className="w-7 h-7 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-accent text-base leading-none"
                     >
                       −
                     </button>
-                    <span className="w-8 text-center text-sm font-semibold text-slate-900">
+                    <span className="w-8 text-center text-sm font-semibold text-foreground">
                       {perDay}
                     </span>
                     <button
                       onClick={() => setPerDay((v) => Math.min(20, v + 1))}
-                      className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 text-base leading-none"
+                      className="w-7 h-7 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-accent text-base leading-none"
                     >
                       +
                     </button>
@@ -213,7 +213,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
                 {/* Day chips */}
                 <div className="flex items-center gap-3">
                   <span className="w-4 shrink-0" />
-                  <label className="text-sm text-slate-600 w-28 shrink-0">Days</label>
+                  <label className="text-sm text-muted-foreground w-28 shrink-0">Days</label>
                   <div className="flex gap-1 flex-wrap">
                     {DAYS.map((d) => (
                       <button
@@ -222,7 +222,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
                         className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
                           days.includes(d.value)
                             ? "bg-brand-500 text-white border-brand-500"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                            : "bg-card text-muted-foreground border-border hover:bg-accent"
                         }`}
                       >
                         {d.label}
@@ -233,7 +233,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
 
                 {/* Next run preview */}
                 {days.length > 0 && (
-                  <p className="text-xs text-slate-500 pl-[calc(1rem+0.75rem+7rem+0.75rem)]">
+                  <p className="text-xs text-muted-foreground pl-[calc(1rem+0.75rem+7rem+0.75rem)]">
                     {formatNextRun(time, days, perDay)}
                   </p>
                 )}
@@ -254,7 +254,7 @@ export function PublishSchedulePanel({ project, draftCount, onPublished }: Props
             <button
               onClick={handleSaveSchedule}
               disabled={saving}
-              className="w-full py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-2 bg-foreground text-white rounded-lg text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {saving ? "Saving…" : "Save Schedule"}
             </button>

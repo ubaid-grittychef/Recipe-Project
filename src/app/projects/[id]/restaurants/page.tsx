@@ -173,7 +173,7 @@ export default function RestaurantsPage({ params }: Props) {
       {ConfirmDialog}
       <Link
         href={`/projects/${id}`}
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Project
@@ -181,8 +181,8 @@ export default function RestaurantsPage({ params }: Props) {
 
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Restaurants</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-foreground">Restaurants</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             CMS entries for restaurants — each one becomes a category page on your site.
           </p>
         </div>
@@ -199,8 +199,8 @@ export default function RestaurantsPage({ params }: Props) {
 
       {/* Add / Edit Form */}
       {(adding || editingId) && (
-        <div className="mb-6 rounded-xl border border-brand-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-base font-semibold text-slate-900">
+        <div className="mb-6 rounded-xl border border-brand-200 bg-card p-6 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-foreground">
             {adding ? "Add Restaurant" : "Edit Restaurant"}
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -210,7 +210,7 @@ export default function RestaurantsPage({ params }: Props) {
                 value={form.name}
                 onChange={(e) => updateForm("name", e.target.value)}
                 placeholder="e.g. McDonald's"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </FormField>
             <FormField label="Slug" hint="Auto-generated from name">
@@ -219,7 +219,7 @@ export default function RestaurantsPage({ params }: Props) {
                 value={form.slug}
                 onChange={(e) => updateForm("slug", e.target.value)}
                 placeholder="e.g. mcdonalds"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </FormField>
             <FormField label="Description" className="sm:col-span-2">
@@ -228,7 +228,7 @@ export default function RestaurantsPage({ params }: Props) {
                 onChange={(e) => updateForm("description", e.target.value)}
                 placeholder="Short description shown on the category page"
                 rows={2}
-                className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="w-full resize-none rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </FormField>
             <FormField label="Logo URL">
@@ -237,7 +237,7 @@ export default function RestaurantsPage({ params }: Props) {
                 value={form.logo_url}
                 onChange={(e) => updateForm("logo_url", e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </FormField>
             <FormField label="Website URL">
@@ -246,7 +246,7 @@ export default function RestaurantsPage({ params }: Props) {
                 value={form.website_url}
                 onChange={(e) => updateForm("website_url", e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
             </FormField>
           </div>
@@ -266,7 +266,7 @@ export default function RestaurantsPage({ params }: Props) {
             <button
               onClick={cancelEdit}
               disabled={saving}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent disabled:opacity-50"
             >
               <X className="h-4 w-4" />
               Cancel
@@ -278,13 +278,13 @@ export default function RestaurantsPage({ params }: Props) {
       {/* Table */}
       {loading ? (
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : restaurants.length === 0 ? (
-        <div className="rounded-xl border border-slate-100 bg-slate-50 py-20 text-center">
+        <div className="rounded-xl border border-border/50 bg-muted/50 py-20 text-center">
           <ChefHat className="mx-auto h-12 w-12 text-slate-200" />
-          <p className="mt-4 text-sm font-medium text-slate-900">No restaurants yet</p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-4 text-sm font-medium text-foreground">No restaurants yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">
             Add restaurants here to create rich category pages on your site.
           </p>
           <button
@@ -296,30 +296,30 @@ export default function RestaurantsPage({ params }: Props) {
           </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-50">
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <table className="min-w-full divide-y divide-border/50">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Restaurant
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Slug
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 sm:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:table-cell">
                   Description
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 md:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground md:table-cell">
                   Website
                 </th>
-                <th className="w-24 px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-400">
+                <th className="w-24 px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border/50">
               {restaurants.map((r) => (
-                <tr key={r.id} className="transition-colors hover:bg-slate-50">
+                <tr key={r.id} className="transition-colors hover:bg-accent">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {r.logo_url ? (
@@ -330,20 +330,20 @@ export default function RestaurantsPage({ params }: Props) {
                           className="h-8 w-8 rounded-lg object-contain"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
-                          <ChefHat className="h-4 w-4 text-slate-400" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
+                          <ChefHat className="h-4 w-4 text-muted-foreground" />
                         </div>
                       )}
-                      <span className="text-sm font-medium text-slate-900">{r.name}</span>
+                      <span className="text-sm font-medium text-foreground">{r.name}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
+                    <code className="rounded bg-secondary px-1.5 py-0.5 text-xs text-muted-foreground">
                       {r.slug}
                     </code>
                   </td>
                   <td className="hidden px-4 py-3 sm:table-cell">
-                    <span className="line-clamp-1 max-w-xs text-xs text-slate-500">
+                    <span className="line-clamp-1 max-w-xs text-xs text-muted-foreground">
                       {r.description || "—"}
                     </span>
                   </td>
@@ -367,7 +367,7 @@ export default function RestaurantsPage({ params }: Props) {
                       <button
                         onClick={() => handleGenerateBio(r.id)}
                         disabled={generatingBioId === r.id || editingId === r.id || adding}
-                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-purple-50 hover:text-purple-500 disabled:opacity-40"
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-purple-50 hover:text-purple-500 disabled:opacity-40"
                         title="Auto-generate description with AI"
                       >
                         {generatingBioId === r.id ? (
@@ -379,7 +379,7 @@ export default function RestaurantsPage({ params }: Props) {
                       <button
                         onClick={() => startEdit(r)}
                         disabled={editingId === r.id || adding}
-                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
                         title="Edit"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -387,7 +387,7 @@ export default function RestaurantsPage({ params }: Props) {
                       <button
                         onClick={() => handleDelete(r.id, r.name)}
                         disabled={deletingId === r.id}
-                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
                         title="Delete"
                       >
                         {deletingId === r.id ? (
@@ -421,9 +421,9 @@ function FormField({
 }) {
   return (
     <div className={className}>
-      <label className="mb-1 block text-sm font-medium text-slate-700">
+      <label className="mb-1 block text-sm font-medium text-foreground">
         {label}
-        {hint && <span className="ml-1.5 text-xs font-normal text-slate-400">{hint}</span>}
+        {hint && <span className="ml-1.5 text-xs font-normal text-muted-foreground">{hint}</span>}
       </label>
       {children}
     </div>

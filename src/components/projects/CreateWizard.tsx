@@ -261,16 +261,16 @@ export default function CreateWizard() {
     <div className="mx-auto max-w-3xl">
       <Stepper steps={STEPS} currentStep={step} />
 
-      <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50">
             <StepIcon className="h-5 w-5 text-brand-500" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3 className="text-lg font-semibold text-foreground">
               {STEPS[step]}
             </h3>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Step {step + 1} of {STEPS.length}
             </p>
           </div>
@@ -317,15 +317,15 @@ export default function CreateWizard() {
           {step === 7 && <StepReview form={form} />}
         </div>
 
-        <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
+        <div className="mt-8 flex items-center justify-between border-t border-border/50 pt-6">
           <button
             onClick={prev}
             disabled={step === 0}
             className={cn(
               "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
               step === 0
-                ? "cursor-not-allowed text-slate-300"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "cursor-not-allowed text-muted-foreground"
+                : "text-muted-foreground hover:bg-accent"
             )}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -380,8 +380,8 @@ function Field({
     <div className="block">
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-sm font-medium text-slate-700">{label}</span>
-          {hint && <span className="ml-2 text-xs text-slate-400">{hint}</span>}
+          <span className="text-sm font-medium text-foreground">{label}</span>
+          {hint && <span className="ml-2 text-xs text-muted-foreground">{hint}</span>}
         </div>
         {action}
       </div>
@@ -407,7 +407,7 @@ function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+      className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
     />
   );
 }
@@ -429,7 +429,7 @@ function TextArea({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+      className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
     />
   );
 }
@@ -494,7 +494,7 @@ function StepBasicInfo({
           <select
             value={form.country}
             onChange={(e) => update({ country: e.target.value })}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
           >
             <option value="US">United States</option>
             <option value="UK">United Kingdom</option>
@@ -509,7 +509,7 @@ function StepBasicInfo({
           <select
             value={form.language}
             onChange={(e) => update({ language: e.target.value })}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
           >
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -555,20 +555,20 @@ function StepKeywords({
             "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-colors",
             mode === "builtin"
               ? "border-brand-400 bg-brand-50"
-              : "border-slate-200 bg-white hover:border-slate-300"
+              : "border-border bg-card hover:border-border"
           )}
         >
           <div className={cn(
             "flex h-9 w-9 items-center justify-center rounded-lg",
-            mode === "builtin" ? "bg-brand-100" : "bg-slate-100"
+            mode === "builtin" ? "bg-brand-100" : "bg-secondary"
           )}>
-            <ListChecks className={cn("h-5 w-5", mode === "builtin" ? "text-brand-600" : "text-slate-500")} />
+            <ListChecks className={cn("h-5 w-5", mode === "builtin" ? "text-brand-600" : "text-muted-foreground")} />
           </div>
           <div>
-            <p className={cn("text-sm font-semibold", mode === "builtin" ? "text-brand-900" : "text-slate-700")}>
+            <p className={cn("text-sm font-semibold", mode === "builtin" ? "text-brand-900" : "text-foreground")}>
               Built-in Queue
             </p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Paste keywords directly in the app — no Google account needed
             </p>
           </div>
@@ -584,20 +584,20 @@ function StepKeywords({
             "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-colors",
             mode === "sheets"
               ? "border-brand-400 bg-brand-50"
-              : "border-slate-200 bg-white hover:border-slate-300"
+              : "border-border bg-card hover:border-border"
           )}
         >
           <div className={cn(
             "flex h-9 w-9 items-center justify-center rounded-lg",
-            mode === "sheets" ? "bg-brand-100" : "bg-slate-100"
+            mode === "sheets" ? "bg-brand-100" : "bg-secondary"
           )}>
-            <FileSpreadsheet className={cn("h-5 w-5", mode === "sheets" ? "text-brand-600" : "text-slate-500")} />
+            <FileSpreadsheet className={cn("h-5 w-5", mode === "sheets" ? "text-brand-600" : "text-muted-foreground")} />
           </div>
           <div>
-            <p className={cn("text-sm font-semibold", mode === "sheets" ? "text-brand-900" : "text-slate-700")}>
+            <p className={cn("text-sm font-semibold", mode === "sheets" ? "text-brand-900" : "text-foreground")}>
               Google Sheets
             </p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Connect a spreadsheet — keywords are read and marked done automatically
             </p>
           </div>
@@ -783,7 +783,7 @@ function StepBranding({
             type="color"
             value={form.primary_color}
             onChange={(e) => update({ primary_color: e.target.value })}
-            className="h-9 w-9 cursor-pointer rounded-lg border-2 border-slate-200"
+            className="h-9 w-9 cursor-pointer rounded-lg border-2 border-border"
           />
         </div>
       </Field>
@@ -797,14 +797,14 @@ function StepBranding({
                 "flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-all",
                 form.font_preset === preset.id
                   ? "border-brand-500 bg-brand-50"
-                  : "border-slate-200 hover:border-slate-300"
+                  : "border-border hover:border-border"
               )}
             >
               <div>
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-foreground">
                   {preset.name}
                 </p>
-                <p className="text-xs text-slate-500">{preset.fonts}</p>
+                <p className="text-xs text-muted-foreground">{preset.fonts}</p>
               </div>
               {form.font_preset === preset.id && (
                 <CheckCircle2 className="h-5 w-5 text-brand-500" />
@@ -830,8 +830,8 @@ function StepBranding({
               id: "default" as const,
               name: "Clean & Modern",
               description: "Light, airy layout. Fast and minimal. Great for most niches.",
-              preview: "bg-white border-slate-200",
-              accent: "bg-slate-100",
+              preview: "bg-card border-border",
+              accent: "bg-secondary",
             },
             {
               id: "premium" as const,
@@ -848,7 +848,7 @@ function StepBranding({
                 "relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all",
                 form.template_variant === t.id
                   ? "border-brand-500 shadow-md"
-                  : "border-slate-200 hover:border-slate-300"
+                  : "border-border hover:border-border"
               )}
             >
               {/* Mini preview mockup */}
@@ -860,8 +860,8 @@ function StepBranding({
                   <div className={cn("h-6 flex-1 rounded opacity-40", t.accent)} />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{t.description}</p>
+              <p className="text-sm font-semibold text-foreground">{t.name}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t.description}</p>
               {form.template_variant === t.id && (
                 <CheckCircle2 className="absolute right-3 top-3 h-5 w-5 text-brand-500" />
               )}
@@ -933,7 +933,7 @@ function StepSEO({
 function StepTone({ form, update }: StepProps) {
   return (
     <>
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         Choose the writing style for all AI-generated content on this site.
       </p>
       <div className="space-y-3">
@@ -945,18 +945,18 @@ function StepTone({ form, update }: StepProps) {
               "w-full rounded-lg border p-4 text-left transition-all",
               form.content_tone === tone.id
                 ? "border-brand-500 bg-brand-50"
-                : "border-slate-200 hover:border-slate-300"
+                : "border-border hover:border-border"
             )}
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-semibold text-foreground">
                   {tone.name}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {tone.description}
                 </p>
-                <p className="mt-3 rounded-md border border-slate-100 bg-white px-3 py-2 text-xs italic text-slate-600">
+                <p className="mt-3 rounded-md border border-border/50 bg-card px-3 py-2 text-xs italic text-muted-foreground">
                   &ldquo;{tone.example}&rdquo;
                 </p>
               </div>
@@ -983,7 +983,7 @@ function StepSchedule({ form, update }: StepProps) {
           onChange={(e) =>
             update({ recipes_per_day: parseInt(e.target.value) || 1 })
           }
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
         />
       </Field>
       <Field label="Generation Time" hint="24-hour format, server timezone">
@@ -991,7 +991,7 @@ function StepSchedule({ form, update }: StepProps) {
           type="time"
           value={form.generation_time}
           onChange={(e) => update({ generation_time: e.target.value })}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
         />
       </Field>
       <label className="flex items-center gap-3">
@@ -1002,10 +1002,10 @@ function StepSchedule({ form, update }: StepProps) {
           className="h-4 w-4 rounded border-slate-300 text-brand-500 focus:ring-brand-500"
         />
         <div>
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-sm font-medium text-foreground">
             Auto-pause when keywords run out
           </span>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Generation will stop automatically when there are no more pending
             keywords in the sheet.
           </p>
@@ -1018,7 +1018,7 @@ function StepSchedule({ form, update }: StepProps) {
 function StepMonetization({ form, update }: StepProps) {
   return (
     <>
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         All fields are optional. Skip any you don&apos;t use. You can always add
         them later in project settings.
       </p>
@@ -1131,23 +1131,23 @@ function StepReview({ form }: { form: WizardFormData }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         Review your project settings. You can go back to any step to make
         changes.
       </p>
       {sections.map((section) => (
         <div
           key={section.title}
-          className="rounded-lg border border-slate-200 p-4"
+          className="rounded-lg border border-border p-4"
         >
-          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {section.title}
           </h4>
           <dl className="space-y-1.5">
             {section.items.map(([label, value]) => (
               <div key={label} className="flex items-baseline justify-between">
-                <dt className="text-sm text-slate-500">{label}</dt>
-                <dd className="max-w-[60%] truncate text-sm font-medium text-slate-900">
+                <dt className="text-sm text-muted-foreground">{label}</dt>
+                <dd className="max-w-[60%] truncate text-sm font-medium text-foreground">
                   {value || "—"}
                 </dd>
               </div>

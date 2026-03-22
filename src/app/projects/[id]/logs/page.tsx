@@ -29,19 +29,19 @@ export default async function GenerationLogsPage({ params }: Props) {
       ]} />
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Generation Logs</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-foreground">Generation Logs</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           History of all automated and manual generation runs
         </p>
       </div>
 
       {logs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-20">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card px-8 py-20">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
             <Activity className="h-8 w-8 text-brand-500" />
           </div>
-          <h3 className="mt-6 text-lg font-semibold text-slate-900">No generation runs yet</h3>
-          <p className="mt-2 max-w-sm text-center text-sm text-slate-500">
+          <h3 className="mt-6 text-lg font-semibold text-foreground">No generation runs yet</h3>
+          <p className="mt-2 max-w-sm text-center text-sm text-muted-foreground">
             Logs will appear here after the first automated or manual generation run.
           </p>
         </div>
@@ -63,7 +63,7 @@ function LogCard({ log }: { log: GenerationLog }) {
       : null;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <StatusIcon
@@ -80,28 +80,28 @@ function LogCard({ log }: { log: GenerationLog }) {
                 {config.label}
               </span>
               {duration !== null && (
-                <span className="flex items-center gap-1 text-xs text-slate-400">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {duration}s
                 </span>
               )}
             </div>
-            <p className="mt-1 text-xs text-slate-400">Started: {formatDate(log.started_at)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Started: {formatDate(log.started_at)}</p>
           </div>
         </div>
 
         <div className="flex gap-6 text-center">
           <div>
-            <p className="text-lg font-bold text-slate-900">{log.keywords_processed}</p>
-            <p className="text-[11px] text-slate-400">Processed</p>
+            <p className="text-lg font-bold text-foreground">{log.keywords_processed}</p>
+            <p className="text-[11px] text-muted-foreground">Processed</p>
           </div>
           <div>
             <p className="text-lg font-bold text-emerald-600">{log.keywords_succeeded}</p>
-            <p className="text-[11px] text-slate-400">Succeeded</p>
+            <p className="text-[11px] text-muted-foreground">Succeeded</p>
           </div>
           <div>
             <p className="text-lg font-bold text-red-500">{log.keywords_failed}</p>
-            <p className="text-[11px] text-slate-400">Failed</p>
+            <p className="text-[11px] text-muted-foreground">Failed</p>
           </div>
         </div>
       </div>

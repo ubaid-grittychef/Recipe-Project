@@ -39,17 +39,17 @@ export default function FactorySettingsPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-foreground">
             Factory Settings
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Global configuration and service connection status
           </p>
         </div>
         <button
           onClick={fetchStatus}
           disabled={loading}
-          className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -62,7 +62,7 @@ export default function FactorySettingsPage() {
 
       {loading && !status ? (
         <div className="flex h-48 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-brand-500" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-brand-500" />
         </div>
       ) : (
         <div className="space-y-4">
@@ -104,9 +104,9 @@ export default function FactorySettingsPage() {
           />
 
           {status?.scheduler && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <h3 className="font-medium text-slate-900">Scheduler</h3>
-              <p className="mt-1 text-sm text-slate-500">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-medium text-foreground">Scheduler</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {status.scheduler.activeJobs} active generation job
                 {status.scheduler.activeJobs !== 1 ? "s" : ""}
               </p>
@@ -142,12 +142,12 @@ function StatusCard({
   envVar: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-medium text-slate-900">{title}</h3>
-          <p className="mt-1 text-sm text-slate-500">{description}</p>
-          <p className="mt-1.5 font-mono text-xs text-slate-400">{envVar}</p>
+          <h3 className="font-medium text-foreground">{title}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          <p className="mt-1.5 font-mono text-xs text-muted-foreground">{envVar}</p>
         </div>
         <div title={status ? "Configured" : "Not configured"}>
           {status ? (

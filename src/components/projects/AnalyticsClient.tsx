@@ -114,13 +114,13 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
         {/* Generation History Bar Chart */}
-        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6">
+        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-6">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Generation History</h2>
-              <p className="text-xs text-slate-500">Recipes generated per week</p>
+              <h2 className="text-sm font-semibold text-foreground">Generation History</h2>
+              <p className="text-xs text-muted-foreground">Recipes generated per week</p>
             </div>
-            <div className="flex gap-1 rounded-lg border border-slate-200 p-0.5">
+            <div className="flex gap-1 rounded-lg border border-border p-0.5">
               {RANGE_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -129,7 +129,7 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
                     "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                     weekRange === opt.value
                       ? "bg-brand-500 text-white"
-                      : "text-slate-500 hover:text-slate-800"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {opt.label}
@@ -138,7 +138,7 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
             </div>
           </div>
           {!hasBarData ? (
-            <div className="flex h-40 items-center justify-center text-sm text-slate-400">
+            <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
               No generation runs yet
             </div>
           ) : (
@@ -159,11 +159,11 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
         </div>
 
         {/* Keyword Success Pie Chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 flex flex-col">
-          <h2 className="mb-1 text-sm font-semibold text-slate-900">Keyword Success Rate</h2>
-          <p className="mb-4 text-xs text-slate-500">{totalKwAttempted} keywords attempted</p>
+        <div className="rounded-xl border border-border bg-card p-6 flex flex-col">
+          <h2 className="mb-1 text-sm font-semibold text-foreground">Keyword Success Rate</h2>
+          <p className="mb-4 text-xs text-muted-foreground">{totalKwAttempted} keywords attempted</p>
           {totalKwAttempted === 0 ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-slate-400">
+            <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
               No data yet
             </div>
           ) : (
@@ -188,18 +188,18 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
                   />
                 </PieChart>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-xl font-bold text-slate-900">{successPct}%</span>
-                  <span className="text-[11px] text-slate-400">success</span>
+                  <span className="text-xl font-bold text-foreground">{successPct}%</span>
+                  <span className="text-[11px] text-muted-foreground">success</span>
                 </div>
               </div>
               <div className="flex gap-5 text-sm">
                 <div className="text-center">
                   <p className="font-bold text-emerald-600">{totalKwDone}</p>
-                  <p className="text-xs text-slate-400">Succeeded</p>
+                  <p className="text-xs text-muted-foreground">Succeeded</p>
                 </div>
                 <div className="text-center">
                   <p className="font-bold text-red-500">{totalKwFailed}</p>
-                  <p className="text-xs text-slate-400">Failed</p>
+                  <p className="text-xs text-muted-foreground">Failed</p>
                 </div>
               </div>
             </div>
@@ -208,9 +208,9 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
       </div>
 
       {/* Row 2: Content Quality Metrics */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="mb-1 text-sm font-semibold text-slate-900">Content Quality</h2>
-        <p className="mb-5 text-xs text-slate-500">Across {totalRecipes} recipe{totalRecipes !== 1 ? "s" : ""}</p>
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h2 className="mb-1 text-sm font-semibold text-foreground">Content Quality</h2>
+        <p className="mb-5 text-xs text-muted-foreground">Across {totalRecipes} recipe{totalRecipes !== 1 ? "s" : ""}</p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
             { label: "With Images", value: `${pctWithImages}%`, sub: `${recipes.filter((r) => !!r.image_url).length} of ${totalRecipes}`, icon: ImageIcon, color: "text-blue-500", bg: "bg-blue-50" },
@@ -218,13 +218,13 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
             { label: "With FAQs", value: `${pctWithFAQs}%`, sub: `${recipes.filter((r) => r.faqs && r.faqs.length > 0).length} of ${totalRecipes}`, icon: HelpCircle, color: "text-amber-500", bg: "bg-amber-50" },
             { label: "High Rating (≥4.5)", value: `${pctHighRating}%`, sub: `${recipes.filter((r) => r.rating >= 4.5).length} of ${totalRecipes}`, icon: Star, color: "text-emerald-500", bg: "bg-emerald-50" },
           ].map((m) => (
-            <div key={m.label} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <div key={m.label} className="rounded-xl border border-border/50 bg-muted/50 p-4">
               <div className={cn("mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg", m.bg)}>
                 <m.icon className={cn("h-4 w-4", m.color)} />
               </div>
-              <p className="text-2xl font-bold text-slate-900">{m.value}</p>
-              <p className="mt-0.5 text-xs font-medium text-slate-500">{m.label}</p>
-              <p className="text-[11px] text-slate-400">{m.sub}</p>
+              <p className="text-2xl font-bold text-foreground">{m.value}</p>
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">{m.label}</p>
+              <p className="text-[11px] text-muted-foreground">{m.sub}</p>
             </div>
           ))}
         </div>
@@ -232,20 +232,20 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
 
       {/* Row 3: Category Distribution */}
       {topCategories.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="mb-1 text-sm font-semibold text-slate-900">Category Distribution</h2>
-          <p className="mb-5 text-xs text-slate-500">Top {topCategories.length} categories by recipe count</p>
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-1 text-sm font-semibold text-foreground">Category Distribution</h2>
+          <p className="mb-5 text-xs text-muted-foreground">Top {topCategories.length} categories by recipe count</p>
           <div className="space-y-3">
             {topCategories.map(([name, count]) => (
               <div key={name} className="flex items-center gap-3">
-                <span className="w-32 truncate text-xs text-slate-600">{name}</span>
-                <div className="flex-1 rounded-full bg-slate-100 h-2.5">
+                <span className="w-32 truncate text-xs text-muted-foreground">{name}</span>
+                <div className="flex-1 rounded-full bg-secondary h-2.5">
                   <div
                     className="h-full rounded-full bg-brand-500 transition-all duration-500"
                     style={{ width: `${(count / maxCatCount) * 100}%` }}
                   />
                 </div>
-                <span className="w-6 text-right text-xs font-semibold text-slate-700">{count}</span>
+                <span className="w-6 text-right text-xs font-semibold text-foreground">{count}</span>
               </div>
             ))}
           </div>
@@ -253,16 +253,16 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
       )}
 
       {/* Row 4: Generation Run History */}
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Recent Generation Runs</h2>
-          <p className="text-xs text-slate-500">Last {recentRuns.length} runs</p>
+      <div className="rounded-xl border border-border bg-card">
+        <div className="border-b border-border/50 px-6 py-4">
+          <h2 className="text-sm font-semibold text-foreground">Recent Generation Runs</h2>
+          <p className="text-xs text-muted-foreground">Last {recentRuns.length} runs</p>
         </div>
         {recentRuns.length === 0 ? (
-          <div className="px-6 py-12 text-center text-sm text-slate-400">No generation runs yet</div>
+          <div className="px-6 py-12 text-center text-sm text-muted-foreground">No generation runs yet</div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            <div className="grid grid-cols-6 gap-4 px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <div className="divide-y divide-border/50">
+            <div className="grid grid-cols-6 gap-4 px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span className="col-span-2">Date</span>
               <span className="text-center">Processed</span>
               <span className="text-center">Succeeded</span>
@@ -280,14 +280,14 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
               }[log.status];
               const StatusIcon = statusConfig.Icon;
               return (
-                <div key={log.id} className="grid grid-cols-6 gap-4 px-6 py-3 text-sm items-center hover:bg-slate-50">
+                <div key={log.id} className="grid grid-cols-6 gap-4 px-6 py-3 text-sm items-center hover:bg-accent">
                   <div className="col-span-2">
-                    <p className="font-medium text-slate-800">{relativeTime(log.started_at)}</p>
-                    <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                    <p className="font-medium text-foreground">{relativeTime(log.started_at)}</p>
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                       {duration !== null && <><Clock className="h-3 w-3" />{duration}s</>}
                     </p>
                   </div>
-                  <p className="text-center font-semibold text-slate-700">{log.keywords_processed}</p>
+                  <p className="text-center font-semibold text-foreground">{log.keywords_processed}</p>
                   <p className="text-center font-semibold text-emerald-600">{log.keywords_succeeded}</p>
                   <p className="text-center font-semibold text-red-500">{log.keywords_failed}</p>
                   <div className="flex justify-center">
@@ -305,22 +305,22 @@ export default function AnalyticsClient({ genLogs, kwLogs, recipes }: Props) {
 
       {/* Total word count footer */}
       {totalRecipes > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50">
                 <TrendingUp className="h-4 w-4 text-brand-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Total Content Output</p>
-                <p className="text-xs text-slate-500">Across all published and draft recipes</p>
+                <p className="text-sm font-semibold text-foreground">Total Content Output</p>
+                <p className="text-xs text-muted-foreground">Across all published and draft recipes</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-foreground">
                 {(recipes.reduce((s, r) => s + (r.word_count || 0), 0) / 1000).toFixed(1)}k
               </p>
-              <p className="text-xs text-slate-400">total words</p>
+              <p className="text-xs text-muted-foreground">total words</p>
             </div>
           </div>
         </div>

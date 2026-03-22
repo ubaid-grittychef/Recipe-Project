@@ -7,10 +7,10 @@ export default function NotFound() {
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-500">
         <ChefHat className="h-10 w-10 text-white" />
       </div>
-      <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+      <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
         Page not found
       </h1>
-      <p className="mt-2 max-w-sm text-center text-slate-500">
+      <p className="mt-2 max-w-sm text-center text-muted-foreground">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>
       <Link

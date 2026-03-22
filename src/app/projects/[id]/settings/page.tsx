@@ -190,7 +190,7 @@ export default function ProjectSettingsPage({ params }: Props) {
   if (!project) {
     return (
       <div className="text-center">
-        <p className="text-slate-500">Project not found.</p>
+        <p className="text-muted-foreground">Project not found.</p>
         <Link href="/" className="mt-2 text-brand-500 hover:text-brand-600">
           Back to dashboard
         </Link>
@@ -208,8 +208,8 @@ export default function ProjectSettingsPage({ params }: Props) {
 
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Project Settings</h1>
-          <p className="mt-1 text-sm text-slate-500">{project.name}</p>
+          <h1 className="text-2xl font-bold text-foreground">Project Settings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{project.name}</p>
         </div>
         <button
           onClick={handleSave}
@@ -290,14 +290,14 @@ export default function ProjectSettingsPage({ params }: Props) {
       </div>
 
       {/* Danger Zone */}
-      <div className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-white">
+      <div className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-card">
         <div className="border-b border-red-100 bg-red-50 px-5 py-3">
           <h3 className="text-sm font-semibold text-red-700">Danger Zone</h3>
         </div>
         <div className="flex items-center justify-between px-5 py-4">
           <div>
-            <p className="text-sm font-medium text-slate-900">Delete this project</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="text-sm font-medium text-foreground">Delete this project</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Permanently removes all recipes, logs, and deployment records. This cannot be undone.
             </p>
           </div>
@@ -339,7 +339,7 @@ function CollapsibleCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn("overflow-hidden rounded-xl border bg-white", isDirty ? "border-amber-300" : "border-slate-200")}>
+    <div className={cn("overflow-hidden rounded-xl border bg-card", isDirty ? "border-amber-300" : "border-border")}>
       <div className="flex w-full items-center justify-between px-5 py-4">
         <button
           type="button"
@@ -350,7 +350,7 @@ function CollapsibleCard({
             <Icon className={cn("h-4 w-4", isDirty ? "text-amber-500" : "text-brand-500")} />
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-medium text-slate-900">{title}</span>
+            <span className="font-medium text-foreground">{title}</span>
             {isDirty && (
               <span className="h-2 w-2 rounded-full bg-amber-500" title="Unsaved changes" />
             )}
@@ -368,7 +368,7 @@ function CollapsibleCard({
               Save
             </button>
           )}
-          <button type="button" onClick={onToggle} className="text-slate-400 hover:text-slate-600">
+          <button type="button" onClick={onToggle} className="text-muted-foreground hover:text-foreground">
             {expanded ? (
               <ChevronDown className="h-5 w-5" />
             ) : (
@@ -378,7 +378,7 @@ function CollapsibleCard({
         </div>
       </div>
       {expanded && (
-        <div className="border-t border-slate-100 px-5 py-4">
+        <div className="border-t border-border/50 px-5 py-4">
           {children}
         </div>
       )}
@@ -397,8 +397,8 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-      {hint && <span className="ml-2 text-xs text-slate-400">{hint}</span>}
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      {hint && <span className="ml-2 text-xs text-muted-foreground">{hint}</span>}
       <div className="mt-1.5">{children}</div>
     </label>
   );
@@ -421,7 +421,7 @@ function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+      className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
     />
   );
 }
@@ -443,7 +443,7 @@ function TextArea({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+      className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
     />
   );
 }
@@ -483,7 +483,7 @@ function SectionBasicInfo({
           <select
             value={form.country}
             onChange={(e) => update({ country: e.target.value })}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
           >
             <option value="US">United States</option>
             <option value="UK">United Kingdom</option>
@@ -498,7 +498,7 @@ function SectionBasicInfo({
           <select
             value={form.language}
             onChange={(e) => update({ language: e.target.value })}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
           >
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -514,7 +514,7 @@ function SectionBasicInfo({
           onChange={(e) =>
             update({ status: e.target.value as Project["status"] })
           }
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
         >
           <option value="setup">Setup</option>
           <option value="active">Active</option>
@@ -681,7 +681,7 @@ function SectionKeywords({
         type="button"
         onClick={validateSheet}
         disabled={validating}
-        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+        className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
       >
         {validating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -721,9 +721,9 @@ function SectionKeywords({
       )}
 
       {/* Keyword import */}
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="mb-2 text-sm font-medium text-slate-700">Import Keywords</p>
-        <p className="mb-3 text-xs text-slate-500">
+      <div className="rounded-lg border border-border bg-muted/50 p-4">
+        <p className="mb-2 text-sm font-medium text-foreground">Import Keywords</p>
+        <p className="mb-3 text-xs text-muted-foreground">
           Paste keywords directly into your sheet — one per line.
           Optionally add a restaurant name separated by a comma or pipe: <span className="font-mono">Big Mac recipe, McDonald&apos;s</span>
         </p>
@@ -732,7 +732,7 @@ function SectionKeywords({
           onChange={(e) => { setImportText(e.target.value); setImportResult(null); }}
           placeholder={"Big Mac copycat recipe, McDonald's\nOlive Garden Alfredo pasta\nChipotle burrito bowl | Chipotle"}
           rows={5}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          className="w-full rounded-lg border border-border px-3 py-2 font-mono text-xs text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
         />
         <div className="mt-2 flex items-center gap-3">
           <button
@@ -795,7 +795,7 @@ function SectionBranding({
                 "relative rounded-xl border-2 p-4 text-left transition-all",
                 form.template_variant === t.id
                   ? "border-brand-500 bg-brand-50"
-                  : "border-slate-200 bg-white hover:border-slate-300"
+                  : "border-border bg-card hover:border-border"
               )}
             >
               {t.badge && (
@@ -805,14 +805,14 @@ function SectionBranding({
               )}
               <div className={cn(
                 "mb-2 flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold",
-                form.template_variant === t.id ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-500"
+                form.template_variant === t.id ? "bg-brand-500 text-white" : "bg-secondary text-muted-foreground"
               )}>
                 {t.letter}
               </div>
-              <p className={cn("text-sm font-semibold", form.template_variant === t.id ? "text-brand-900" : "text-slate-900")}>
+              <p className={cn("text-sm font-semibold", form.template_variant === t.id ? "text-brand-900" : "text-foreground")}>
                 {t.name}
               </p>
-              <p className="mt-0.5 text-xs text-slate-500">{t.desc}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t.desc}</p>
               {form.template_variant === t.id && (
                 <div className="absolute right-3 bottom-3 h-4 w-4 rounded-full bg-brand-500 flex items-center justify-center">
                   <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -858,7 +858,7 @@ function SectionBranding({
         <select
           value={form.font_preset}
           onChange={(e) => update({ font_preset: e.target.value })}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
         >
           {FONT_PRESETS.map((p) => (
             <option key={p.id} value={p.id}>
@@ -938,7 +938,7 @@ function SectionAITone({
                 "flex cursor-pointer gap-3 rounded-lg border p-4 transition-colors",
                 form.content_tone === opt.id
                   ? "border-brand-500 bg-brand-50"
-                  : "border-slate-200 hover:border-slate-300"
+                  : "border-border hover:border-border"
               )}
             >
               <input
@@ -950,11 +950,11 @@ function SectionAITone({
                 className="text-brand-500"
               />
               <div>
-                <span className="font-medium text-slate-900">{opt.name}</span>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <span className="font-medium text-foreground">{opt.name}</span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {opt.description}
                 </p>
-                <p className="mt-1 text-xs italic text-slate-600">
+                <p className="mt-1 text-xs italic text-muted-foreground">
                   &quot;{opt.example}&quot;
                 </p>
               </div>
@@ -986,7 +986,7 @@ function SectionPrompts({
 
   return (
     <div className="space-y-5">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-muted-foreground">
         Override any section of the AI recipe prompt for this project. Leave a field blank to use the built-in default. Changes apply to all future recipe generations.
       </p>
 
@@ -1052,20 +1052,20 @@ function PromptField({
   return (
     <div>
       <div className="mb-1.5 flex items-start justify-between gap-2">
-        <label className="text-sm font-medium text-slate-700">{label}</label>
+        <label className="text-sm font-medium text-foreground">{label}</label>
         {value && (
           <span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
             Custom
           </span>
         )}
       </div>
-      <p className="mb-1.5 text-xs text-slate-400">{hint}</p>
+      <p className="mb-1.5 text-xs text-muted-foreground">{hint}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        className="w-full resize-y rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-slate-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
       />
     </div>
   );
@@ -1218,13 +1218,13 @@ function SectionSiteDatabase({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-muted-foreground">
         Configure your Vercel account for deployment and your Supabase project for recipe storage.
       </p>
 
       {/* Vercel Token */}
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Vercel Deployment</p>
+      <div className="rounded-lg border border-border bg-muted/50 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Vercel Deployment</p>
         <Field
           label="Vercel API Token"
           hint={
@@ -1251,9 +1251,9 @@ function SectionSiteDatabase({
       </div>
 
       {/* Supabase */}
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Site Supabase Database</p>
-        <p className="mb-3 text-xs text-slate-500">
+      <div className="rounded-lg border border-border bg-muted/50 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Site Supabase Database</p>
+        <p className="mb-3 text-xs text-muted-foreground">
           Each recipe site needs its own Supabase project. Generated recipes are published here.
         </p>
       <Field label="Site Supabase URL">
@@ -1284,7 +1284,7 @@ function SectionSiteDatabase({
           type="button"
           onClick={testConnection}
           disabled={testing}
-          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
         >
           {testing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -1311,7 +1311,7 @@ function SectionSiteDatabase({
         <button
           type="button"
           onClick={copySQL}
-          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+          className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent"
         >
           {copied ? (
             <CheckCircle2 className="h-4 w-4 text-emerald-500" />

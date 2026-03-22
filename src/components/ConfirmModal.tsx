@@ -53,10 +53,10 @@ export function useConfirm(): [
         onClick={() => answer(false)}
       />
       {/* Modal */}
-      <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <div className="relative w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl">
         <button
           onClick={() => answer(false)}
-          className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          className="absolute right-4 top-4 rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
@@ -68,15 +68,15 @@ export function useConfirm(): [
           </div>
         )}
 
-        <h2 className="text-base font-semibold text-slate-900">{state.title}</h2>
+        <h2 className="text-base font-semibold text-foreground">{state.title}</h2>
         {state.description && (
-          <p className="mt-1.5 text-sm text-slate-500">{state.description}</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">{state.description}</p>
         )}
 
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
             onClick={() => answer(false)}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent"
           >
             {state.cancelLabel ?? "Cancel"}
           </button>

@@ -30,7 +30,7 @@ export default function BillingPage() {
     }
   }
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Loading billing info...</div>;
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Loading billing info...</div>;
 
   const isActive = profile?.subscription_status === "active";
   const periodEnd = profile?.current_period_end
@@ -39,18 +39,18 @@ export default function BillingPage() {
 
   return (
     <div className="max-w-xl mx-auto p-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Billing</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Billing</h1>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+      <div className="bg-card rounded-xl border border-border p-6 mb-4">
         <div className="flex items-center gap-3 mb-4">
-          <CreditCard className="h-5 w-5 text-slate-500" />
-          <h2 className="font-semibold text-slate-900">Subscription</h2>
+          <CreditCard className="h-5 w-5 text-muted-foreground" />
+          <h2 className="font-semibold text-foreground">Subscription</h2>
         </div>
 
-        <div className="space-y-2 text-sm text-slate-600 mb-6">
+        <div className="space-y-2 text-sm text-muted-foreground mb-6">
           <div className="flex justify-between">
             <span>Plan</span>
-            <span className="font-medium text-slate-900 capitalize">{profile?.subscription_plan ?? "Free"}</span>
+            <span className="font-medium text-foreground capitalize">{profile?.subscription_plan ?? "Free"}</span>
           </div>
           <div className="flex justify-between">
             <span>Status</span>
@@ -61,7 +61,7 @@ export default function BillingPage() {
           {periodEnd && (
             <div className="flex justify-between">
               <span>Renews</span>
-              <span className="font-medium text-slate-900">{periodEnd}</span>
+              <span className="font-medium text-foreground">{periodEnd}</span>
             </div>
           )}
         </div>
@@ -70,7 +70,7 @@ export default function BillingPage() {
           <button
             onClick={openPortal}
             disabled={portalLoading}
-            className="flex items-center gap-2 text-sm px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+            className="flex items-center gap-2 text-sm px-4 py-2 border border-border rounded-lg hover:bg-accent disabled:opacity-50"
           >
             {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
             Manage subscription

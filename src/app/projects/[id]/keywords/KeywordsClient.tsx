@@ -70,8 +70,8 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
     <>
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Keyword Logs</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-foreground">Keyword Logs</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Processing status for each keyword — {logs.length.toLocaleString()} total
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
 
       {/* Status filter pills */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        <Filter className="h-4 w-4 text-slate-400" />
+        <Filter className="h-4 w-4 text-muted-foreground" />
         {pills.map(({ value, label, count }) => (
           <button
             key={value}
@@ -98,13 +98,13 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
               "rounded-full px-4 py-2 text-sm font-medium transition-colors",
               statusFilter === value
                 ? "bg-brand-500 text-white shadow-sm"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                : "bg-secondary text-muted-foreground hover:bg-border"
             )}
           >
             {label}
             <span className={cn(
               "ml-1.5 rounded-full px-1.5 py-0.5 text-xs",
-              statusFilter === value ? "bg-white/20" : "bg-slate-200"
+              statusFilter === value ? "bg-card/20" : "bg-border"
             )}>
               {count.toLocaleString()}
             </span>
@@ -112,16 +112,16 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-8 py-20">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
               <KeyRound className="h-8 w-8 text-brand-500" />
             </div>
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">
+            <h3 className="mt-6 text-lg font-semibold text-foreground">
               {statusFilter !== "all" ? "No matching logs" : "No keyword logs yet"}
             </h3>
-            <p className="mt-2 max-w-sm text-center text-sm text-slate-500">
+            <p className="mt-2 max-w-sm text-center text-sm text-muted-foreground">
               {statusFilter !== "all"
                 ? "Try a different status filter or show all."
                 : "Keyword processing logs will appear here once generation runs."}
@@ -130,36 +130,36 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-border">
                 <thead>
                   <tr>
                     {["Keyword", "Restaurant", "Status", "Error Reason", "Processed At"].map((h) => (
-                      <th key={h} className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                      <th key={h} className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                   {paginated.map((log) => (
-                    <tr key={log.id} className="transition-colors hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900">{log.keyword}</td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">{log.restaurant_name ?? "—"}</td>
+                    <tr key={log.id} className="transition-colors hover:bg-accent">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">{log.keyword}</td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">{log.restaurant_name ?? "—"}</td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <StatusBadge status={log.status} />
                       </td>
-                      <td className="max-w-xs px-6 py-4 text-sm text-slate-600">
+                      <td className="max-w-xs px-6 py-4 text-sm text-muted-foreground">
                         <span className="line-clamp-2">{log.error_reason ?? "—"}</span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">{formatDate(log.processed_at)}</td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">{formatDate(log.processed_at)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3">
-                <p className="text-xs text-slate-500">
+              <div className="flex items-center justify-between border-t border-border/50 px-6 py-3">
+                <p className="text-xs text-muted-foreground">
                   {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
                   {filtered.length.toLocaleString()}
                 </p>
@@ -167,15 +167,15 @@ export default function KeywordsClient({ id, initialLogs }: Props) {
                   <button
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-40"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <span className="px-2 text-xs text-slate-600">Page {page + 1} / {totalPages}</span>
+                  <span className="px-2 text-xs text-muted-foreground">Page {page + 1} / {totalPages}</span>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={page >= totalPages - 1}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-40"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>

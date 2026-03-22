@@ -219,7 +219,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
     <div>
       <Link
         href="/"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         All Projects
@@ -227,7 +227,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
 
       {/* Project Header */}
       <div
-        className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+        className="mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
         style={{ borderLeftColor: project.primary_color || "#f97316", borderLeftWidth: "5px" }}
       >
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -236,7 +236,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
               <img
                 src={project.logo_url}
                 alt={project.name}
-                className="h-14 w-14 shrink-0 rounded-xl object-contain border border-slate-200 bg-white p-1"
+                className="h-14 w-14 shrink-0 rounded-xl object-contain border border-border bg-card p-1"
               />
             ) : (
               <div
@@ -248,7 +248,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
             )}
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-2xl font-bold text-slate-900">{project.name}</h1>
+                <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
                 {project.deployment_status === "deployed" ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -266,9 +266,9 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-500">{project.niche}</p>
+              <p className="text-sm text-muted-foreground">{project.niche}</p>
               {project.domain && (
-                <p className="mt-0.5 text-xs text-slate-400">{project.domain}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{project.domain}</p>
               )}
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
               className={cn(
                 "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-colors",
                 project.status === "active"
-                  ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-secondary text-muted-foreground hover:bg-slate-200"
                   : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
               )}
             >
@@ -307,7 +307,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
             </button>
             <Link
               href={`/projects/${id}/settings`}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
             >
               <Settings className="h-4 w-4" />
               Settings
@@ -316,7 +316,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
         </div>
 
         {/* Tab bar */}
-        <div className="flex gap-0 border-t border-slate-100">
+        <div className="flex gap-0 border-t border-border/50">
           {[
             { key: "overview", label: "Overview", icon: LayoutDashboard },
             { key: "content", label: "Content", icon: FileText },
@@ -329,7 +329,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
                 "flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors",
                 activeTab === key
                   ? "border-brand-500 text-brand-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
               <Icon className="h-4 w-4" />
@@ -390,27 +390,27 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
           </div>
 
           {/* Timing strip */}
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white">
-            <div className="grid divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="mb-6 rounded-xl border border-border bg-card">
+            <div className="grid divide-y divide-border/50 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               <div className="flex items-center gap-3 px-5 py-3.5">
-                <Clock className="h-4 w-4 shrink-0 text-slate-400" />
+                <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-500">Last Generation</p>
-                  <p className="text-sm font-medium text-slate-900">{formatDate(project.last_generation_at)}</p>
+                  <p className="text-xs text-muted-foreground">Last Generation</p>
+                  <p className="text-sm font-medium text-foreground">{formatDate(project.last_generation_at)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-5 py-3.5">
-                <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
+                <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-500">Next Scheduled</p>
-                  <p className="text-sm font-medium text-slate-900">{formatDate(project.next_scheduled_at)}</p>
+                  <p className="text-xs text-muted-foreground">Next Scheduled</p>
+                  <p className="text-sm font-medium text-foreground">{formatDate(project.next_scheduled_at)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-5 py-3.5">
-                <Target className="h-4 w-4 shrink-0 text-slate-400" />
+                <Target className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-500">Batch Size</p>
-                  <p className="text-sm font-medium text-slate-900">{project.recipes_per_day} recipes / day</p>
+                  <p className="text-xs text-muted-foreground">Batch Size</p>
+                  <p className="text-sm font-medium text-foreground">{project.recipes_per_day} recipes / day</p>
                 </div>
               </div>
             </div>
@@ -477,30 +477,30 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
           </div>
 
           {/* Keyword queue widget */}
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5">
+          <div className="mb-6 rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-900">Keyword Queue</h3>
+              <h3 className="text-sm font-semibold text-foreground">Keyword Queue</h3>
               <Link href={`/projects/${id}/queue`} className="text-xs text-brand-600 hover:text-brand-700 font-medium">
                 Manage →
               </Link>
             </div>
-            <div className="flex gap-4 text-sm text-slate-500 mb-3">
-              <span><strong className="text-slate-900">{queueCounts.pending}</strong> pending</span>
-              <span><strong className="text-slate-900">{queueCounts.done}</strong> done</span>
+            <div className="flex gap-4 text-sm text-muted-foreground mb-3">
+              <span><strong className="text-foreground">{queueCounts.pending}</strong> pending</span>
+              <span><strong className="text-foreground">{queueCounts.done}</strong> done</span>
               {queueCounts.failed > 0 && (
                 <span><strong className="text-red-600">{queueCounts.failed}</strong> failed</span>
               )}
             </div>
             <Link
               href={`/projects/${id}/queue`}
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600"
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-border rounded-lg hover:bg-accent text-muted-foreground"
             >
               + Add Keywords
             </Link>
           </div>
 
           {/* Content quick links */}
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Manage Content</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Manage Content</p>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <QuickLink href={`/projects/${id}/recipes`} icon={BookOpen} title="Recipes" description="View, edit, publish" />
             <QuickLink href={`/projects/${id}/queue`} icon={ListChecks} title="Keyword Queue" description="Add & manage keywords" />
@@ -543,14 +543,14 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
                   {project.deployment_status === "deployed" && (
                     <>
                       <button onClick={checkSiteHealth} disabled={checkingHealth}
-                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-card px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
                         {checkingHealth ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Activity className="h-3.5 w-3.5" />}
                         {healthCheck
                           ? healthCheck.healthy ? `Online · ${healthCheck.latency_ms}ms` : "Unreachable"
                           : checkingHealth ? "Checking…" : "Health"}
                       </button>
                       <button onClick={pingSitemap} disabled={pinging}
-                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-card px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
                         {pinging ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                         {pinging ? "Pinging…" : "Ping"}
                       </button>
@@ -601,7 +601,7 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
           )}
 
           {/* Operations quick links */}
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Operations</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <QuickLink href={`/projects/${id}/deploy`} icon={Rocket} title="Deploy & Domains" description="Vercel + custom domains" />
             <QuickLink href={`/projects/${id}/logs`} icon={Activity} title="Generation Logs" description="Run history & stats" />
@@ -670,20 +670,20 @@ function SetupChecklist({
 
   if (collapsed) {
     return (
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white px-5 py-3">
+      <div className="mb-6 rounded-xl border border-border bg-card px-5 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <ListChecks className="h-4 w-4 text-brand-500" />
-            <span className="text-sm font-semibold text-slate-900">Getting started</span>
+            <span className="text-sm font-semibold text-foreground">Getting started</span>
             <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700">
               {completedCount}/{steps.length} done
             </span>
-            <span className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
-              {pendingSteps[0]?.label && <>Next: <span className="font-medium text-slate-700">{pendingSteps[0].label}</span></>}
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+              {pendingSteps[0]?.label && <>Next: <span className="font-medium text-foreground">{pendingSteps[0].label}</span></>}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-secondary">
               <div className="h-full rounded-full bg-brand-500 transition-all duration-500"
                 style={{ width: `${(completedCount / steps.length) * 100}%` }} />
             </div>
@@ -698,17 +698,17 @@ function SetupChecklist({
   }
 
   return (
-    <div className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+    <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border/50 px-5 py-3">
         <div className="flex items-center gap-2.5">
           <ListChecks className="h-4 w-4 text-brand-500" />
-          <span className="text-sm font-semibold text-slate-900">Getting started</span>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+          <span className="text-sm font-semibold text-foreground">Getting started</span>
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {completedCount}/{steps.length}
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-1.5 w-32 overflow-hidden rounded-full bg-secondary">
             <div
               className="h-full rounded-full bg-brand-500 transition-all duration-500"
               style={{ width: `${(completedCount / steps.length) * 100}%` }}
@@ -716,13 +716,13 @@ function SetupChecklist({
           </div>
           {completedCount >= 3 && (
             <button onClick={() => setCollapsed(true)}
-              className="text-xs font-medium text-slate-400 hover:text-slate-600">
+              className="text-xs font-medium text-muted-foreground hover:text-muted-foreground">
               Collapse ↑
             </button>
           )}
         </div>
       </div>
-      <ul className="divide-y divide-slate-50 px-5">
+      <ul className="divide-y divide-border/50 px-5">
         {steps.map((step, i) => (
           <li key={i} className="flex items-center gap-3 py-3">
             {step.done ? (
@@ -731,10 +731,10 @@ function SetupChecklist({
               <Circle className="h-4 w-4 shrink-0 text-slate-300" />
             )}
             <div className="flex-1 min-w-0">
-              <span className={cn("text-sm font-medium", step.done ? "text-slate-400 line-through" : "text-slate-900")}>
+              <span className={cn("text-sm font-medium", step.done ? "text-muted-foreground line-through" : "text-foreground")}>
                 {step.label}
               </span>
-              <p className="text-xs text-slate-400 truncate">{step.note}</p>
+              <p className="text-xs text-muted-foreground truncate">{step.note}</p>
             </div>
             {step.cta && (
               step.cta.href ? (
@@ -772,13 +772,13 @@ function PipelineBar({ id, project, draftCount, generationRunning }: { id: strin
   const stageColor = (s: StageStatus) =>
     s === "done" ? "text-emerald-600 bg-emerald-50 border-emerald-200" :
     s === "active" ? "text-blue-600 bg-blue-50 border-blue-200" :
-    "text-slate-400 bg-slate-50 border-slate-200";
+    "text-muted-foreground bg-muted/50 border-border";
 
   const dotColor = (s: StageStatus) =>
     s === "done" ? "bg-emerald-400" : s === "active" ? "bg-blue-400 animate-pulse" : "bg-slate-200";
 
   return (
-    <div className="mb-6 flex items-stretch gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white text-sm">
+    <div className="mb-6 flex items-stretch gap-0 overflow-hidden rounded-xl border border-border bg-card text-sm">
       <Link href={`/projects/${id}/recipes`} className={cn("flex flex-1 items-center gap-3 border-r px-5 py-3.5 transition-colors hover:brightness-95", stageColor(generateStatus))}>
         <div className={cn("h-2 w-2 shrink-0 rounded-full", dotColor(generateStatus))} />
         <Zap className="h-4 w-4 shrink-0" />
@@ -832,27 +832,27 @@ function PipelineBar({ id, project, draftCount, generationRunning }: { id: strin
 
 function StatCard({ icon: Icon, label, value, color, bg }: { icon: React.ElementType; label: string; value: string | number; color: string; bg?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-card">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-card">
       <div className="flex items-start justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", bg ?? "bg-slate-100")}>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", bg ?? "bg-secondary")}>
           <Icon className={cn("h-4 w-4", color)} />
         </div>
       </div>
-      <p className="mt-3 text-3xl font-bold text-slate-900 leading-none">{value}</p>
+      <p className="mt-3 text-3xl font-bold text-foreground leading-none">{value}</p>
     </div>
   );
 }
 
 function QuickLink({ href, icon: Icon, title, description }: { href: string; icon: React.ElementType; title: string; description: string }) {
   return (
-    <Link href={href} className="group flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-card transition-all duration-150 hover:border-brand-200 hover:shadow-card-hover hover:-translate-y-0.5">
+    <Link href={href} className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-card transition-all duration-150 hover:border-brand-200 hover:shadow-card-hover hover:-translate-y-0.5">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 group-hover:bg-brand-100 transition-colors">
         <Icon className="h-4 w-4 text-brand-500" />
       </div>
       <div className="min-w-0">
-        <h3 className="text-sm font-semibold text-slate-900 group-hover:text-brand-600 transition-colors">{title}</h3>
-        <p className="mt-0.5 text-xs text-slate-400 truncate">{description}</p>
+        <h3 className="text-sm font-semibold text-foreground group-hover:text-brand-600 transition-colors">{title}</h3>
+        <p className="mt-0.5 text-xs text-muted-foreground truncate">{description}</p>
       </div>
     </Link>
   );
@@ -877,17 +877,17 @@ function ContentHealthCard({ recipes }: { recipes: Recipe[] }) {
   ];
 
   return (
-    <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-slate-900">Content Health</h2>
+    <div className="mb-6 rounded-xl border border-border bg-card p-5">
+      <h2 className="mb-4 text-sm font-semibold text-foreground">Content Health</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {metrics.map((m) => (
-          <div key={m.label} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <div key={m.label} className="rounded-lg border border-border/50 bg-muted/50 p-3">
             <div className={cn("mb-2 inline-flex h-7 w-7 items-center justify-center rounded-md", m.bg)}>
               <TrendingUp className={cn("h-3.5 w-3.5", m.color)} />
             </div>
-            <p className="text-xl font-bold text-slate-900">{m.value}</p>
-            <p className="mt-0.5 text-xs font-medium text-slate-500">{m.label}</p>
-            <p className="text-[11px] text-slate-400">{m.sub}</p>
+            <p className="text-xl font-bold text-foreground">{m.value}</p>
+            <p className="mt-0.5 text-xs font-medium text-muted-foreground">{m.label}</p>
+            <p className="text-[11px] text-muted-foreground">{m.sub}</p>
           </div>
         ))}
       </div>
@@ -943,9 +943,9 @@ function ActivityFeed({ id }: { id: string }) {
   }, [id]);
 
   if (loading) return (
-    <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-slate-900">Recent Activity</h2>
-      <div className="flex items-center gap-2 text-sm text-slate-400">
+    <div className="mb-6 rounded-xl border border-border bg-card p-5">
+      <h2 className="mb-4 text-sm font-semibold text-foreground">Recent Activity</h2>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading activity…
       </div>
@@ -955,8 +955,8 @@ function ActivityFeed({ id }: { id: string }) {
   if (events.length === 0) return null;
 
   return (
-    <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-slate-900">Recent Activity</h2>
+    <div className="mb-6 rounded-xl border border-border bg-card p-5">
+      <h2 className="mb-4 text-sm font-semibold text-foreground">Recent Activity</h2>
       <div className="space-y-3">
         {events.map((event, i) => (
           <div key={event.id} className="flex items-start gap-3">
@@ -968,7 +968,7 @@ function ActivityFeed({ id }: { id: string }) {
                   : event.status === "completed" ? "bg-emerald-400" : event.status === "failed" ? "bg-red-400" : "bg-blue-400 animate-pulse"
               )} />
               {i < events.length - 1 && (
-                <div className="mt-1 h-full w-px bg-slate-100 absolute top-3 left-1/2 -translate-x-1/2" style={{ minHeight: "16px" }} />
+                <div className="mt-1 h-full w-px bg-secondary absolute top-3 left-1/2 -translate-x-1/2" style={{ minHeight: "16px" }} />
               )}
             </div>
             <div className="flex-1 min-w-0 pb-3">
@@ -976,11 +976,11 @@ function ActivityFeed({ id }: { id: string }) {
                 {event.type === "generation" ? (
                   <Zap className="h-3.5 w-3.5 shrink-0 text-brand-500" />
                 ) : (
-                  <Rocket className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <Rocket className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 )}
-                <p className="text-sm text-slate-700 truncate">{event.description}</p>
+                <p className="text-sm text-foreground truncate">{event.description}</p>
               </div>
-              <p className="mt-0.5 text-xs text-slate-400">{relativeTime(event.time)}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{relativeTime(event.time)}</p>
             </div>
           </div>
         ))}

@@ -150,7 +150,7 @@ export default function GenerationProgressCard({ projectId, onComplete, onRunnin
             <span className="font-medium text-emerald-600">{log.keywords_succeeded}</span> succeeded &nbsp;·&nbsp;
             <span className="font-medium text-red-500">{log.keywords_failed}</span> failed
             {!isRunning && log.keywords_succeeded > 0 && (
-              <span className="ml-2 inline-flex items-center gap-0.5 text-slate-400">
+              <span className="ml-2 inline-flex items-center gap-0.5 text-muted-foreground">
                 <DollarSign className="h-3 w-3" />
                 {estimateCost(log.keywords_succeeded)} est. cost
               </span>

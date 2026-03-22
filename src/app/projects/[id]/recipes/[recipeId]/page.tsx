@@ -152,7 +152,7 @@ export default function RecipeEditorPage({ params }: Props) {
   if (!recipe) {
     return (
       <div className="text-center">
-        <p className="text-slate-500">Recipe not found.</p>
+        <p className="text-muted-foreground">Recipe not found.</p>
         <Link
           href={`/projects/${id}/recipes`}
           className="mt-2 text-brand-500 hover:text-brand-600"
@@ -168,7 +168,7 @@ export default function RecipeEditorPage({ params }: Props) {
       {ConfirmDialog}
       <button
         onClick={handleNavigateBack}
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Recipes
@@ -177,8 +177,8 @@ export default function RecipeEditorPage({ params }: Props) {
       {/* Header with save actions */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Edit Recipe</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-foreground">Edit Recipe</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Status:{" "}
             <span
               className={
@@ -198,13 +198,13 @@ export default function RecipeEditorPage({ params }: Props) {
         </div>
         <div className="flex items-center gap-2">
           {/* Tab toggle */}
-          <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+          <div className="flex rounded-lg border border-border bg-muted/50 p-0.5">
             <button
               onClick={() => setActiveTab("edit")}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 activeTab === "edit"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Edit
@@ -213,8 +213,8 @@ export default function RecipeEditorPage({ params }: Props) {
               onClick={() => setActiveTab("preview")}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 activeTab === "preview"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Preview
@@ -223,7 +223,7 @@ export default function RecipeEditorPage({ params }: Props) {
           <button
             onClick={handleRefresh}
             disabled={refreshing || saving}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
             title="Regenerate intro content and SEO fields with AI"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
@@ -351,7 +351,7 @@ export default function RecipeEditorPage({ params }: Props) {
               className="input-field font-mono text-sm"
               placeholder="Use **Bold Text** for subheadings..."
             />
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               {recipe.intro_content?.split(/\s+/).filter(Boolean).length ?? 0}{" "}
               words — Use **double asterisks** for subheadings
             </p>
@@ -372,7 +372,7 @@ export default function RecipeEditorPage({ params }: Props) {
             />
           </Field>
           {recipe.image_url && (
-            <div className="mt-2 overflow-hidden rounded-lg border border-slate-200">
+            <div className="mt-2 overflow-hidden rounded-lg border border-border">
               <img
                 src={recipe.image_url}
                 alt={recipe.title}
@@ -462,7 +462,7 @@ export default function RecipeEditorPage({ params }: Props) {
         <Section title="Ingredients">
           {recipe.ingredients.map((ing, i) => (
             <div key={i} className="flex items-center gap-2">
-              <GripVertical className="h-4 w-4 shrink-0 text-slate-300" />
+              <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 type="text"
                 value={ing.quantity}
@@ -501,7 +501,7 @@ export default function RecipeEditorPage({ params }: Props) {
                   const updated = recipe.ingredients.filter((_, j) => j !== i);
                   update({ ingredients: updated });
                 }}
-                className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -516,7 +516,7 @@ export default function RecipeEditorPage({ params }: Props) {
                 ],
               })
             }
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-brand-300 hover:text-brand-500"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-brand-300 hover:text-brand-500"
           >
             <Plus className="h-4 w-4" />
             Add Ingredient
@@ -547,7 +547,7 @@ export default function RecipeEditorPage({ params }: Props) {
                   );
                   update({ instructions: updated });
                 }}
-                className="mt-2 rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                className="mt-2 rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -557,7 +557,7 @@ export default function RecipeEditorPage({ params }: Props) {
             onClick={() =>
               update({ instructions: [...recipe.instructions, ""] })
             }
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-brand-300 hover:text-brand-500"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-brand-300 hover:text-brand-500"
           >
             <Plus className="h-4 w-4" />
             Add Step
@@ -585,7 +585,7 @@ export default function RecipeEditorPage({ params }: Props) {
                   );
                   update({ tips: updated });
                 }}
-                className="mt-2 rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                className="mt-2 rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -593,7 +593,7 @@ export default function RecipeEditorPage({ params }: Props) {
           ))}
           <button
             onClick={() => update({ tips: [...(recipe.tips ?? []), ""] })}
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-brand-300 hover:text-brand-500"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-brand-300 hover:text-brand-500"
           >
             <Plus className="h-4 w-4" />
             Add Tip
@@ -621,7 +621,7 @@ export default function RecipeEditorPage({ params }: Props) {
                   );
                   update({ variations: updated });
                 }}
-                className="mt-2 rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                className="mt-2 rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -631,7 +631,7 @@ export default function RecipeEditorPage({ params }: Props) {
             onClick={() =>
               update({ variations: [...(recipe.variations ?? []), ""] })
             }
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-brand-300 hover:text-brand-500"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-brand-300 hover:text-brand-500"
           >
             <Plus className="h-4 w-4" />
             Add Variation
@@ -643,10 +643,10 @@ export default function RecipeEditorPage({ params }: Props) {
           {(recipe.faqs ?? []).map((faq, i) => (
             <div
               key={i}
-              className="rounded-lg border border-slate-200 p-4 space-y-2"
+              className="rounded-lg border border-border p-4 space-y-2"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400">
+                <span className="text-xs font-medium text-muted-foreground">
                   FAQ {i + 1}
                 </span>
                 <button
@@ -656,7 +656,7 @@ export default function RecipeEditorPage({ params }: Props) {
                     );
                     update({ faqs: updated });
                   }}
-                  className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                  className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -694,7 +694,7 @@ export default function RecipeEditorPage({ params }: Props) {
                 ],
               })
             }
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-brand-300 hover:text-brand-500"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-brand-300 hover:text-brand-500"
           >
             <Plus className="h-4 w-4" />
             Add FAQ
@@ -825,9 +825,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="border-b border-slate-100 bg-slate-50 px-5 py-3">
-        <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="border-b border-border/50 bg-muted/50 px-5 py-3">
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       <div className="space-y-4 p-5">{children}</div>
     </div>
@@ -843,7 +843,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-slate-500">
+      <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
         {label}
       </span>
       {children}
@@ -856,7 +856,7 @@ function CharCount({ value, max }: { value: string; max: number }) {
   return (
     <p
       className={`mt-1 text-right text-xs ${
-        len > max ? "text-red-500" : "text-slate-400"
+        len > max ? "text-red-500" : "text-muted-foreground"
       }`}
     >
       {len}/{max}
