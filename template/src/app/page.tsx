@@ -4,6 +4,7 @@ import RecipeCard from "@/components/RecipeCard";
 import Link from "next/link";
 import { ArrowRight, ChefHat, Utensils, BookOpen } from "lucide-react";
 import HeroSearch from "@/components/HeroSearch";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { getCategoryEmoji, getCategoryGradient } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -100,6 +101,11 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ─── Recently Viewed ────────────────────────────────────────── */}
+      <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+        <RecentlyViewed />
+      </div>
 
       {/* ─── Featured Recipes ──────────────────────────────────────── */}
       {featured.length > 0 && (

@@ -13,4 +13,12 @@ export const siteConfig = {
   hellofreshUrl: process.env.NEXT_PUBLIC_HELLOFRESH_URL ?? "",
   adsenseId: process.env.NEXT_PUBLIC_ADSENSE_ID ?? "",
   gaId: process.env.NEXT_PUBLIC_GA_ID ?? "",
+
+  newsletterUrl: process.env.NEXT_PUBLIC_NEWSLETTER_URL ?? "",
+  pinterest: process.env.NEXT_PUBLIC_PINTEREST_URL ?? "",
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "",
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "",
+  twitter: process.env.NEXT_PUBLIC_TWITTER_URL ?? "",
+  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL ?? "",
+  tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL ?? "",
 };

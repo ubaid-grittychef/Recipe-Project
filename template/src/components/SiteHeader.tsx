@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
 import { ChefHat, Menu, X, Search } from "lucide-react";
+import BookmarkCount from "@/components/BookmarkCount";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -96,6 +97,9 @@ export default function SiteHeader() {
 
         {/* Right actions */}
         <div className="flex items-center gap-1">
+          <div className="hidden sm:flex">
+            <BookmarkCount />
+          </div>
           {searchOpen ? (
             <form
               onSubmit={handleSearchSubmit}

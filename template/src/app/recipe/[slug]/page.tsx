@@ -13,6 +13,9 @@ import RecipeActions from "@/components/RecipeActions";
 import AffiliateLink from "@/components/AffiliateLink";
 import RecipeIngredientSection from "@/components/RecipeIngredientSection";
 import CookMode from "@/components/CookMode";
+import RecentlyViewedTracker from "@/components/RecentlyViewedTracker";
+import RecentlyViewed from "@/components/RecentlyViewed";
+import BookmarkButton from "@/components/BookmarkButton";
 import Image from "next/image";
 import {
   Clock,
@@ -291,6 +294,8 @@ export default async function RecipePage({ params }: Props) {
       )}
 
       <article className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        <RecentlyViewedTracker recipe={{ slug, title: recipe.title, image_url: recipe.image_url, category: recipe.category, total_time: recipe.total_time, rating: recipe.rating }} />
+
         {/* Breadcrumb */}
         <nav
           aria-label="Breadcrumb"
@@ -376,6 +381,7 @@ export default async function RecipePage({ params }: Props) {
           </a>
           <RecipeActions title={recipe.title} />
           <CookMode instructions={recipe.instructions} recipeTitle={recipe.title} />
+          <BookmarkButton slug={slug} size="md" />
         </div>
 
         {/* Hero image — shown prominently above the fold */}
@@ -670,6 +676,10 @@ export default async function RecipePage({ params }: Props) {
               {kw}
             </span>
           ))}
+        </div>
+        {/* Recently Viewed */}
+        <div className="mt-10" data-print-hide>
+          <RecentlyViewed excludeSlug={slug} />
         </div>
       </article>
 

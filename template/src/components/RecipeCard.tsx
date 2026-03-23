@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Clock, Users, ChefHat } from "lucide-react";
 import { Recipe } from "@/lib/types";
 import { slugifyCategory } from "@/lib/utils";
+import BookmarkButton from "@/components/BookmarkButton";
 
 export default function RecipeCard({ recipe }: { recipe: Recipe }) {
   const [imgError, setImgError] = useState(false);
@@ -60,6 +61,11 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
             </span>
           </div>
         )}
+
+        {/* Bookmark */}
+        <div className="absolute top-3 right-3">
+          <BookmarkButton slug={recipe.slug} size="sm" />
+        </div>
       </div>
 
       {/* Content */}

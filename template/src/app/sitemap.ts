@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
-import { getRecipeSlugsWithDates, getCategories } from "@/lib/data";
+import { getRecipeSlugsWithDates, getCategories, getAllRecipes } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
+import { COLLECTIONS } from "@/lib/collections";
+import { getCuisines, getMealTypes } from "@/lib/taxonomies";
 
 // Revalidate every hour so the sitemap reflects newly published recipes promptly
 export const revalidate = 300;
@@ -15,10 +17,14 @@ const SITEMAP_MAX_URLS = 49_900;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url.replace(/\/$/, "");
 
-  const [recipes, categories] = await Promise.all([
+  const [recipes, categories, allRecipes] = await Promise.all([
     getRecipeSlugsWithDates(),
     getCategories(),
+    getAllRecipes(),
   ]);
+
+  const cuisines = getCuisines(allRecipes);
+  const mealTypes = getMealTypes(allRecipes);
 
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -38,6 +44,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/collections`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cuisines`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/meals`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/search`,
@@ -72,8 +96,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const collectionPages: MetadataRoute.Sitemap = COLLECTIONS.map((c) => ({
+    url: `${baseUrl}/collections/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  const cuisinePages: MetadataRoute.Sitemap = cuisines.map((c) => ({
+    url: `${baseUrl}/cuisine/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  const mealPages: MetadataRoute.Sitemap = mealTypes.map((m) => ({
+    url: `${baseUrl}/meal/${m.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
   // Cap recipe pages to stay within the Google 50k sitemap URL limit
-  const usedSlots = staticPages.length + categoryPages.length;
+  const usedSlots = staticPages.length + categoryPages.length + collectionPages.length + cuisinePages.length + mealPages.length;
   const recipeSlice = recipes.slice(0, Math.max(0, SITEMAP_MAX_URLS - usedSlots));
 
   const recipePages: MetadataRoute.Sitemap = recipeSlice.map((r) => ({
@@ -83,5 +128,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [...staticPages, ...categoryPages, ...recipePages];
+  return [...staticPages, ...categoryPages, ...collectionPages, ...cuisinePages, ...mealPages, ...recipePages];
 }
