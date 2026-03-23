@@ -11,7 +11,8 @@ import { slugifyCategory } from "@/lib/utils";
 import RecipeCard from "@/components/RecipeCard";
 import RecipeActions from "@/components/RecipeActions";
 import AffiliateLink from "@/components/AffiliateLink";
-import IngredientsChecklist from "@/components/IngredientsChecklist";
+import RecipeIngredientSection from "@/components/RecipeIngredientSection";
+import CookMode from "@/components/CookMode";
 import Image from "next/image";
 import {
   Clock,
@@ -364,7 +365,7 @@ export default async function RecipePage({ params }: Props) {
         </div>
 
         {/* Jump to Recipe + Actions */}
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="mt-5 flex flex-wrap items-center gap-3" data-print-hide>
           <a
             href="#recipe-card"
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90"
@@ -374,6 +375,7 @@ export default async function RecipePage({ params }: Props) {
             Jump to Recipe
           </a>
           <RecipeActions title={recipe.title} />
+          <CookMode instructions={recipe.instructions} recipeTitle={recipe.title} />
         </div>
 
         {/* Hero image — shown prominently above the fold */}
@@ -399,7 +401,7 @@ export default async function RecipePage({ params }: Props) {
 
         {/* Ad slot: below description */}
         {siteConfig.adsenseId && (
-          <div className="my-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400">
+          <div className="my-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400" data-print-hide>
             Ad Space
           </div>
         )}
@@ -466,12 +468,12 @@ export default async function RecipePage({ params }: Props) {
             ))}
           </div>
 
-          {/* Ingredients */}
+          {/* Ingredients with Servings Adjuster */}
           <div id="recipe-content" className="scroll-mt-20 px-6 py-6">
-            <h2 className="mb-4 text-lg font-bold text-slate-900">
-              Ingredients
-            </h2>
-            <IngredientsChecklist ingredients={recipe.ingredients} />
+            <RecipeIngredientSection
+              originalServings={recipe.servings}
+              ingredients={recipe.ingredients}
+            />
 
             {siteConfig.hellofreshUrl && (
               <div className="mt-5 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-5">
@@ -504,7 +506,7 @@ export default async function RecipePage({ params }: Props) {
 
           {/* Ad slot */}
           {siteConfig.adsenseId && (
-            <div className="mx-6 mb-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400">
+            <div className="mx-6 mb-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400" data-print-hide>
               Ad Space
             </div>
           )}
@@ -595,7 +597,7 @@ export default async function RecipePage({ params }: Props) {
 
         {/* Variations */}
         {recipe.variations && recipe.variations.length > 0 && (
-          <section className="mt-10">
+          <section className="mt-10" data-print-hide>
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="h-5 w-5 text-violet-500" />
               <h2 className="text-xl font-bold text-slate-900">
@@ -620,14 +622,14 @@ export default async function RecipePage({ params }: Props) {
 
         {/* Ad slot */}
         {siteConfig.adsenseId && (
-          <div className="my-8 min-h-[250px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400">
+          <div className="my-8 min-h-[250px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400" data-print-hide>
             Ad Space
           </div>
         )}
 
         {/* FAQ Section */}
         {recipe.faqs && recipe.faqs.length > 0 && (
-          <section className="mt-10">
+          <section className="mt-10" data-print-hide>
             <div className="flex items-center gap-2 mb-4">
               <HelpCircle className="h-5 w-5 text-blue-500" />
               <h2 className="text-xl font-bold text-slate-900">
@@ -659,7 +661,7 @@ export default async function RecipePage({ params }: Props) {
         )}
 
         {/* Keywords / Tags */}
-        <div className="mt-8 flex flex-wrap gap-2">
+        <div className="mt-8 flex flex-wrap gap-2" data-print-hide>
           {recipe.focus_keywords?.map((kw) => (
             <span
               key={kw}
@@ -673,7 +675,7 @@ export default async function RecipePage({ params }: Props) {
 
       {/* Related Recipes */}
       {related.length > 0 && (
-        <section className="border-t border-slate-100 bg-slate-50">
+        <section className="border-t border-slate-100 bg-slate-50" data-print-hide>
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
             <h2 className="mb-6 text-xl font-bold text-slate-900">
               You Might Also Like

@@ -1,9 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import RecipeCard from "@/components/RecipeCard";
+import Pagination from "@/components/Pagination";
 import { Recipe } from "@/lib/types";
 import { Search, X, ChefHat } from "lucide-react";
+import {
+  TimeRange,
+  TIME_RANGES,
+  matchesTimeRange,
+  DietaryLabel,
+  deriveDietaryLabels,
+  Cuisine,
+  deriveCuisine,
+} from "@/lib/filters";
 
 interface Props {
   recipes: Recipe[];
@@ -20,6 +30,8 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "cook_time",  label: "Quickest" },
   { value: "word_count", label: "Most Detailed" },
 ];
+
+const RECIPES_PER_PAGE = 12;
 
 function parseMins(str?: string | null): number {
   if (!str) return 999;
@@ -56,6 +68,39 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [sort, setSort]                         = useState<SortOption>("newest");
+  const [currentPage, setCurrentPage]           = useState(1);
+
+  // New filter state
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange | null>(null);
+  const [selectedDietary, setSelectedDietary]     = useState<DietaryLabel[]>([]);
+  const [selectedCuisine, setSelectedCuisine]     = useState<Cuisine | null>(null);
+
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // Pre-compute dietary labels and cuisine for all recipes
+  const recipeMeta = useMemo(() => {
+    const metaMap = new Map<string, { dietary: DietaryLabel[]; cuisine: Cuisine | null }>();
+    recipes.forEach((r) => {
+      metaMap.set(r.id, {
+        dietary: deriveDietaryLabels(r),
+        cuisine: deriveCuisine(r),
+      });
+    });
+    return metaMap;
+  }, [recipes]);
+
+  // Compute available filter options from the full recipe set
+  const availableDietary = useMemo(() => {
+    const all = new Set<DietaryLabel>();
+    recipeMeta.forEach((m) => m.dietary.forEach((d) => all.add(d)));
+    return Array.from(all);
+  }, [recipeMeta]);
+
+  const availableCuisines = useMemo(() => {
+    const all = new Set<Cuisine>();
+    recipeMeta.forEach((m) => { if (m.cuisine) all.add(m.cuisine); });
+    return Array.from(all).sort();
+  }, [recipeMeta]);
 
   const filtered = useMemo(() => {
     let result = recipes;
@@ -79,6 +124,25 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
     if (selectedDifficulty)
       result = result.filter((r) => r.difficulty === selectedDifficulty);
 
+    // Time range filter
+    if (selectedTimeRange)
+      result = result.filter((r) => matchesTimeRange(r, selectedTimeRange));
+
+    // Dietary filter (all selected labels must match)
+    if (selectedDietary.length > 0)
+      result = result.filter((r) => {
+        const meta = recipeMeta.get(r.id);
+        if (!meta) return false;
+        return selectedDietary.every((d) => meta.dietary.includes(d));
+      });
+
+    // Cuisine filter
+    if (selectedCuisine)
+      result = result.filter((r) => {
+        const meta = recipeMeta.get(r.id);
+        return meta?.cuisine === selectedCuisine;
+      });
+
     return [...result].sort((a, b) => {
       switch (sort) {
         case "rating":     return (b.rating ?? 0) - (a.rating ?? 0);
@@ -87,15 +151,48 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
         default:           return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
       }
     });
-  }, [recipes, query, selectedCategory, selectedRestaurant, selectedDifficulty, sort]);
+  }, [recipes, query, selectedCategory, selectedRestaurant, selectedDifficulty, sort, selectedTimeRange, selectedDietary, selectedCuisine, recipeMeta]);
 
-  const activeFilters = [selectedCategory, selectedRestaurant, selectedDifficulty].filter(Boolean).length;
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / RECIPES_PER_PAGE);
+  const paginatedRecipes = filtered.slice(
+    (currentPage - 1) * RECIPES_PER_PAGE,
+    currentPage * RECIPES_PER_PAGE
+  );
+
+  // Reset page to 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, selectedCategory, selectedRestaurant, selectedDifficulty, selectedTimeRange, selectedDietary, selectedCuisine]);
+
+  // Scroll to top of grid when page changes (but not on filter-triggered resets)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [currentPage]);
+
+  const activeFilters = [
+    selectedCategory,
+    selectedRestaurant,
+    selectedDifficulty,
+    selectedTimeRange,
+    selectedCuisine,
+  ].filter(Boolean).length + selectedDietary.length;
 
   function clearAll() {
     setQuery("");
     setSelectedCategory(null);
     setSelectedRestaurant(null);
     setSelectedDifficulty(null);
+    setSelectedTimeRange(null);
+    setSelectedDietary([]);
+    setSelectedCuisine(null);
   }
 
   const hasFilters = categories.length > 0 || restaurants.length > 0;
@@ -164,6 +261,68 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
               />
             ))}
           </div>
+
+          {/* Time Range */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Time</span>
+            {TIME_RANGES.map((range) => (
+              <button
+                key={range.key}
+                onClick={() => setSelectedTimeRange((prev) => prev === range.key ? null : range.key)}
+                className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+                  selectedTimeRange === range.key
+                    ? "bg-sky-50 border-sky-300 text-sky-700 shadow-sm"
+                    : "border-[#e5e0d8] bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Dietary */}
+          {availableDietary.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Dietary</span>
+              {availableDietary.map((label) => (
+                <button
+                  key={label}
+                  onClick={() =>
+                    setSelectedDietary((prev) =>
+                      prev.includes(label) ? prev.filter((d) => d !== label) : [...prev, label]
+                    )
+                  }
+                  className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+                    selectedDietary.includes(label)
+                      ? "bg-emerald-50 border-emerald-300 text-emerald-700 shadow-sm"
+                      : "border-[#e5e0d8] bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Cuisine */}
+          {availableCuisines.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Cuisine</span>
+              {availableCuisines.map((cuisine) => (
+                <button
+                  key={cuisine}
+                  onClick={() => setSelectedCuisine((prev) => prev === cuisine ? null : cuisine)}
+                  className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+                    selectedCuisine === cuisine
+                      ? "bg-violet-50 border-violet-300 text-violet-700 shadow-sm"
+                      : "border-[#e5e0d8] bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                  }`}
+                >
+                  {cuisine}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -199,34 +358,46 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
       </div>
 
       {/* ── Recipe grid ──────────────────────────────────── */}
-      {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
-        </div>
-      ) : (
-        <div className="py-24 text-center">
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
-            <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+      <div ref={gridRef}>
+        {filtered.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {paginatedRecipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filtered.length}
+              itemsPerPage={RECIPES_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        ) : (
+          <div className="py-24 text-center">
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
+              <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+            </div>
+            <h3
+              className="text-xl font-black text-slate-900"
+              style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+            >
+              No recipes found
+            </h3>
+            <p className="mt-2 text-sm text-slate-500">
+              Try a different search or clear your filters.
+            </p>
+            <button
+              onClick={clearAll}
+              className="mt-5 rounded-full border border-[#e5e0d8] bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow"
+            >
+              Clear filters
+            </button>
           </div>
-          <h3
-            className="text-xl font-black text-slate-900"
-            style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
-          >
-            No recipes found
-          </h3>
-          <p className="mt-2 text-sm text-slate-500">
-            Try a different search or clear your filters.
-          </p>
-          <button
-            onClick={clearAll}
-            className="mt-5 rounded-full border border-[#e5e0d8] bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow"
-          >
-            Clear filters
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

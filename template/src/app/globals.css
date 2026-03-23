@@ -86,9 +86,44 @@
 }
 
 @media print {
-  header, footer, nav, .no-print { display: none !important; }
+  /* Hide non-essential */
+  header, footer, nav,
+  [data-print-hide],
+  .no-print { display: none !important; }
+
+  /* Reset backgrounds and shadows */
+  body, main, article, section, div {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  /* Recipe card stays intact */
+  #recipe-card {
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Recipe content full width */
   .recipe-content { max-width: 100% !important; }
+
+  /* Clean ingredients */
+  .ingredient-row { border-color: #eee !important; }
+
+  /* Steps stay together */
+  ol li { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Reasonable image size */
+  img { max-width: 400px !important; max-height: 300px !important; object-fit: cover !important; }
+
+  /* Hide checkboxes */
+  input[type="checkbox"] { display: none !important; }
+
+  /* Page margins */
+  @page { margin: 1.5cm; }
+
+  /* Remove link underlines, show URLs */
+  a { text-decoration: none !important; color: black !important; }
   a[href]::after { content: none !important; }
-  body { background: white !important; color: black !important; }
-  img { max-width: 300px !important; }
 }

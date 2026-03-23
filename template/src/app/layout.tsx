@@ -4,6 +4,7 @@ import "./globals.css";
 import { siteConfig } from "@/lib/config";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import BackToTop from "@/components/BackToTop";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +97,7 @@ export default function RootLayout({
       className={cn(inter.variable, playfair.variable, poppins.variable, "font-sans", geist.variable)}
     >
       <head>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed.xml" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -113,6 +115,7 @@ export default function RootLayout({
         <SiteHeader />
         <main className="min-h-screen">{children}</main>
         <SiteFooter />
+        <BackToTop />
 
         {siteConfig.adsenseId && (
           <Script
