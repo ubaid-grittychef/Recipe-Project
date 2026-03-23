@@ -39,7 +39,7 @@ export default function RecentlyViewed({ excludeSlug }: RecentlyViewedProps) {
             href={`/recipe/${recipe.slug}`}
             className="group flex-shrink-0 w-40"
           >
-            <div className="relative h-28 w-40 overflow-hidden rounded-lg bg-warm-beige">
+            <div className="relative w-40 aspect-[4/3] overflow-hidden rounded-lg bg-warm-beige">
               {recipe.image_url ? (
                 <Image
                   src={recipe.image_url}

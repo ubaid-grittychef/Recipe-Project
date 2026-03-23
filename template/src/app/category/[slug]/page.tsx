@@ -118,15 +118,17 @@ export default async function CategoryPage({ params }: Props) {
 
       {/* Recipe grid */}
       {recipes.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-20 text-center">
-          <ChefHat className="mx-auto h-16 w-16 text-slate-200 dark:text-slate-700" />
-          <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
+        <div className="py-28 text-center">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-warm-border-dark p-6">
+            <ChefHat className="h-10 w-10 text-warm-muted" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             No recipes found
           </h2>
           <p className="mt-2 max-w-md mx-auto text-slate-500 dark:text-slate-400">

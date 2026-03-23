@@ -106,7 +106,7 @@ export default function NewsletterSignup({ variant = "inline" }: NewsletterSignu
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Your email"
-          className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          className="flex-1 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           disabled={status === "submitting"}
         />
         <button

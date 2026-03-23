@@ -20,13 +20,14 @@ export default function ReadingProgress() {
 
   return (
     <div
-      className="reading-progress"
+      className="reading-progress print:hidden"
       style={{ width: `${progress}%` }}
       role="progressbar"
       aria-valuenow={Math.round(progress)}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label="Reading progress"
+      data-print-hide
     />
   );
 }

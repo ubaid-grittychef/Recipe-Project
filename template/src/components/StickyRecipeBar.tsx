@@ -23,7 +23,7 @@ export default function StickyRecipeBar({ title, rating }: StickyRecipeBarProps)
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-warm-border bg-warm-cream/95 backdrop-blur-sm transition-transform duration-300 print:hidden"
+      className="fixed bottom-0 left-0 right-0 z-30 border-t border-warm-border bg-warm-cream/95 backdrop-blur-sm transition-transform duration-300 print:hidden"
       data-print-hide
     >
       <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-4 px-4 sm:px-6">

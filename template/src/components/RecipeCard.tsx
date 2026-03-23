@@ -93,7 +93,7 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
         )}
 
         {/* Meta */}
-        <div className="mt-auto flex items-center gap-3 border-t border-warm-border-light pt-3 text-xs text-slate-400 mt-3">
+        <div className="mt-auto flex items-center gap-3 border-t border-warm-border-light pt-3 text-xs text-slate-400">
           {totalTime && (
             <span className="flex items-center gap-1.5 font-medium">
               <Clock className="h-3.5 w-3.5 text-slate-300" />

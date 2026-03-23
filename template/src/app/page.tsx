@@ -124,7 +124,7 @@ export default async function HomePage() {
         <section className="border-y border-warm-border bg-white dark:bg-slate-900 py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <SectionHeader eyebrow="Explore" title="Browse by Category" href="/categories" linkLabel="All categories" />
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {categories.slice(0, 12).map((cat) => {
                 const gradient = getCategoryGradient(cat.name);
                 const emoji = getCategoryEmoji(cat.name);
@@ -136,7 +136,7 @@ export default async function HomePage() {
                   >
                     <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
                     <div className="relative flex flex-col items-center px-3 py-6 text-center">
-                      <span className="text-3xl transition-transform duration-300 group-hover:scale-110 drop-shadow">{emoji}</span>
+                      <span className="text-4xl transition-transform duration-300 group-hover:scale-110 drop-shadow">{emoji}</span>
                       <p
                         className="mt-2.5 text-sm font-bold text-white drop-shadow-sm leading-tight"
                         style={{ fontFamily: "var(--font-heading), Georgia, serif" }}

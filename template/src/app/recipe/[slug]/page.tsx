@@ -546,7 +546,7 @@ export default async function RecipePage({ params }: Props) {
             <p className="mb-4 text-xs text-slate-400">
               Per serving (approximate)
             </p>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {[
                 { label: "Calories", value: recipe.nutrition.calories },
                 { label: "Protein", value: recipe.nutrition.protein },
@@ -686,7 +686,7 @@ export default async function RecipePage({ params }: Props) {
         <section className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900" data-print-hide>
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
             <h2 className="mb-6 text-xl font-bold text-slate-900 dark:text-slate-100">You Might Also Like</h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((r) => (
                 <RecipeCard key={r.id} recipe={r} />
               ))}

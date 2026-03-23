@@ -36,7 +36,7 @@ export default function BlogPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-16 sm:py-20">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-200 dark:bg-orange-900 opacity-40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-amber-200 dark:bg-amber-900 opacity-40 blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
@@ -64,7 +64,7 @@ export default function BlogPage() {
               className="group overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-shadow hover:shadow-md"
             >
               {/* Image placeholder */}
-              <div className={`flex h-44 items-center justify-center bg-gradient-to-br ${getGradient(post.category)}`}>
+              <div className={`flex aspect-video items-center justify-center bg-gradient-to-br ${getGradient(post.category)}`}>
                 <span className="rounded-full bg-white/20 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
                   {post.category}
                 </span>

@@ -30,7 +30,7 @@ export default function BackToTop() {
           : "opacity-0 pointer-events-none"
       }`}
     >
-      <ChevronUp className="h-6 w-6" />
+      <ChevronUp className="h-5 w-5" />
     </button>
   );
 }
