@@ -173,6 +173,13 @@ export function buildSiteEnvVars(project: {
   adsense_publisher_id: string | null;
   ga_id: string | null;
   template_variant?: string | null;
+  newsletter_url?: string | null;
+  pinterest_url?: string | null;
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  twitter_url?: string | null;
+  youtube_url?: string | null;
+  tiktok_url?: string | null;
 }): Record<string, string> {
   const vars: Record<string, string> = {
     NEXT_PUBLIC_SITE_NAME: project.name,
@@ -202,6 +209,22 @@ export function buildSiteEnvVars(project: {
     vars.NEXT_PUBLIC_GA_ID = project.ga_id;
   if (project.template_variant && project.template_variant !== "default")
     vars.NEXT_PUBLIC_TEMPLATE_VARIANT = project.template_variant;
+
+  // Social & Newsletter
+  if (project.newsletter_url)
+    vars.NEXT_PUBLIC_NEWSLETTER_URL = project.newsletter_url;
+  if (project.pinterest_url)
+    vars.NEXT_PUBLIC_PINTEREST_URL = project.pinterest_url;
+  if (project.instagram_url)
+    vars.NEXT_PUBLIC_INSTAGRAM_URL = project.instagram_url;
+  if (project.facebook_url)
+    vars.NEXT_PUBLIC_FACEBOOK_URL = project.facebook_url;
+  if (project.twitter_url)
+    vars.NEXT_PUBLIC_TWITTER_URL = project.twitter_url;
+  if (project.youtube_url)
+    vars.NEXT_PUBLIC_YOUTUBE_URL = project.youtube_url;
+  if (project.tiktok_url)
+    vars.NEXT_PUBLIC_TIKTOK_URL = project.tiktok_url;
 
   return vars;
 }

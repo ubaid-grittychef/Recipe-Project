@@ -87,6 +87,15 @@ export interface Project {
   adsense_publisher_id: string | null;
   ga_id: string | null;
 
+  // Social & Newsletter
+  newsletter_url: string | null;
+  pinterest_url: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  twitter_url: string | null;
+  youtube_url: string | null;
+  tiktok_url: string | null;
+
   // Site Supabase
   site_supabase_url: string | null;
   site_supabase_anon_key: string | null;

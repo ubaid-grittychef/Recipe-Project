@@ -49,6 +49,15 @@ CREATE TABLE IF NOT EXISTS projects (
   adsense_publisher_id TEXT,
   ga_id TEXT,
 
+  -- Social & Newsletter
+  newsletter_url TEXT,
+  pinterest_url TEXT,
+  instagram_url TEXT,
+  facebook_url TEXT,
+  twitter_url TEXT,
+  youtube_url TEXT,
+  tiktok_url TEXT,
+
   -- Site Supabase
   site_supabase_url TEXT,
   site_supabase_anon_key TEXT,

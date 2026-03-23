@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   Upload,
   ListChecks,
+  Share2,
 } from "lucide-react";
 import { SkeletonSettingsPage } from "@/components/Skeleton";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ const EDITABLE_FIELDS = [
   "prompt_overrides",
   "sheet_url", "sheet_keyword_column", "sheet_restaurant_column", "sheet_status_column",
   "skimlinks_id", "amazon_associate_id", "hellofresh_url", "adsense_publisher_id", "ga_id",
+  "newsletter_url", "pinterest_url", "instagram_url", "facebook_url", "twitter_url", "youtube_url", "tiktok_url",
   "site_supabase_url", "site_supabase_anon_key", "site_supabase_service_key",
   "vercel_token",
 ] as const;
@@ -53,6 +55,7 @@ const SECTIONS = [
   { id: "ai", title: "AI Tone", icon: MessageSquare },
   { id: "prompts", title: "AI Prompt Overrides", icon: Sparkles },
   { id: "monetization", title: "Monetization", icon: DollarSign },
+  { id: "social", title: "Social & Newsletter", icon: Share2 },
   { id: "database", title: "Deployment & Database", icon: Database },
 ] as const;
 
@@ -280,6 +283,9 @@ export default function ProjectSettingsPage({ params }: Props) {
               )}
               {sectionId === "monetization" && (
                 <SectionMonetization form={form} update={sectionUpdate} />
+              )}
+              {sectionId === "social" && (
+                <SectionSocial form={form} update={sectionUpdate} />
               )}
               {sectionId === "database" && (
                 <SectionSiteDatabase form={form} update={sectionUpdate} />
@@ -1115,6 +1121,73 @@ function SectionMonetization({
           placeholder="G-XXXXXXXXXX"
         />
       </Field>
+    </div>
+  );
+}
+
+function SectionSocial({
+  form,
+  update,
+}: {
+  form: Partial<Project>;
+  update: (f: Partial<Project>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Add your social media links and newsletter URL. These appear on your deployed recipe site.
+      </p>
+      <Field label="Newsletter Signup URL" hint="External endpoint (Mailchimp, ConvertKit, etc.) — optional">
+        <TextInput
+          value={form.newsletter_url ?? ""}
+          onChange={(v) => update({ newsletter_url: v || null })}
+          placeholder="https://your-newsletter-provider.com/subscribe"
+        />
+      </Field>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Instagram URL">
+          <TextInput
+            value={form.instagram_url ?? ""}
+            onChange={(v) => update({ instagram_url: v || null })}
+            placeholder="https://instagram.com/yourpage"
+          />
+        </Field>
+        <Field label="Facebook URL">
+          <TextInput
+            value={form.facebook_url ?? ""}
+            onChange={(v) => update({ facebook_url: v || null })}
+            placeholder="https://facebook.com/yourpage"
+          />
+        </Field>
+        <Field label="YouTube URL">
+          <TextInput
+            value={form.youtube_url ?? ""}
+            onChange={(v) => update({ youtube_url: v || null })}
+            placeholder="https://youtube.com/@yourchannel"
+          />
+        </Field>
+        <Field label="Pinterest URL">
+          <TextInput
+            value={form.pinterest_url ?? ""}
+            onChange={(v) => update({ pinterest_url: v || null })}
+            placeholder="https://pinterest.com/yourprofile"
+          />
+        </Field>
+        <Field label="Twitter / X URL">
+          <TextInput
+            value={form.twitter_url ?? ""}
+            onChange={(v) => update({ twitter_url: v || null })}
+            placeholder="https://x.com/yourhandle"
+          />
+        </Field>
+        <Field label="TikTok URL">
+          <TextInput
+            value={form.tiktok_url ?? ""}
+            onChange={(v) => update({ tiktok_url: v || null })}
+            placeholder="https://tiktok.com/@yourhandle"
+          />
+        </Field>
+      </div>
     </div>
   );
 }
