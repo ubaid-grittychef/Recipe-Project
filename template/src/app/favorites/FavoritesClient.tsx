@@ -28,11 +28,11 @@ export default function FavoritesClient({ allRecipes }: FavoritesClientProps) {
   const savedRecipes = allRecipes.filter(r => bookmarkedSlugs.includes(r.slug));
 
   return (
-    <div className="bg-[#fffdf7] dark:bg-slate-950 min-h-[60vh]">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="bg-warm-cream min-h-[60vh]">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-500">
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.25em] text-orange-500">
             Your Collection
           </p>
           <h1
@@ -51,8 +51,8 @@ export default function FavoritesClient({ allRecipes }: FavoritesClientProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
-              <Heart className="h-9 w-9 text-[#c9bfb0]" />
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-warm-border-dark">
+              <Heart className="h-9 w-9 text-warm-muted" />
             </div>
             <h2
               className="text-2xl font-black text-slate-900 dark:text-slate-100"
@@ -65,7 +65,7 @@ export default function FavoritesClient({ allRecipes }: FavoritesClientProps) {
             </p>
             <Link
               href="/recipes"
-              className="mt-6 rounded-full border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-slate-300 hover:shadow"
+              className="mt-6 rounded-full border border-warm-border bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-slate-300 hover:shadow"
             >
               Browse recipes
             </Link>

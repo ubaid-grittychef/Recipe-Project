@@ -11,17 +11,16 @@ export default function SiteFooter() {
   return (
     <footer className="bg-slate-900 text-slate-300">
       {/* Top accent */}
-      <div className="h-[3px] w-full" style={{ backgroundColor: siteConfig.primaryColor }} />
+      <div className="h-[3px] w-full bg-primary-500" />
 
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16 sm:px-6">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
 
           {/* Brand column */}
           <div className="col-span-2">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
               <div
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-white shadow-sm"
-                style={{ backgroundColor: siteConfig.primaryColor }}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-500 text-white shadow-sm"
               >
                 <ChefHat className="h-5 w-5" />
               </div>
@@ -94,7 +93,7 @@ export default function SiteFooter() {
 
           {/* Explore */}
           <div>
-            <h3 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+            <h3 className="mb-4 text-[0.625rem] font-bold uppercase tracking-[0.2em] text-slate-500">
               Explore
             </h3>
             <ul className="space-y-2.5">
@@ -121,7 +120,7 @@ export default function SiteFooter() {
 
           {/* Legal */}
           <div>
-            <h3 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+            <h3 className="mb-4 text-[0.625rem] font-bold uppercase tracking-[0.2em] text-slate-500">
               Legal
             </h3>
             <ul className="space-y-2.5">
@@ -144,7 +143,7 @@ export default function SiteFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-slate-800 pt-6 text-[12px] text-slate-600 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-slate-800 pt-6 text-xs text-slate-600 sm:flex-row">
           <p>© {year} {siteConfig.name}. All rights reserved.</p>
           <p className="italic">Restaurant-quality recipes at home.</p>
         </div>

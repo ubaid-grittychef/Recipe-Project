@@ -16,14 +16,15 @@ import CookMode from "@/components/CookMode";
 import RecentlyViewedTracker from "@/components/RecentlyViewedTracker";
 import RecentlyViewed from "@/components/RecentlyViewed";
 import BookmarkButton from "@/components/BookmarkButton";
-import Image from "next/image";
+import ReadingProgress from "@/components/ReadingProgress";
+import StickyRecipeBar from "@/components/StickyRecipeBar";
+import ImageSkeleton from "@/components/ImageSkeleton";
 import {
   Clock,
   Users,
   ChefHat,
   Flame,
   ShoppingCart,
-  ExternalLink,
   Star,
   Lightbulb,
   ArrowDown,
@@ -272,6 +273,7 @@ export default async function RecipePage({ params }: Props) {
 
   return (
     <>
+      <ReadingProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -373,8 +375,7 @@ export default async function RecipePage({ params }: Props) {
         <div className="mt-5 flex flex-wrap items-center gap-3" data-print-hide>
           <a
             href="#recipe-card"
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90"
-            style={{ backgroundColor: siteConfig.primaryColor }}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90"
           >
             <ArrowDown className="h-4 w-4" />
             Jump to Recipe
@@ -387,7 +388,7 @@ export default async function RecipePage({ params }: Props) {
         {/* Hero image — shown prominently above the fold */}
         {recipe.image_url && (
           <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl shadow-sm">
-            <Image
+            <ImageSkeleton
               src={recipe.image_url}
               alt={`${recipe.title} recipe`}
               fill
@@ -426,8 +427,7 @@ export default async function RecipePage({ params }: Props) {
         >
           {/* Recipe card header */}
           <div
-            className="px-6 py-5 text-white"
-            style={{ backgroundColor: siteConfig.primaryColor }}
+            className="px-6 py-5 text-white bg-primary-500"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -501,7 +501,7 @@ export default async function RecipePage({ params }: Props) {
                       <ShoppingCart className="h-4 w-4" />
                       Get Ingredients Delivered
                     </AffiliateLink>
-                    <p className="mt-2 text-[10px] text-emerald-600/70">
+                    <p className="mt-2 text-[0.625rem] text-emerald-600/70">
                       Affiliate link — we may earn a small commission at no extra cost to you.
                     </p>
                   </div>
@@ -526,8 +526,7 @@ export default async function RecipePage({ params }: Props) {
               {recipe.instructions.map((step, i) => (
                 <li key={i} className="flex gap-4">
                   <div
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-                    style={{ backgroundColor: siteConfig.primaryColor }}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-500 text-sm font-bold text-white"
                   >
                     {i + 1}
                   </div>
@@ -587,8 +586,7 @@ export default async function RecipePage({ params }: Props) {
                   className="flex gap-3 rounded-lg border border-amber-100 dark:border-amber-900/30 bg-amber-50/40 dark:bg-amber-950/20 p-4"
                 >
                   <span
-                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: siteConfig.primaryColor }}
+                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-500 text-xs font-bold text-white"
                   >
                     {i + 1}
                   </span>
@@ -696,6 +694,8 @@ export default async function RecipePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <StickyRecipeBar title={recipe.title} rating={rating} />
     </>
   );
 }

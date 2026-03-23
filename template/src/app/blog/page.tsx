@@ -41,8 +41,7 @@ export default function BlogPage() {
         <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-amber-200 dark:bg-amber-900 opacity-40 blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
           <div
-            className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg"
-            style={{ backgroundColor: siteConfig.primaryColor }}
+            className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-500 text-white shadow-lg"
           >
             <BookOpen className="h-8 w-8" />
           </div>
@@ -56,7 +55,7 @@ export default function BlogPage() {
       </section>
 
       {/* Posts grid */}
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16 sm:px-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
             <Link

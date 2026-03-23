@@ -33,7 +33,7 @@ export default function SearchInput({ initialQuery }: { initialQuery: string }) 
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Search recipes, ingredients, cuisines…"
-        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3.5 pl-11 pr-4 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-100 dark:focus:ring-orange-900/30 placeholder:text-slate-400"
+        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-100 dark:focus:ring-orange-900/30 placeholder:text-slate-400"
         autoFocus
       />
     </div>

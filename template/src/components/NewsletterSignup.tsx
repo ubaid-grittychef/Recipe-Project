@@ -106,14 +106,13 @@ export default function NewsletterSignup({ variant = "inline" }: NewsletterSignu
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Your email"
-          className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           disabled={status === "submitting"}
         />
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="px-4 py-2 rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 whitespace-nowrap"
-          style={{ backgroundColor: siteConfig.primaryColor }}
+          className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 whitespace-nowrap"
         >
           {status === "submitting" ? "..." : "Subscribe"}
         </button>

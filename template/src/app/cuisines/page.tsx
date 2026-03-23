@@ -24,14 +24,14 @@ export default async function CuisinesPage() {
   }));
 
   return (
-    <div className="bg-[#fffdf7] dark:bg-slate-950">
+    <div className="bg-warm-cream">
 
       {/* Page header */}
-      <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
+      <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-warm-cream">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="flex items-center gap-4 mb-6">
             <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Explore</span>
+            <span className="text-[0.625rem] font-bold uppercase tracking-[0.3em] text-slate-400">Explore</span>
             <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
           </div>
           <div className="text-center">
@@ -58,18 +58,18 @@ export default async function CuisinesPage() {
               <Link
                 key={cuisine.slug}
                 href={`/cuisine/${cuisine.slug}`}
-                className="group flex flex-col items-center rounded-xl border border-[#ede8e0] dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl text-center"
+                className="group flex flex-col items-center rounded-xl border border-warm-border-light bg-white dark:bg-slate-900 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl text-center"
               >
                 <span className="text-4xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
                   {cuisine.emoji}
                 </span>
                 <h2
-                  className="mt-3 text-[14px] font-bold leading-snug text-slate-900 dark:text-slate-100 group-hover:text-orange-600 transition-colors"
+                  className="mt-3 text-sm font-bold leading-snug text-slate-900 dark:text-slate-100 group-hover:text-orange-600 transition-colors"
                   style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
                 >
                   {cuisine.name}
                 </h2>
-                <span className="mt-2 rounded-full bg-orange-50 dark:bg-orange-950/30 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600">
+                <span className="mt-2 rounded-full bg-orange-50 dark:bg-orange-950/30 px-2.5 py-0.5 text-xs font-semibold text-orange-600">
                   {cuisine.count} {cuisine.count === 1 ? "recipe" : "recipes"}
                 </span>
               </Link>
@@ -77,8 +77,8 @@ export default async function CuisinesPage() {
           </div>
         ) : (
           <div className="py-28 text-center">
-            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
-              <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-warm-border-dark">
+              <ChefHat className="h-9 w-9 text-warm-muted" />
             </div>
             <h2
               className="text-2xl font-black text-slate-900 dark:text-slate-100"

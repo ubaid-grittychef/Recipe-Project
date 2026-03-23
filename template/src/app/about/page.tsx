@@ -26,8 +26,7 @@ export default function AboutPage() {
         <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-amber-200 opacity-40 blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
           <div
-            className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg"
-            style={{ backgroundColor: siteConfig.primaryColor }}
+            className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-500 text-white shadow-lg"
           >
             <ChefHat className="h-8 w-8" />
           </div>
@@ -40,7 +39,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:py-16 sm:px-6">
         {/* Stats row */}
         <div className="mb-12 grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           {[
@@ -62,8 +61,7 @@ export default function AboutPage() {
             <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
               <div className="flex items-start gap-4">
                 <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
-                  style={{ backgroundColor: siteConfig.primaryColor }}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-500 text-white"
                 >
                   <User className="h-5 w-5" />
                 </div>
@@ -84,8 +82,7 @@ export default function AboutPage() {
           <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
             <div className="flex items-start gap-4">
               <div
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
-                style={{ backgroundColor: siteConfig.primaryColor }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-500 text-white"
               >
                 <Target className="h-5 w-5" />
               </div>

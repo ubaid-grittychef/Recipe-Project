@@ -40,16 +40,16 @@ export default async function HomePage() {
   const latest = recipes.slice(3, 15);
 
   return (
-    <div className="bg-[#fffdf7] dark:bg-slate-950">
+    <div className="bg-warm-cream">
 
       {/* ─── Hero ──────────────────────────────────────────────────── */}
-      <section className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
-        <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20 sm:px-6">
+      <section className="border-b-2 border-slate-900 dark:border-slate-700 bg-warm-cream">
+        <div className="mx-auto max-w-5xl px-4 py-12 sm:py-16 sm:px-6">
 
           {/* Masthead rule */}
           <div className="flex items-center gap-4 mb-8">
             <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+            <span className="text-[0.625rem] font-bold uppercase tracking-[0.3em] text-slate-400">
               Restaurant Copycat Recipes
             </span>
             <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
@@ -80,7 +80,7 @@ export default async function HomePage() {
 
           {/* Stats */}
           {recipes.length > 0 && (
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-[13px]">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm">
               <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <BookOpen className="h-4 w-4 text-orange-400" />
                 <strong className="text-slate-900 dark:text-slate-100 font-bold">{recipes.length}</strong> recipes
@@ -109,7 +109,7 @@ export default async function HomePage() {
 
       {/* ─── Featured Recipes ──────────────────────────────────────── */}
       {featured.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <SectionHeader eyebrow="Editor's Picks" title="Featured Recipes" href="/recipes" linkLabel="View all" />
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((recipe) => (
@@ -121,7 +121,7 @@ export default async function HomePage() {
 
       {/* ─── Browse by Category ────────────────────────────────────── */}
       {categories.length > 0 && (
-        <section className="border-y border-[#e5e0d8] dark:border-slate-800 bg-white dark:bg-slate-900 py-14 sm:py-16">
+        <section className="border-y border-warm-border bg-white dark:bg-slate-900 py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <SectionHeader eyebrow="Explore" title="Browse by Category" href="/categories" linkLabel="All categories" />
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
@@ -138,12 +138,12 @@ export default async function HomePage() {
                     <div className="relative flex flex-col items-center px-3 py-6 text-center">
                       <span className="text-3xl transition-transform duration-300 group-hover:scale-110 drop-shadow">{emoji}</span>
                       <p
-                        className="mt-2.5 text-[13px] font-bold text-white drop-shadow-sm leading-tight"
+                        className="mt-2.5 text-sm font-bold text-white drop-shadow-sm leading-tight"
                         style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
                       >
                         {cat.name}
                       </p>
-                      <span className="mt-1 rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">
+                      <span className="mt-1 rounded-full bg-black/20 px-2 py-0.5 text-[0.625rem] font-semibold text-white/90">
                         {cat.count}
                       </span>
                     </div>
@@ -164,11 +164,11 @@ export default async function HomePage() {
               <Link
                 key={r.slug}
                 href={`/category/${r.slug}`}
-                className="group flex items-center gap-2 rounded-full border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-700"
+                className="group flex items-center gap-2 rounded-full border border-warm-border bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-700"
               >
                 <Utensils className="h-3.5 w-3.5 text-slate-300 group-hover:text-orange-400 transition-colors" />
                 {r.name}
-                <span className="rounded-full bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[11px] text-slate-500 dark:text-slate-400 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 group-hover:text-orange-600 transition-colors">
+                <span className="rounded-full bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-xs text-slate-500 dark:text-slate-400 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 group-hover:text-orange-600 transition-colors">
                   {r.count}
                 </span>
               </Link>
@@ -179,7 +179,7 @@ export default async function HomePage() {
 
       {/* ─── Latest Recipes ────────────────────────────────────────── */}
       {latest.length > 0 && (
-        <section className="border-t border-[#e5e0d8] dark:border-slate-800 bg-[#faf7f2] dark:bg-slate-900 py-14 sm:py-16">
+        <section className="border-t border-warm-border bg-warm-sand py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <SectionHeader eyebrow="Fresh" title="Latest Recipes" href="/recipes" linkLabel="View all" />
             <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -193,7 +193,7 @@ export default async function HomePage() {
 
       {/* ─── All recipes when there are only a few ─────────────────── */}
       {recipes.length > 0 && featured.length === recipes.length && (
-        <section className="border-t border-[#e5e0d8] dark:border-slate-800 bg-[#faf7f2] dark:bg-slate-900 py-14 sm:py-16">
+        <section className="border-t border-warm-border bg-warm-sand py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <SectionHeader eyebrow="All" title="Our Recipes" href="/recipes" linkLabel="View all" />
             <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -208,8 +208,8 @@ export default async function HomePage() {
       {/* ─── Empty state ───────────────────────────────────────────── */}
       {recipes.length === 0 && (
         <section className="mx-auto max-w-2xl px-4 py-28 text-center sm:px-6">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
-            <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-warm-border-dark">
+            <ChefHat className="h-9 w-9 text-warm-muted" />
           </div>
           <h2
             className="text-3xl font-black text-slate-900 dark:text-slate-100"
@@ -224,7 +224,7 @@ export default async function HomePage() {
           <div className="mt-8 flex justify-center gap-3">
             <Link
               href="/about"
-              className="rounded-full border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-slate-300 hover:shadow"
+              className="rounded-full border border-warm-border bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-slate-300 hover:shadow"
             >
               Learn more
             </Link>
@@ -250,7 +250,7 @@ function SectionHeader({
   return (
     <div className="flex items-end justify-between">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-orange-500">{eyebrow}</p>
+        <p className="text-[0.625rem] font-bold uppercase tracking-[0.25em] text-orange-500">{eyebrow}</p>
         <h2
           className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100 sm:text-3xl"
           style={{ fontFamily: "var(--font-heading), 'Georgia', serif", letterSpacing: "-0.02em" }}
@@ -261,7 +261,7 @@ function SectionHeader({
       {href && linkLabel && (
         <Link
           href={href}
-          className="flex items-center gap-1.5 text-[13px] font-bold text-orange-500 hover:text-orange-600 transition-colors"
+          className="flex items-center gap-1.5 text-sm font-bold text-orange-500 hover:text-orange-600 transition-colors"
         >
           {linkLabel}
           <ArrowRight className="h-3.5 w-3.5" />

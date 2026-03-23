@@ -165,7 +165,7 @@ export default async function BlogPostPage({ params }: Props) {
                   className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <span
-                    className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${getBadgeColor(r.category)}`}
+                    className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${getBadgeColor(r.category)}`}
                   >
                     {r.category}
                   </span>

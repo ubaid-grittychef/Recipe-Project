@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChefHat, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { siteConfig } from "@/lib/config";
 
 interface Props {
   instructions: string[];
@@ -145,11 +144,8 @@ export default function CookMode({ instructions, recipeTitle }: Props) {
       {/* Progress bar */}
       <div className="h-1 w-full bg-slate-100 dark:bg-slate-800">
         <div
-          className="h-full transition-all duration-300 ease-out"
-          style={{
-            width: `${progress}%`,
-            backgroundColor: siteConfig.primaryColor,
-          }}
+          className="h-full bg-primary-500 transition-all duration-300 ease-out"
+          style={{ width: `${progress}%` }}
         />
       </div>
 
@@ -157,8 +153,7 @@ export default function CookMode({ instructions, recipeTitle }: Props) {
       <div className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-8 sm:px-12">
         <div className="max-w-2xl text-center">
           <span
-            className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white"
-            style={{ backgroundColor: siteConfig.primaryColor }}
+            className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-500 text-lg font-bold text-white"
           >
             {currentStep + 1}
           </span>
@@ -188,16 +183,11 @@ export default function CookMode({ instructions, recipeTitle }: Props) {
               onClick={() => setCurrentStep(i)}
               className={`h-2.5 w-2.5 rounded-full transition-colors ${
                 i === currentStep
-                  ? "scale-110"
+                  ? "scale-110 bg-primary-500"
                   : i < currentStep
                     ? "bg-slate-300"
                     : "bg-slate-200"
               }`}
-              style={
-                i === currentStep
-                  ? { backgroundColor: siteConfig.primaryColor }
-                  : undefined
-              }
               aria-label={`Go to step ${i + 1}`}
             />
           ))}
@@ -208,8 +198,7 @@ export default function CookMode({ instructions, recipeTitle }: Props) {
 
         <button
           onClick={next}
-          className="flex h-12 min-w-[100px] items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white transition-colors hover:opacity-90"
-          style={{ backgroundColor: siteConfig.primaryColor }}
+          className="flex h-12 min-w-[100px] items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 text-sm font-bold text-white transition-colors hover:opacity-90"
           aria-label={currentStep === total - 1 ? "Finish cooking" : "Next step"}
         >
           {currentStep === total - 1 ? "Finish" : "Next"}

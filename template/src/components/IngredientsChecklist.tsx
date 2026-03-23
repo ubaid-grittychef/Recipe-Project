@@ -34,8 +34,7 @@ export default function IngredientsChecklist({ ingredients }: Props) {
         return (
           <li
             key={i}
-            className="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800 px-4 py-3 transition-colors"
-            style={{ backgroundColor: isDone ? "#f8fafc" : undefined }}
+            className={`flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800 px-4 py-3 transition-colors ${isDone ? "bg-slate-50 dark:bg-slate-800/50" : ""}`}
           >
             <label className="flex cursor-pointer items-center gap-3 text-sm">
               <input
@@ -56,7 +55,7 @@ export default function IngredientsChecklist({ ingredients }: Props) {
                 href={`https://www.amazon.com/s?k=${encodeURIComponent(ing.name)}&tag=${siteConfig.amazonTag}`}
                 type="amazon"
                 label={ing.name}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-400 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-colors hover:bg-amber-500"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-400 px-2.5 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-amber-500"
               >
                 <ShoppingCart className="h-3 w-3" />
                 Amazon

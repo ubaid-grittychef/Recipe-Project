@@ -20,8 +20,7 @@ export default async function NotFound() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-20 text-center">
       <div
-        className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl text-white"
-        style={{ backgroundColor: siteConfig.primaryColor }}
+        className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-500 text-white"
       >
         <ChefHat className="h-10 w-10" />
       </div>
@@ -38,8 +37,7 @@ export default async function NotFound() {
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-          style={{ backgroundColor: siteConfig.primaryColor }}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
         >
           <Home className="h-4 w-4" />
           Home

@@ -69,7 +69,7 @@ export function deriveDietaryLabels(recipe: Recipe): DietaryLabel[] {
   if (text.includes("low-carb") || text.includes("low carb")) labels.push("Low-Carb");
 
   // Check nutrition for keto/low-carb
-  const nutrition = recipe.nutrition as Record<string, unknown>;
+  const nutrition = recipe.nutrition as unknown as Record<string, unknown>;
   if (nutrition?.carbs) {
     const carbNum = parseInt(String(nutrition.carbs));
     if (!isNaN(carbNum) && carbNum < 20) {

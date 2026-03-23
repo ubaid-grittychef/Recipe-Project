@@ -69,7 +69,7 @@ export default function Pagination({
           className={`flex min-w-[40px] h-10 items-center justify-center rounded-lg border transition-colors ${
             currentPage === 1
               ? "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-300 opacity-40 cursor-not-allowed"
-              : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300"
+              : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300"
           }`}
           aria-label="Previous page"
         >
@@ -92,7 +92,7 @@ export default function Pagination({
               className={`flex min-w-[40px] h-10 items-center justify-center rounded-lg border text-sm font-medium transition-colors ${
                 currentPage === page
                   ? "border-orange-500 bg-orange-500 text-white shadow-sm"
-                  : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300"
+                  : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300"
               }`}
               aria-label={`Page ${page}`}
               aria-current={currentPage === page ? "page" : undefined}
@@ -109,7 +109,7 @@ export default function Pagination({
           className={`flex min-w-[40px] h-10 items-center justify-center rounded-lg border transition-colors ${
             currentPage === totalPages
               ? "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-300 opacity-40 cursor-not-allowed"
-              : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300"
+              : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300"
           }`}
           aria-label="Next page"
         >

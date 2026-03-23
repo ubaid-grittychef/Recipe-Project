@@ -51,16 +51,15 @@ export default function SiteHeader() {
   }
 
   return (
-    <header className={`sticky top-0 z-50 bg-[#fffdf7] dark:bg-slate-900 transition-all duration-200 ${scrolled ? "shadow-[0_1px_0_0_#e5e0d8,0_2px_8px_0_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_#1e293b,0_2px_8px_0_rgba(0,0,0,0.3)]" : "border-b border-[#e5e0d8] dark:border-slate-800"}`}>
+    <header className={`sticky top-0 z-50 bg-warm-cream transition-all duration-200 ${scrolled ? "shadow-header dark:shadow-header-dark" : "border-b border-warm-border"}`}>
       {/* Top accent bar */}
-      <div className="h-[3px] w-full" style={{ backgroundColor: siteConfig.primaryColor }} />
+      <div className="h-[3px] w-full bg-primary-500" />
 
-      <div className="mx-auto flex h-[64px] max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
-            style={{ backgroundColor: siteConfig.primaryColor }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white shadow-sm transition-transform duration-200 group-hover:scale-105"
           >
             <ChefHat className="h-4.5 w-4.5 h-[18px] w-[18px]" />
           </div>
@@ -81,15 +80,14 @@ export default function SiteHeader() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors ${
+                className={`relative px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-colors ${
                   active ? "text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 {link.label}
                 {active && (
                   <span
-                    className="absolute inset-x-4 -bottom-[1px] h-[2px] rounded-full"
-                    style={{ backgroundColor: siteConfig.primaryColor }}
+                    className="absolute inset-x-4 -bottom-[1px] h-[2px] rounded-full bg-primary-500"
                   />
                 )}
               </Link>
@@ -106,7 +104,7 @@ export default function SiteHeader() {
           {searchOpen ? (
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden items-center gap-0 overflow-hidden rounded-full border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 ring-2 ring-orange-100 dark:ring-orange-900/30 sm:flex"
+              className="hidden items-center gap-0 overflow-hidden rounded-full border border-warm-border bg-white dark:bg-slate-800 ring-2 ring-orange-100 dark:ring-orange-900/30 sm:flex"
             >
               <Search className="ml-3.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
               <input
@@ -150,7 +148,7 @@ export default function SiteHeader() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="border-t border-[#e5e0d8] dark:border-slate-800 bg-[#fffdf7] dark:bg-slate-900 px-4 pb-4 pt-2 sm:hidden">
+        <div className="border-t border-warm-border bg-warm-cream px-4 pb-4 pt-2 sm:hidden">
           <nav className="space-y-0.5">
             {navLinks.map((link) => {
               const active = isActive(link.href);
@@ -177,7 +175,7 @@ export default function SiteHeader() {
           </div>
           <form
             onSubmit={handleSearchSubmit}
-            className="mt-3 flex items-center gap-2 rounded-xl border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5"
+            className="mt-3 flex items-center gap-2 rounded-xl border border-warm-border bg-white dark:bg-slate-800 px-4 py-2.5"
           >
             <Search className="h-4 w-4 shrink-0 text-slate-400" />
             <input

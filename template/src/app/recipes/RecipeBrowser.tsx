@@ -51,10 +51,10 @@ function Chip({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-150 ${
         active
-          ? "border-orange-400 dark:border-orange-600 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 shadow-sm"
-          : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+          ? "border-primary-400 dark:border-primary-600 bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 shadow-sm"
+          : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
       }`}
     >
       {label}
@@ -207,7 +207,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search recipes by title, ingredient, restaurant…"
-          className="w-full rounded-xl border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 py-3 pl-11 pr-10 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition-all focus:border-orange-300 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 placeholder:text-slate-400"
+          className="w-full rounded-xl border border-warm-border bg-white dark:bg-slate-800 py-3 pl-11 pr-10 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition-all focus:border-primary-300 focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary-900/30 placeholder:text-slate-400"
         />
         {query && (
           <button
@@ -221,10 +221,10 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
 
       {/* ── Filters + Sort ───────────────────────────────── */}
       {hasFilters && (
-        <div className="mb-6 rounded-xl border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-900 p-4 space-y-3">
+        <div className="mb-6 rounded-xl border border-warm-border bg-white dark:bg-slate-900 p-4 space-y-3">
           {categories.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Category</span>
+              <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Category</span>
               {categories.map((cat) => (
                 <Chip
                   key={cat.slug}
@@ -238,7 +238,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
 
           {restaurants.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Restaurant</span>
+              <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Restaurant</span>
               {restaurants.slice(0, 10).map((r) => (
                 <Chip
                   key={r.slug}
@@ -251,7 +251,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
           )}
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Difficulty</span>
+            <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Difficulty</span>
             {DIFFICULTIES.map((d) => (
               <Chip
                 key={d}
@@ -264,15 +264,15 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
 
           {/* Time Range */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Time</span>
+            <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Time</span>
             {TIME_RANGES.map((range) => (
               <button
                 key={range.key}
                 onClick={() => setSelectedTimeRange((prev) => prev === range.key ? null : range.key)}
-                className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-150 ${
                   selectedTimeRange === range.key
                     ? "bg-sky-50 dark:bg-sky-950/30 border-sky-300 dark:border-sky-700 text-sky-700 dark:text-sky-400 shadow-sm"
-                    : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                    : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 {range.label}
@@ -283,7 +283,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
           {/* Dietary */}
           {availableDietary.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Dietary</span>
+              <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Dietary</span>
               {availableDietary.map((label) => (
                 <button
                   key={label}
@@ -292,10 +292,10 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
                       prev.includes(label) ? prev.filter((d) => d !== label) : [...prev, label]
                     )
                   }
-                  className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-150 ${
                     selectedDietary.includes(label)
                       ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 shadow-sm"
-                      : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                      : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                   }`}
                 >
                   {label}
@@ -307,15 +307,15 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
           {/* Cuisine */}
           {availableCuisines.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Cuisine</span>
+              <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400 w-20 shrink-0">Cuisine</span>
               {availableCuisines.map((cuisine) => (
                 <button
                   key={cuisine}
                   onClick={() => setSelectedCuisine((prev) => prev === cuisine ? null : cuisine)}
-                  className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-all duration-150 ${
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-150 ${
                     selectedCuisine === cuisine
                       ? "bg-violet-50 dark:bg-violet-950/30 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-400 shadow-sm"
-                      : "border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                      : "border-warm-border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                   }`}
                 >
                   {cuisine}
@@ -329,7 +329,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
       {/* ── Toolbar: sort + count ─────────────────────────── */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Sort</span>
+          <span className="text-[0.625rem] font-bold uppercase tracking-[0.15em] text-slate-400">Sort</span>
           {SORT_OPTIONS.map((opt) => (
             <Chip
               key={opt.value}
@@ -348,7 +348,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
           {(activeFilters > 0 || query) && (
             <button
               onClick={clearAll}
-              className="flex items-center gap-1 rounded-full border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 py-1 text-[12px] font-semibold text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
+              className="flex items-center gap-1 rounded-full border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 py-1 text-xs font-semibold text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
             >
               <X className="h-3 w-3" />
               Clear all
@@ -377,8 +377,8 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
           </>
         ) : (
           <div className="py-24 text-center">
-            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
-              <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-warm-border-dark">
+              <ChefHat className="h-9 w-9 text-warm-muted" />
             </div>
             <h3
               className="text-xl font-black text-slate-900 dark:text-slate-100"
@@ -391,7 +391,7 @@ export default function RecipeBrowser({ recipes, categories, restaurants }: Prop
             </p>
             <button
               onClick={clearAll}
-              className="mt-5 rounded-full border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-slate-300 hover:shadow"
+              className="mt-5 rounded-full border border-warm-border bg-white dark:bg-slate-800 px-5 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-slate-300 hover:shadow"
             >
               Clear filters
             </button>

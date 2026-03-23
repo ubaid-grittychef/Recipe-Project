@@ -39,7 +39,7 @@ export default function RecentlyViewed({ excludeSlug }: RecentlyViewedProps) {
             href={`/recipe/${recipe.slug}`}
             className="group flex-shrink-0 w-40"
           >
-            <div className="relative h-28 w-40 overflow-hidden rounded-lg bg-[#f5f0e8] dark:bg-slate-800">
+            <div className="relative h-28 w-40 overflow-hidden rounded-lg bg-warm-beige">
               {recipe.image_url ? (
                 <Image
                   src={recipe.image_url}
@@ -50,7 +50,7 @@ export default function RecentlyViewed({ excludeSlug }: RecentlyViewedProps) {
                 />
               ) : (
                 <div className="flex h-full items-center justify-center">
-                  <ChefHat className="h-8 w-8 text-[#c9bfb0]" />
+                  <ChefHat className="h-8 w-8 text-warm-muted" />
                 </div>
               )}
             </div>

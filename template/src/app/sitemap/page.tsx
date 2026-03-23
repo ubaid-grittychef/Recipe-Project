@@ -56,8 +56,7 @@ export default async function SitemapPage() {
       {/* Header */}
       <div className="mb-12">
         <div
-          className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl text-white"
-          style={{ backgroundColor: siteConfig.primaryColor }}
+          className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500 text-white"
         >
           <FileText className="h-7 w-7" />
         </div>

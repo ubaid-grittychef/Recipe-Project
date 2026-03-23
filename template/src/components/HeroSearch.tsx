@@ -37,8 +37,7 @@ export default function HeroSearch() {
       </div>
       <button
         type="submit"
-        className="m-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow transition-opacity hover:opacity-90"
-        style={{ backgroundColor: siteConfig.primaryColor }}
+        className="m-2 rounded-xl bg-primary-500 px-6 py-3 text-sm font-semibold text-white shadow transition-opacity hover:opacity-90"
       >
         Search
       </button>

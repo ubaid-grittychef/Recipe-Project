@@ -40,13 +40,13 @@ export default async function RecipesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema).replace(/<\//g, "<\\/") }}
       />
 
-      <div className="bg-[#fffdf7] dark:bg-slate-950">
+      <div className="bg-warm-cream">
         {/* ── Page header ────────────────────────────────── */}
-        <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
+        <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-warm-cream">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
             <div className="flex items-center gap-4 mb-6">
               <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Collection</span>
+              <span className="text-[0.625rem] font-bold uppercase tracking-[0.3em] text-slate-400">Collection</span>
               <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
             </div>
             <div className="text-center">

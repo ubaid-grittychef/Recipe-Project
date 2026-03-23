@@ -3,12 +3,32 @@
 @tailwind utilities;
 
 :root {
+  /* Primary — 500 is overridden by layout.tsx from siteConfig.primaryColor */
   --color-primary-50: #fff7ed;
   --color-primary-100: #ffedd5;
   --color-primary-200: #fed7aa;
   --color-primary-500: #f97316;
   --color-primary-600: #ea580c;
   --color-primary-700: #c2410c;
+
+  /* Warm neutral palette — auto-switches in dark mode */
+  --warm-cream: #fffdf7;
+  --warm-sand: #faf7f2;
+  --warm-beige: #f5f0e8;
+  --warm-border: #e5e0d8;
+  --warm-border-light: #ede8e0;
+  --warm-border-dark: #d4cfc7;
+  --warm-muted: #c9bfb0;
+}
+
+.dark {
+  --warm-cream: #0f172a;
+  --warm-sand: #1e293b;
+  --warm-beige: #1e293b;
+  --warm-border: #334155;
+  --warm-border-light: #334155;
+  --warm-border-dark: #475569;
+  --warm-muted: #64748b;
 }
 
 @layer base {
@@ -60,10 +80,38 @@
 
 }
 
+@layer utilities {
+  /* ── Scroll-triggered fade-in ── */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out both;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Image skeleton shimmer ── */
+  .animate-shimmer {
+    background: linear-gradient(90deg, var(--warm-beige) 25%, var(--warm-sand) 50%, var(--warm-beige) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Reading progress bar ── */
+  .reading-progress {
+    @apply fixed top-0 left-0 h-[3px] z-[60] transition-[width] duration-100 ease-linear;
+    background: var(--color-primary-500);
+  }
+}
+
 @layer components {
   /* ── Recipe content ── */
   .recipe-step-number {
-    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white shadow-sm;
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-500 text-sm font-bold text-white shadow-sm;
   }
   .ingredient-row {
     @apply flex items-center gap-3 py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-opacity;
@@ -72,12 +120,12 @@
     @apply opacity-35 line-through;
   }
   .jump-to-recipe {
-    @apply inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-orange-600 transition-all hover:shadow-lg hover:-translate-y-px;
+    @apply inline-flex items-center gap-2 rounded-full bg-primary-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-primary-600 transition-all hover:shadow-lg hover:-translate-y-px;
   }
 
   /* ── Section heading style ── */
   .section-eyebrow {
-    @apply text-xs font-semibold uppercase tracking-widest text-orange-500;
+    @apply text-xs font-semibold uppercase tracking-widest text-primary-500;
   }
   .section-heading {
     @apply mt-1.5 text-2xl font-bold text-slate-900 dark:text-slate-100 sm:text-3xl;

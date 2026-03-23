@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Clock, Users, ChefHat } from "lucide-react";
 import { Recipe } from "@/lib/types";
 import { slugifyCategory } from "@/lib/utils";
 import BookmarkButton from "@/components/BookmarkButton";
+import ImageSkeleton from "@/components/ImageSkeleton";
 
 export default function RecipeCard({ recipe }: { recipe: Recipe }) {
   const [imgError, setImgError] = useState(false);
@@ -22,12 +22,12 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
   return (
     <Link
       href={`/recipe/${recipe.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-[#ede8e0] dark:border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:border-[#d4cfc7] dark:hover:border-slate-700"
+      className="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-warm-border-light shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:border-warm-border-dark"
     >
       {/* Image */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f0e8] dark:bg-slate-800">
+      <div className="relative aspect-[16/10] overflow-hidden bg-warm-beige">
         {recipe.image_url && !imgError ? (
-          <Image
+          <ImageSkeleton
             src={recipe.image_url}
             alt={`${recipe.title} recipe`}
             fill
@@ -37,7 +37,7 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <ChefHat className="h-10 w-10 text-[#c9bfb0]" />
+            <ChefHat className="h-10 w-10 text-warm-muted" />
           </div>
         )}
 
@@ -47,7 +47,7 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
         {/* Category pill */}
         {(recipe.category || recipe.restaurant_name) && (
           <div className="absolute top-3 left-3">
-            <span className="rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
+            <span className="rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-slate-700 shadow-sm">
               {recipe.category || recipe.restaurant_name}
             </span>
           </div>
@@ -56,7 +56,7 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
         {/* Difficulty */}
         {recipe.difficulty && (
           <div className="absolute bottom-3 right-3">
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${diff.cls} shadow-sm`}>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${diff.cls} shadow-sm`}>
               {diff.label}
             </span>
           </div>
@@ -69,17 +69,17 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-4 pt-3.5">
+      <div className="flex flex-1 flex-col p-4 pt-3">
         {/* Restaurant tag */}
         {recipe.restaurant_name && recipe.category && (
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-500">
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.08em] text-orange-500">
             {recipe.restaurant_name}
           </p>
         )}
 
         {/* Title */}
         <h3
-          className="line-clamp-2 text-[15px] font-bold leading-snug text-slate-900 dark:text-slate-100 transition-colors group-hover:text-orange-600"
+          className="line-clamp-2 text-sm font-bold leading-snug text-slate-900 dark:text-slate-100 transition-colors group-hover:text-orange-600"
           style={{ fontFamily: "var(--font-heading), 'Georgia', serif" }}
         >
           {recipe.title}
@@ -87,13 +87,13 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
 
         {/* Description */}
         {recipe.description && (
-          <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
             {recipe.description}
           </p>
         )}
 
         {/* Meta */}
-        <div className="mt-auto flex items-center gap-3 border-t border-[#ede8e0] dark:border-slate-800 pt-3 text-[12px] text-slate-400 mt-3">
+        <div className="mt-auto flex items-center gap-3 border-t border-warm-border-light pt-3 text-xs text-slate-400 mt-3">
           {totalTime && (
             <span className="flex items-center gap-1.5 font-medium">
               <Clock className="h-3.5 w-3.5 text-slate-300" />

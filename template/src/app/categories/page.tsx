@@ -18,14 +18,14 @@ export default async function CategoriesPage() {
   const categories = await getCategories();
 
   return (
-    <div className="bg-[#fffdf7] dark:bg-slate-950">
+    <div className="bg-warm-cream">
 
       {/* ── Page header ─────────────────────────────────── */}
-      <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
+      <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-warm-cream">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="flex items-center gap-4 mb-6">
             <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Explore</span>
+            <span className="text-[0.625rem] font-bold uppercase tracking-[0.3em] text-slate-400">Explore</span>
             <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
           </div>
           <div className="text-center">
@@ -68,12 +68,12 @@ export default async function CategoriesPage() {
                       {emoji}
                     </span>
                     <h2
-                      className="mt-3 text-[14px] font-bold leading-snug text-white drop-shadow-sm"
+                      className="mt-3 text-sm font-bold leading-snug text-white drop-shadow-sm"
                       style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
                     >
                       {cat.name}
                     </h2>
-                    <span className="mt-2 rounded-full bg-black/20 px-2.5 py-0.5 text-[11px] font-semibold text-white/90 backdrop-blur-sm">
+                    <span className="mt-2 rounded-full bg-black/20 px-2.5 py-0.5 text-xs font-semibold text-white/90 backdrop-blur-sm">
                       {cat.count} {cat.count === 1 ? "recipe" : "recipes"}
                     </span>
                   </div>
@@ -83,8 +83,8 @@ export default async function CategoriesPage() {
           </div>
         ) : (
           <div className="py-28 text-center">
-            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-[#d4cfc7]">
-              <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-warm-border-dark">
+              <ChefHat className="h-9 w-9 text-warm-muted" />
             </div>
             <h2
               className="text-2xl font-black text-slate-900 dark:text-slate-100"

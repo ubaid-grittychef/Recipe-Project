@@ -97,6 +97,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(inter.variable, playfair.variable, poppins.variable, "font-sans", geist.variable)}
+      style={{ "--color-primary-500": siteConfig.primaryColor } as React.CSSProperties}
     >
       <head>
         <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed.xml" />
