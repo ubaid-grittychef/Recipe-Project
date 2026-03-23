@@ -40,23 +40,23 @@ export default async function RecipesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema).replace(/<\//g, "<\\/") }}
       />
 
-      <div className="bg-[#fffdf7]">
+      <div className="bg-[#fffdf7] dark:bg-slate-950">
         {/* ── Page header ────────────────────────────────── */}
-        <div className="border-b-2 border-slate-900 bg-[#fffdf7]">
+        <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
             <div className="flex items-center gap-4 mb-6">
-              <div className="h-px flex-1 bg-slate-900" />
+              <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Collection</span>
-              <div className="h-px flex-1 bg-slate-900" />
+              <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
             </div>
             <div className="text-center">
               <h1
-                className="text-4xl font-black text-slate-900 sm:text-6xl"
+                className="text-4xl font-black text-slate-900 dark:text-slate-100 sm:text-6xl"
                 style={{ fontFamily: "var(--font-heading), 'Georgia', serif", letterSpacing: "-0.03em" }}
               >
                 All Recipes
               </h1>
-              <p className="mt-4 text-sm text-slate-500">
+              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
                 {recipes.length > 0
                   ? `${recipes.length} ${recipes.length === 1 ? "recipe" : "recipes"} — search, filter, and explore`
                   : "Our collection is growing — check back soon"}

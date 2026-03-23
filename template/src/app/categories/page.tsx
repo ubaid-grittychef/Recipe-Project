@@ -18,24 +18,24 @@ export default async function CategoriesPage() {
   const categories = await getCategories();
 
   return (
-    <div className="bg-[#fffdf7]">
+    <div className="bg-[#fffdf7] dark:bg-slate-950">
 
       {/* ── Page header ─────────────────────────────────── */}
-      <div className="border-b-2 border-slate-900 bg-[#fffdf7]">
+      <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="flex items-center gap-4 mb-6">
-            <div className="h-px flex-1 bg-slate-900" />
+            <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Explore</span>
-            <div className="h-px flex-1 bg-slate-900" />
+            <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
           </div>
           <div className="text-center">
             <h1
-              className="text-4xl font-black text-slate-900 sm:text-6xl"
+              className="text-4xl font-black text-slate-900 dark:text-slate-100 sm:text-6xl"
               style={{ fontFamily: "var(--font-heading), 'Georgia', serif", letterSpacing: "-0.03em" }}
             >
               Recipe Categories
             </h1>
-            <p className="mt-4 text-sm text-slate-500">
+            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
               {categories.length > 0
                 ? `${categories.length} ${categories.length === 1 ? "category" : "categories"} of copycat recipes`
                 : "Browse our growing collection"}
@@ -87,7 +87,7 @@ export default async function CategoriesPage() {
               <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
             </div>
             <h2
-              className="text-2xl font-black text-slate-900"
+              className="text-2xl font-black text-slate-900 dark:text-slate-100"
               style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
             >
               No categories yet

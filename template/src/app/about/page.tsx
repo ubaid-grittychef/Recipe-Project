@@ -21,7 +21,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 py-20">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-200 opacity-40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-amber-200 opacity-40 blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
@@ -31,18 +31,18 @@ export default function AboutPage() {
           >
             <ChefHat className="h-8 w-8" />
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">
             About {siteConfig.name}
           </h1>
           {siteConfig.tagline && (
-            <p className="mt-4 text-lg text-slate-600">{siteConfig.tagline}</p>
+            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">{siteConfig.tagline}</p>
           )}
         </div>
       </section>
 
       <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
         {/* Stats row */}
-        <div className="mb-12 grid grid-cols-3 divide-x divide-slate-100 rounded-2xl border border-slate-100 bg-white shadow-sm">
+        <div className="mb-12 grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           {[
             { icon: BookOpen, label: "Recipes", value: "500+" },
             { icon: Star, label: "Avg Rating", value: "4.8★" },
@@ -50,8 +50,8 @@ export default function AboutPage() {
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="flex flex-col items-center py-6">
               <Icon className="h-5 w-5 text-orange-400" />
-              <p className="mt-2 text-xl font-bold text-slate-900">{value}</p>
-              <p className="text-xs text-slate-500">{label}</p>
+              <p className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
             </div>
           ))}
         </div>
@@ -68,8 +68,8 @@ export default function AboutPage() {
                   <User className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Meet the Author</h2>
-                  <p className="mt-2 leading-relaxed text-slate-600">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Meet the Author</h2>
+                  <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-400">
                     {siteConfig.name} is created and maintained by{" "}
                     <strong>{siteConfig.author}</strong>. We bring you tested copycat
                     recipes and cooking inspiration to recreate your favorite restaurant
@@ -90,8 +90,8 @@ export default function AboutPage() {
                 <Target className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Our Mission</h2>
-                <p className="mt-2 leading-relaxed text-slate-600">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Our Mission</h2>
+                <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-400">
                   {siteConfig.description ||
                     "Our mission is to help home cooks recreate their favorite restaurant meals with clear, step-by-step recipes. We focus on accuracy, ease of use, and delicious results."}
                 </p>
@@ -100,14 +100,14 @@ export default function AboutPage() {
           </section>
 
           {/* Disclaimer */}
-          <section className="rounded-2xl border border-amber-100 bg-amber-50 p-6 sm:p-8">
+          <section className="rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-amber-50 dark:bg-amber-950/20 p-6 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
                 <Shield className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Disclaimer</h2>
-                <p className="mt-2 leading-relaxed text-slate-600">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Disclaimer</h2>
+                <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-400">
                   This site may contain affiliate links. When you click on certain links
                   and make a purchase, we may receive a small commission at no extra cost
                   to you. This helps us keep the site running and continue creating free

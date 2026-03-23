@@ -76,20 +76,20 @@ export default async function CollectionDetailPage({ params }: Props) {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 flex items-center text-sm text-slate-400">
-          <Link href="/" className="hover:text-slate-600">Home</Link>
+          <Link href="/" className="hover:text-slate-600 dark:hover:text-slate-300">Home</Link>
           <ChevronRight className="mx-1 h-3 w-3 shrink-0" />
-          <Link href="/collections" className="hover:text-slate-600">Collections</Link>
+          <Link href="/collections" className="hover:text-slate-600 dark:hover:text-slate-300">Collections</Link>
           <ChevronRight className="mx-1 h-3 w-3 shrink-0" />
-          <span className="text-slate-600" aria-current="page">{collection.name}</span>
+          <span className="text-slate-600 dark:text-slate-400" aria-current="page">{collection.name}</span>
         </nav>
 
         {/* Header */}
         <div className="mb-10">
           <span className="text-5xl">{collection.emoji}</span>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
             {collection.name}
           </h1>
-          <p className="mt-2 text-slate-600">{collection.description}</p>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">{collection.description}</p>
           <p className="mt-1 text-sm text-slate-500">
             {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
           </p>
@@ -103,12 +103,12 @@ export default async function CollectionDetailPage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 py-20 text-center">
-            <ChefHat className="mx-auto h-16 w-16 text-slate-200" />
-            <h2 className="mt-4 text-xl font-semibold text-slate-900">
+          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-20 text-center">
+            <ChefHat className="mx-auto h-16 w-16 text-slate-200 dark:text-slate-700" />
+            <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
               No recipes found
             </h2>
-            <p className="mt-2 max-w-md mx-auto text-slate-500">
+            <p className="mt-2 max-w-md mx-auto text-slate-500 dark:text-slate-400">
               No recipes match this collection yet. Check back soon
               or browse our other collections.
             </p>

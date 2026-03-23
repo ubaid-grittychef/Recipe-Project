@@ -22,10 +22,10 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
   return (
     <Link
       href={`/recipe/${recipe.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl bg-white border border-[#ede8e0] shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:border-[#d4cfc7]"
+      className="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-[#ede8e0] dark:border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] hover:border-[#d4cfc7] dark:hover:border-slate-700"
     >
       {/* Image */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f0e8]">
+      <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f0e8] dark:bg-slate-800">
         {recipe.image_url && !imgError ? (
           <Image
             src={recipe.image_url}
@@ -79,7 +79,7 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
 
         {/* Title */}
         <h3
-          className="line-clamp-2 text-[15px] font-bold leading-snug text-slate-900 transition-colors group-hover:text-orange-600"
+          className="line-clamp-2 text-[15px] font-bold leading-snug text-slate-900 dark:text-slate-100 transition-colors group-hover:text-orange-600"
           style={{ fontFamily: "var(--font-heading), 'Georgia', serif" }}
         >
           {recipe.title}
@@ -87,13 +87,13 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
 
         {/* Description */}
         {recipe.description && (
-          <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-slate-500">
+          <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-slate-500 dark:text-slate-400">
             {recipe.description}
           </p>
         )}
 
         {/* Meta */}
-        <div className="mt-auto flex items-center gap-3 border-t border-[#ede8e0] pt-3 text-[12px] text-slate-400 mt-3">
+        <div className="mt-auto flex items-center gap-3 border-t border-[#ede8e0] dark:border-slate-800 pt-3 text-[12px] text-slate-400 mt-3">
           {totalTime && (
             <span className="flex items-center gap-1.5 font-medium">
               <Clock className="h-3.5 w-3.5 text-slate-300" />

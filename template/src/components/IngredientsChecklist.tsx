@@ -34,7 +34,7 @@ export default function IngredientsChecklist({ ingredients }: Props) {
         return (
           <li
             key={i}
-            className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3 transition-colors"
+            className="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800 px-4 py-3 transition-colors"
             style={{ backgroundColor: isDone ? "#f8fafc" : undefined }}
           >
             <label className="flex cursor-pointer items-center gap-3 text-sm">
@@ -44,7 +44,7 @@ export default function IngredientsChecklist({ ingredients }: Props) {
                 onChange={() => toggle(i)}
                 className="h-4 w-4 rounded border-slate-300 accent-orange-500"
               />
-              <span className={isDone ? "text-slate-400 line-through" : "text-slate-700"}>
+              <span className={isDone ? "text-slate-400 line-through" : "text-slate-700 dark:text-slate-300"}>
                 <span className={isDone ? "font-medium" : "font-medium"}>
                   {ing.quantity} {ing.unit}
                 </span>{" "}

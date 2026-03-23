@@ -26,7 +26,7 @@ export default function RecentlyViewed({ excludeSlug }: RecentlyViewedProps) {
       <div className="flex items-center gap-2 mb-4">
         <Clock className="h-5 w-5 text-slate-400" />
         <h2
-          className="text-xl font-bold text-slate-900"
+          className="text-xl font-bold text-slate-900 dark:text-slate-100"
           style={{ fontFamily: "var(--font-heading), 'Georgia', serif" }}
         >
           Recently Viewed
@@ -39,7 +39,7 @@ export default function RecentlyViewed({ excludeSlug }: RecentlyViewedProps) {
             href={`/recipe/${recipe.slug}`}
             className="group flex-shrink-0 w-40"
           >
-            <div className="relative h-28 w-40 overflow-hidden rounded-lg bg-[#f5f0e8]">
+            <div className="relative h-28 w-40 overflow-hidden rounded-lg bg-[#f5f0e8] dark:bg-slate-800">
               {recipe.image_url ? (
                 <Image
                   src={recipe.image_url}
@@ -54,7 +54,7 @@ export default function RecentlyViewed({ excludeSlug }: RecentlyViewedProps) {
                 </div>
               )}
             </div>
-            <p className="mt-2 text-sm font-medium text-slate-900 line-clamp-2 group-hover:text-orange-600 transition-colors">
+            <p className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-orange-600 transition-colors">
               {recipe.title}
             </p>
             {recipe.total_time && (

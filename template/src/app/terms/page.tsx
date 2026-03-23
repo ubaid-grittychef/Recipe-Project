@@ -12,12 +12,12 @@ export default function TermsPage() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <h1 className="text-3xl font-extrabold text-slate-900">Terms of Use</h1>
+      <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">Terms of Use</h1>
       <p className="mt-2 text-sm text-slate-400">
         Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
       </p>
 
-      <div className="prose prose-slate mt-8 max-w-none">
+      <div className="prose prose-slate dark:prose-invert mt-8 max-w-none">
         <p>
           Welcome to {siteName}. By accessing and using this website, you accept
           and agree to be bound by the terms and conditions outlined below.

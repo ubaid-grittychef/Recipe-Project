@@ -75,11 +75,11 @@ export default function NewsletterBanner() {
         visible ? "translate-y-0" : "translate-y-full"
       }`}
     >
-      <div className="bg-white/95 backdrop-blur-sm border-t border-slate-200 shadow-2xl">
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800 shadow-2xl">
         <div className="mx-auto max-w-2xl px-4 py-4 relative">
           <button
             onClick={handleDismiss}
-            className="absolute top-2 right-2 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="absolute top-2 right-2 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             aria-label="Dismiss newsletter banner"
           >
             <X className="w-5 h-5" />

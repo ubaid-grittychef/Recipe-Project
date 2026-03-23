@@ -16,14 +16,14 @@ export default function PrivacyPage() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <h1 className="text-3xl font-extrabold text-slate-900">
+      <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
         Privacy Policy
       </h1>
       <p className="mt-2 text-sm text-slate-400">
         Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
       </p>
 
-      <div className="prose prose-slate mt-8 max-w-none">
+      <div className="prose prose-slate dark:prose-invert mt-8 max-w-none">
         <p>
           {siteName} (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;)
           operates the website at{" "}

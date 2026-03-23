@@ -93,11 +93,11 @@ export default async function CategoryPage({ params }: Props) {
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center text-sm text-slate-400">
-        <Link href="/" className="hover:text-slate-600">Home</Link>
+        <Link href="/" className="hover:text-slate-600 dark:hover:text-slate-300">Home</Link>
         <ChevronRight className="mx-1 h-3 w-3 shrink-0" />
-        <Link href="/categories" className="hover:text-slate-600">Categories</Link>
+        <Link href="/categories" className="hover:text-slate-600 dark:hover:text-slate-300">Categories</Link>
         <ChevronRight className="mx-1 h-3 w-3 shrink-0" />
-        <span className="text-slate-600" aria-current="page">{category.name}</span>
+        <span className="text-slate-600 dark:text-slate-400" aria-current="page">{category.name}</span>
       </nav>
 
       {/* Header */}
@@ -108,10 +108,10 @@ export default async function CategoryPage({ params }: Props) {
         >
           <ChefHat className="h-7 w-7" />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
           {category.name} Recipes
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
           {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"} in this
           category
         </p>
@@ -125,12 +125,12 @@ export default async function CategoryPage({ params }: Props) {
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 py-20 text-center">
-          <ChefHat className="mx-auto h-16 w-16 text-slate-200" />
-          <h2 className="mt-4 text-xl font-semibold text-slate-900">
+        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-20 text-center">
+          <ChefHat className="mx-auto h-16 w-16 text-slate-200 dark:text-slate-700" />
+          <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
             No recipes found
           </h2>
-          <p className="mt-2 max-w-md mx-auto text-slate-500">
+          <p className="mt-2 max-w-md mx-auto text-slate-500 dark:text-slate-400">
             We don&apos;t have any {category.name} recipes yet. Check back soon
             or browse our other categories.
           </p>

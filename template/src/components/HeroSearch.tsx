@@ -19,7 +19,7 @@ export default function HeroSearch() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto mt-10 flex max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-white/10"
+      className="mx-auto mt-10 flex max-w-2xl overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl ring-1 ring-white/10 dark:ring-slate-700"
     >
       <label htmlFor="hero-search" className="sr-only">
         Search recipes
@@ -32,7 +32,7 @@ export default function HeroSearch() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search recipes, ingredients, cuisines…"
-          className="flex-1 py-4 text-slate-900 outline-none placeholder:text-slate-400"
+          className="flex-1 py-4 bg-transparent text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-400"
         />
       </div>
       <button

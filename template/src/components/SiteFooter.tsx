@@ -102,6 +102,7 @@ export default function SiteFooter() {
                 { href: "/", label: "Home" },
                 { href: "/recipes", label: "All Recipes" },
                 { href: "/categories", label: "Categories" },
+                { href: "/blog", label: "Blog" },
                 { href: "/search", label: "Search" },
                 { href: "/favorites", label: "Saved Recipes" },
                 { href: "/about", label: "About" },

@@ -55,7 +55,7 @@ export default function NewsletterSignup({ variant = "inline" }: NewsletterSignu
 
   if (status === "success") {
     return (
-      <div className={variant === "banner" ? "bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-6" : ""}>
+      <div className={variant === "banner" ? "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200 dark:border-orange-900/30 rounded-xl p-6" : ""}>
         <div className="flex items-center gap-2">
           <Check className="w-5 h-5 text-green-500" />
           <span className={variant === "banner" ? "text-green-700 font-medium" : "text-green-400 text-sm"}>
@@ -68,9 +68,9 @@ export default function NewsletterSignup({ variant = "inline" }: NewsletterSignu
 
   if (variant === "banner") {
     return (
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-6">
-        <h3 className="text-lg font-bold text-slate-900 mb-1">Get Our Best Recipes Weekly</h3>
-        <p className="text-sm text-slate-600 mb-3">
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200 dark:border-orange-900/30 rounded-xl p-6">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">Get Our Best Recipes Weekly</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
           Join our newsletter for new recipes, tips, and cooking inspiration.
         </p>
         <form onSubmit={handleSubmit} className="flex gap-2">
@@ -79,7 +79,7 @@ export default function NewsletterSignup({ variant = "inline" }: NewsletterSignu
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Your email address"
-            className="flex-1 px-4 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+            className="flex-1 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
             disabled={status === "submitting"}
           />
           <button

@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/config";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import BackToTop from "@/components/BackToTop";
+import ThemeProvider from "@/components/ThemeProvider";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
 
@@ -94,6 +95,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(inter.variable, playfair.variable, poppins.variable, "font-sans", geist.variable)}
     >
       <head>
@@ -112,6 +114,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <ThemeProvider>
         <SiteHeader />
         <main className="min-h-screen">{children}</main>
         <SiteFooter />
@@ -141,6 +144,7 @@ export default function RootLayout({
             </Script>
           </>
         )}
+        </ThemeProvider>
       </body>
     </html>
   );

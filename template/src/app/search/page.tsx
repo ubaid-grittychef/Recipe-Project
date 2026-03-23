@@ -57,7 +57,7 @@ export default async function SearchPage({ searchParams }: Props) {
       {/* Back link */}
       <Link
         href="/recipes"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
       >
         <ArrowLeft className="h-4 w-4" />
         Browse all recipes
@@ -66,7 +66,7 @@ export default async function SearchPage({ searchParams }: Props) {
       {/* Search bar */}
       <div className="mb-8 flex items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {query ? (
               <>
                 Results for{" "}
@@ -77,7 +77,7 @@ export default async function SearchPage({ searchParams }: Props) {
             )}
           </h1>
           {query && (
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {results.length} recipe{results.length !== 1 ? "s" : ""} found
             </p>
           )}
@@ -97,11 +97,11 @@ export default async function SearchPage({ searchParams }: Props) {
           </div>
         ) : query ? (
           <div className="py-20 text-center">
-            <Search className="mx-auto h-14 w-14 text-slate-200" />
-            <h2 className="mt-4 text-lg font-semibold text-slate-900">
+            <Search className="mx-auto h-14 w-14 text-slate-200 dark:text-slate-700" />
+            <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
               No results for &ldquo;{query}&rdquo;
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Try a different term or{" "}
               <Link href="/recipes" className="text-primary-600 hover:underline">
                 browse all recipes
@@ -111,7 +111,7 @@ export default async function SearchPage({ searchParams }: Props) {
           </div>
         ) : (
           <div className="py-20 text-center">
-            <ChefHat className="mx-auto h-14 w-14 text-slate-200" />
+            <ChefHat className="mx-auto h-14 w-14 text-slate-200 dark:text-slate-700" />
             <p className="mt-4 text-slate-500">
               Start typing to search through {allRecipes.length} recipes.
             </p>

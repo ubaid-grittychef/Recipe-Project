@@ -61,10 +61,10 @@ export default async function SitemapPage() {
         >
           <FileText className="h-7 w-7" />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
           Recipe Sitemap
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
           All {recipes.length} recipes organized by date
         </p>
       </div>
@@ -73,19 +73,19 @@ export default async function SitemapPage() {
       <div className="mb-10 flex flex-wrap gap-3">
         <Link
           href="/"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-primary-200 hover:bg-primary-50"
+          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-primary-200 hover:bg-primary-50"
         >
           Home
         </Link>
         <Link
           href="/categories"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-primary-200 hover:bg-primary-50"
+          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-primary-200 hover:bg-primary-50"
         >
           Categories
         </Link>
         <Link
           href="/about"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-primary-200 hover:bg-primary-50"
+          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-primary-200 hover:bg-primary-50"
         >
           About
         </Link>
@@ -102,7 +102,7 @@ export default async function SitemapPage() {
             ).toLocaleDateString("en-US", { month: "long", year: "numeric" });
             return (
               <section key={monthKey}>
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
                   <Calendar className="h-5 w-5 text-primary-500" />
                   {monthName}
                 </h2>
@@ -111,7 +111,7 @@ export default async function SitemapPage() {
                     <li key={r.slug}>
                       <Link
                         href={`/recipe/${r.slug}`}
-                        className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3 text-slate-700 transition-colors hover:border-primary-100 hover:bg-primary-50/50"
+                        className="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800 px-4 py-3 text-slate-700 dark:text-slate-300 transition-colors hover:border-primary-100 hover:bg-primary-50/50 dark:hover:bg-slate-800"
                       >
                         <span className="font-medium">{r.title}</span>
                         <span className="text-xs text-slate-400">
@@ -126,9 +126,9 @@ export default async function SitemapPage() {
           })}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 py-16 text-center">
-          <FileText className="mx-auto h-12 w-12 text-slate-200" />
-          <p className="mt-4 text-slate-600">No recipes yet.</p>
+        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-16 text-center">
+          <FileText className="mx-auto h-12 w-12 text-slate-200 dark:text-slate-700" />
+          <p className="mt-4 text-slate-600 dark:text-slate-400">No recipes yet.</p>
           <Link
             href="/"
             className="mt-4 inline-block text-sm font-medium text-primary-600 hover:text-primary-700"

@@ -32,7 +32,7 @@ export default function RecipeIngredientSection({ originalServings, ingredients 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-slate-900">Ingredients</h2>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Ingredients</h2>
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Users className="h-4 w-4" />
           <ServingsAdjuster servings={currentServings} onChange={setCurrentServings} />

@@ -101,7 +101,7 @@ function renderStars(rating: number) {
     } else if (i === full && hasHalf) {
       stars.push(
         <span key={i} className="relative inline-block h-4 w-4">
-          <Star className="absolute h-4 w-4 text-slate-200" />
+          <Star className="absolute h-4 w-4 text-slate-200 dark:text-slate-700" />
           <span className="absolute inset-0 overflow-hidden" style={{ width: "50%" }}>
             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
           </span>
@@ -109,7 +109,7 @@ function renderStars(rating: number) {
       );
     } else {
       stars.push(
-        <Star key={i} className="h-4 w-4 text-slate-200" />
+        <Star key={i} className="h-4 w-4 text-slate-200 dark:text-slate-700" />
       );
     }
   }
@@ -144,7 +144,7 @@ function renderIntroContent(content: string) {
       elements.push(
         <h2
           key={i}
-          className="mb-3 mt-6 text-xl font-bold text-slate-900"
+          className="mb-3 mt-6 text-xl font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100"
         >
           {parts[i]}
         </h2>
@@ -156,7 +156,7 @@ function renderIntroContent(content: string) {
           elements.push(
             <p
               key={`${i}-${j}`}
-              className="mb-4 text-base leading-relaxed text-slate-700"
+              className="mb-4 text-base leading-relaxed text-slate-700 dark:text-slate-300"
             >
               {renderInlineLinks(p.trim())}
             </p>
@@ -299,9 +299,9 @@ export default async function RecipePage({ params }: Props) {
         {/* Breadcrumb */}
         <nav
           aria-label="Breadcrumb"
-          className="mb-6 text-sm text-slate-400"
+          className="mb-6 text-sm text-slate-400 dark:text-slate-500"
         >
-          <Link href="/" className="hover:text-slate-600">
+          <Link href="/" className="hover:text-slate-600 dark:hover:text-slate-300">
             Home
           </Link>
           {middleCrumb && (
@@ -309,30 +309,30 @@ export default async function RecipePage({ params }: Props) {
               <ChevronRight className="mx-1 inline-block h-3 w-3 shrink-0" />
               <Link
                 href={`/category/${slugifyCategory(middleCrumb)}`}
-                className="hover:text-slate-600"
+                className="hover:text-slate-600 dark:hover:text-slate-300"
               >
                 {middleCrumb}
               </Link>
             </>
           )}
           <ChevronRight className="mx-1 inline-block h-3 w-3 shrink-0" />
-          <span className="text-slate-600" aria-current="page">{recipe.title}</span>
+          <span className="text-slate-600 dark:text-slate-400" aria-current="page">{recipe.title}</span>
         </nav>
 
         {/* H1 Title */}
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
           {recipe.title}
         </h1>
 
         {/* Meta bar: rating, times, author, date */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500">
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
           <span
             className="flex items-center gap-1"
             role="img"
             aria-label={`Rating: ${rating} out of 5 stars (${ratingCount} reviews)`}
           >
             {renderStars(rating)}
-            <span className="ml-1 font-medium text-slate-700" aria-hidden="true">
+            <span className="ml-1 font-medium text-slate-700 dark:text-slate-300" aria-hidden="true">
               {rating}
             </span>
             <span className="text-slate-400" aria-hidden="true">
@@ -399,15 +399,15 @@ export default async function RecipePage({ params }: Props) {
         )}
 
         {/* Hero description */}
-        <div className="mt-8 rounded-xl border border-amber-100 bg-amber-50/50 p-6">
-          <p className="text-base leading-relaxed text-slate-700">
+        <div className="mt-8 rounded-xl border border-amber-100 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/20 p-6">
+          <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300">
             {recipe.description}
           </p>
         </div>
 
         {/* Ad slot: below description */}
         {siteConfig.adsenseId && (
-          <div className="my-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400" data-print-hide>
+          <div className="my-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-xs text-slate-400" data-print-hide>
             Ad Space
           </div>
         )}
@@ -422,7 +422,7 @@ export default async function RecipePage({ params }: Props) {
         {/* ====== RECIPE CARD (anchor for Jump to Recipe) ====== */}
         <div
           id="recipe-card"
-          className="mt-12 scroll-mt-20 overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm"
+          className="mt-12 scroll-mt-20 overflow-hidden rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm"
         >
           {/* Recipe card header */}
           <div
@@ -444,7 +444,7 @@ export default async function RecipePage({ params }: Props) {
           </div>
 
           {/* Time/servings row */}
-          <div className="grid grid-cols-4 divide-x divide-slate-100 border-b border-slate-100">
+          <div className="grid grid-cols-4 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
             {[
               { label: "Prep", value: recipe.prep_time, icon: Clock },
               { label: "Cook", value: recipe.cook_time, icon: Flame },
@@ -467,7 +467,7 @@ export default async function RecipePage({ params }: Props) {
                 <span className="text-xs font-medium text-slate-500">
                   {item.label}
                 </span>
-                <span className="mt-0.5 text-sm font-semibold text-slate-900">
+                <span className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {item.value}
                 </span>
               </div>
@@ -512,14 +512,14 @@ export default async function RecipePage({ params }: Props) {
 
           {/* Ad slot */}
           {siteConfig.adsenseId && (
-            <div className="mx-6 mb-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400" data-print-hide>
+            <div className="mx-6 mb-6 min-h-[90px] rounded-lg border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-xs text-slate-400" data-print-hide>
               Ad Space
             </div>
           )}
 
           {/* Instructions */}
-          <div className="border-t border-slate-100 px-6 py-6">
-            <h2 className="mb-4 text-lg font-bold text-slate-900">
+          <div className="border-t border-slate-100 dark:border-slate-800 px-6 py-6">
+            <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
               Instructions
             </h2>
             <ol className="space-y-5">
@@ -531,7 +531,7 @@ export default async function RecipePage({ params }: Props) {
                   >
                     {i + 1}
                   </div>
-                  <p className="pt-1 text-sm leading-relaxed text-slate-700">
+                  <p className="pt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                     {step}
                   </p>
                 </li>
@@ -540,8 +540,8 @@ export default async function RecipePage({ params }: Props) {
           </div>
 
           {/* Nutrition */}
-          <div className="border-t border-slate-100 px-6 py-6">
-            <h2 className="mb-1 text-lg font-bold text-slate-900">
+          <div className="border-t border-slate-100 dark:border-slate-800 px-6 py-6">
+            <h2 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
               Nutrition Facts
             </h2>
             <p className="mb-4 text-xs text-slate-400">
@@ -558,9 +558,9 @@ export default async function RecipePage({ params }: Props) {
               ].map((n) => (
                 <div
                   key={n.label}
-                  className="rounded-lg border border-slate-100 p-3 text-center"
+                  className="rounded-lg border border-slate-100 dark:border-slate-800 p-3 text-center"
                 >
-                  <p className="text-lg font-bold text-slate-900">
+                  <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
                     {n.value}
                   </p>
                   <p className="text-xs text-slate-400">{n.label}</p>
@@ -576,7 +576,7 @@ export default async function RecipePage({ params }: Props) {
           <section className="mt-10">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="h-5 w-5 text-amber-500" />
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Pro Tips
               </h2>
             </div>
@@ -584,7 +584,7 @@ export default async function RecipePage({ params }: Props) {
               {recipe.tips.map((tip, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 rounded-lg border border-amber-100 bg-amber-50/40 p-4"
+                  className="flex gap-3 rounded-lg border border-amber-100 dark:border-amber-900/30 bg-amber-50/40 dark:bg-amber-950/20 p-4"
                 >
                   <span
                     className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
@@ -592,7 +592,7 @@ export default async function RecipePage({ params }: Props) {
                   >
                     {i + 1}
                   </span>
-                  <p className="text-sm leading-relaxed text-slate-700">
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                     {tip}
                   </p>
                 </div>
@@ -606,7 +606,7 @@ export default async function RecipePage({ params }: Props) {
           <section className="mt-10" data-print-hide>
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="h-5 w-5 text-violet-500" />
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Recipe Variations
               </h2>
             </div>
@@ -614,10 +614,10 @@ export default async function RecipePage({ params }: Props) {
               {recipe.variations.map((v, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 rounded-lg border border-violet-100 bg-violet-50/30 p-4"
+                  className="flex items-start gap-3 rounded-lg border border-violet-100 dark:border-violet-900/30 bg-violet-50/30 dark:bg-violet-950/20 p-4"
                 >
                   <span className="mt-0.5 text-violet-400">•</span>
-                  <p className="text-sm leading-relaxed text-slate-700">
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                     {v}
                   </p>
                 </li>
@@ -628,7 +628,7 @@ export default async function RecipePage({ params }: Props) {
 
         {/* Ad slot */}
         {siteConfig.adsenseId && (
-          <div className="my-8 min-h-[250px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400" data-print-hide>
+          <div className="my-8 min-h-[250px] rounded-lg border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-xs text-slate-400" data-print-hide>
             Ad Space
           </div>
         )}
@@ -638,25 +638,25 @@ export default async function RecipePage({ params }: Props) {
           <section className="mt-10" data-print-hide>
             <div className="flex items-center gap-2 mb-4">
               <HelpCircle className="h-5 w-5 text-blue-500" />
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Frequently Asked Questions
               </h2>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
               {recipe.faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-white"
+                  className="group bg-white dark:bg-slate-900"
                   open={i === 0}
                 >
-                  <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 [&::-webkit-details-marker]:hidden">
                     <span>{faq.question}</span>
                     <span className="ml-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180">
                       ▾
                     </span>
                   </summary>
                   <div className="px-5 pb-4">
-                    <p className="text-sm leading-relaxed text-slate-600">
+                    <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                       {faq.answer}
                     </p>
                   </div>
@@ -671,7 +671,7 @@ export default async function RecipePage({ params }: Props) {
           {recipe.focus_keywords?.map((kw) => (
             <span
               key={kw}
-              className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500"
+              className="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs text-slate-500 dark:text-slate-400"
             >
               {kw}
             </span>
@@ -685,11 +685,9 @@ export default async function RecipePage({ params }: Props) {
 
       {/* Related Recipes */}
       {related.length > 0 && (
-        <section className="border-t border-slate-100 bg-slate-50" data-print-hide>
+        <section className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900" data-print-hide>
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-            <h2 className="mb-6 text-xl font-bold text-slate-900">
-              You Might Also Like
-            </h2>
+            <h2 className="mb-6 text-xl font-bold text-slate-900 dark:text-slate-100">You Might Also Like</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((r) => (
                 <RecipeCard key={r.id} recipe={r} />

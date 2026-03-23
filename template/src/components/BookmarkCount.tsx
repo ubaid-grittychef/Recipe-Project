@@ -22,7 +22,7 @@ export default function BookmarkCount() {
   return (
     <Link
       href="/favorites"
-      className="relative rounded-full p-2.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 flex items-center justify-center"
+      className="relative rounded-full p-2.5 text-slate-500 dark:text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center"
       aria-label={`Saved recipes${count > 0 ? ` (${count})` : ""}`}
     >
       <Heart className="h-[18px] w-[18px]" />

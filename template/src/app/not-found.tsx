@@ -26,10 +26,10 @@ export default async function NotFound() {
         <ChefHat className="h-10 w-10" />
       </div>
 
-      <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 sm:text-4xl">
         Recipe not found
       </h1>
-      <p className="mt-3 text-base text-slate-600">
+      <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
         This recipe seems to have wandered off the menu. It may have been
         moved, renamed, or removed.
       </p>
@@ -46,14 +46,14 @@ export default async function NotFound() {
         </Link>
         <Link
           href="/recipes"
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
         >
           <BookOpen className="h-4 w-4" />
           All Recipes
         </Link>
         <Link
           href="/search"
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
         >
           <Search className="h-4 w-4" />
           Search
@@ -66,15 +66,15 @@ export default async function NotFound() {
           <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
             You might like
           </h2>
-          <div className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white text-left">
+          <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-left">
             {recentRecipes.map((r) => (
               <Link
                 key={r.slug}
                 href={`/recipe/${r.slug}`}
-                className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-slate-50"
+                className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{r.title}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{r.title}</p>
                   {r.category && (
                     <p className="mt-0.5 text-xs text-slate-400">{r.category}</p>
                   )}

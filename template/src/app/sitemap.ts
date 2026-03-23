@@ -3,6 +3,7 @@ import { getRecipeSlugsWithDates, getCategories, getAllRecipes } from "@/lib/dat
 import { siteConfig } from "@/lib/config";
 import { COLLECTIONS } from "@/lib/collections";
 import { getCuisines, getMealTypes } from "@/lib/taxonomies";
+import { getAllPosts } from "@/lib/blog-data";
 
 // Revalidate every hour so the sitemap reflects newly published recipes promptly
 export const revalidate = 300;
@@ -87,6 +88,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
   ];
 
   const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
@@ -117,8 +124,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const blogPosts = getAllPosts();
+  const blogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.published_at),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
   // Cap recipe pages to stay within the Google 50k sitemap URL limit
-  const usedSlots = staticPages.length + categoryPages.length + collectionPages.length + cuisinePages.length + mealPages.length;
+  const usedSlots = staticPages.length + categoryPages.length + collectionPages.length + cuisinePages.length + mealPages.length + blogPages.length;
   const recipeSlice = recipes.slice(0, Math.max(0, SITEMAP_MAX_URLS - usedSlots));
 
   const recipePages: MetadataRoute.Sitemap = recipeSlice.map((r) => ({
@@ -128,5 +143,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [...staticPages, ...categoryPages, ...collectionPages, ...cuisinePages, ...mealPages, ...recipePages];
+  return [...staticPages, ...categoryPages, ...collectionPages, ...cuisinePages, ...mealPages, ...blogPages, ...recipePages];
 }

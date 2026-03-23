@@ -24,19 +24,19 @@ export default async function MealsPage() {
   }));
 
   return (
-    <div className="bg-[#fffdf7]">
+    <div className="bg-[#fffdf7] dark:bg-slate-950">
 
       {/* Page header */}
-      <div className="border-b-2 border-slate-900 bg-[#fffdf7]">
+      <div className="border-b-2 border-slate-900 dark:border-slate-700 bg-[#fffdf7] dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="flex items-center gap-4 mb-6">
-            <div className="h-px flex-1 bg-slate-900" />
+            <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Explore</span>
-            <div className="h-px flex-1 bg-slate-900" />
+            <div className="h-px flex-1 bg-slate-900 dark:bg-slate-700" />
           </div>
           <div className="text-center">
             <h1
-              className="text-4xl font-black text-slate-900 sm:text-6xl"
+              className="text-4xl font-black text-slate-900 dark:text-slate-100 sm:text-6xl"
               style={{ fontFamily: "var(--font-heading), 'Georgia', serif", letterSpacing: "-0.03em" }}
             >
               Meal Types
@@ -58,18 +58,18 @@ export default async function MealsPage() {
               <Link
                 key={meal.slug}
                 href={`/meal/${meal.slug}`}
-                className="group flex flex-col items-center rounded-xl border border-[#ede8e0] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl text-center"
+                className="group flex flex-col items-center rounded-xl border border-[#ede8e0] dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl text-center"
               >
                 <span className="text-4xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
                   {meal.emoji}
                 </span>
                 <h2
-                  className="mt-3 text-[14px] font-bold leading-snug text-slate-900 group-hover:text-orange-600 transition-colors"
+                  className="mt-3 text-[14px] font-bold leading-snug text-slate-900 dark:text-slate-100 group-hover:text-orange-600 transition-colors"
                   style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
                 >
                   {meal.name}
                 </h2>
-                <span className="mt-2 rounded-full bg-orange-50 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600">
+                <span className="mt-2 rounded-full bg-orange-50 dark:bg-orange-950/30 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600">
                   {meal.count} {meal.count === 1 ? "recipe" : "recipes"}
                 </span>
               </Link>
@@ -81,7 +81,7 @@ export default async function MealsPage() {
               <ChefHat className="h-9 w-9 text-[#c9bfb0]" />
             </div>
             <h2
-              className="text-2xl font-black text-slate-900"
+              className="text-2xl font-black text-slate-900 dark:text-slate-100"
               style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
             >
               No meal types yet

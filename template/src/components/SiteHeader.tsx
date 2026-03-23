@@ -6,11 +6,13 @@ import Link from "next/link";
 import { siteConfig } from "@/lib/config";
 import { ChefHat, Menu, X, Search } from "lucide-react";
 import BookmarkCount from "@/components/BookmarkCount";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/recipes", label: "Recipes" },
   { href: "/categories", label: "Categories" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
 ];
 
@@ -49,7 +51,7 @@ export default function SiteHeader() {
   }
 
   return (
-    <header className={`sticky top-0 z-50 bg-[#fffdf7] transition-all duration-200 ${scrolled ? "shadow-[0_1px_0_0_#e5e0d8,0_2px_8px_0_rgba(0,0,0,0.06)]" : "border-b border-[#e5e0d8]"}`}>
+    <header className={`sticky top-0 z-50 bg-[#fffdf7] dark:bg-slate-900 transition-all duration-200 ${scrolled ? "shadow-[0_1px_0_0_#e5e0d8,0_2px_8px_0_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_#1e293b,0_2px_8px_0_rgba(0,0,0,0.3)]" : "border-b border-[#e5e0d8] dark:border-slate-800"}`}>
       {/* Top accent bar */}
       <div className="h-[3px] w-full" style={{ backgroundColor: siteConfig.primaryColor }} />
 
@@ -63,7 +65,7 @@ export default function SiteHeader() {
             <ChefHat className="h-4.5 w-4.5 h-[18px] w-[18px]" />
           </div>
           <span
-            className="text-[17px] font-black text-slate-900 tracking-tight leading-none"
+            className="text-[17px] font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none"
             style={{ fontFamily: "var(--font-heading), 'Georgia', serif" }}
           >
             {siteConfig.name}
@@ -80,7 +82,7 @@ export default function SiteHeader() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={`relative px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors ${
-                  active ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
+                  active ? "text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 {link.label}
@@ -97,13 +99,14 @@ export default function SiteHeader() {
 
         {/* Right actions */}
         <div className="flex items-center gap-1">
-          <div className="hidden sm:flex">
+          <div className="hidden sm:flex items-center gap-1">
+            <ThemeToggle />
             <BookmarkCount />
           </div>
           {searchOpen ? (
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden items-center gap-0 overflow-hidden rounded-full border border-[#e5e0d8] bg-white ring-2 ring-orange-100 sm:flex"
+              className="hidden items-center gap-0 overflow-hidden rounded-full border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 ring-2 ring-orange-100 dark:ring-orange-900/30 sm:flex"
             >
               <Search className="ml-3.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
               <input
@@ -111,12 +114,12 @@ export default function SiteHeader() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search recipes…"
-                className="w-44 bg-transparent px-2.5 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                className="w-44 bg-transparent px-2.5 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-400"
               />
               <button
                 type="button"
                 onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                className="mr-2 rounded-full p-1 text-slate-400 hover:text-slate-600"
+                className="mr-2 rounded-full p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -124,20 +127,20 @@ export default function SiteHeader() {
           ) : (
             <button
               onClick={openSearch}
-              className="hidden rounded-full p-2.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 sm:flex items-center justify-center"
+              className="hidden rounded-full p-2.5 text-slate-500 dark:text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 sm:flex items-center justify-center"
               aria-label="Search recipes"
             >
               <Search className="h-[18px] w-[18px]" />
             </button>
           )}
 
-          <Link href="/search" className="rounded-full p-2.5 text-slate-500 hover:bg-slate-100 sm:hidden">
+          <Link href="/search" className="rounded-full p-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 sm:hidden">
             <Search className="h-[18px] w-[18px]" />
           </Link>
 
           <button
             onClick={() => setOpen(!open)}
-            className="rounded-lg p-2.5 text-slate-500 hover:bg-slate-100 sm:hidden"
+            className="rounded-lg p-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 sm:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -147,7 +150,7 @@ export default function SiteHeader() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="border-t border-[#e5e0d8] bg-[#fffdf7] px-4 pb-4 pt-2 sm:hidden">
+        <div className="border-t border-[#e5e0d8] dark:border-slate-800 bg-[#fffdf7] dark:bg-slate-900 px-4 pb-4 pt-2 sm:hidden">
           <nav className="space-y-0.5">
             {navLinks.map((link) => {
               const active = isActive(link.href);
@@ -159,8 +162,8 @@ export default function SiteHeader() {
                   aria-current={active ? "page" : undefined}
                   className={`flex items-center rounded-lg px-4 py-2.5 text-sm font-semibold uppercase tracking-wide transition-colors ${
                     active
-                      ? "bg-orange-50 text-orange-700"
-                      : "text-slate-700 hover:bg-slate-50"
+                      ? "bg-orange-50 dark:bg-orange-950/30 text-orange-700"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                   }`}
                 >
                   {link.label}
@@ -168,16 +171,20 @@ export default function SiteHeader() {
               );
             })}
           </nav>
+          <div className="mt-3 flex items-center justify-between px-4">
+            <span className="text-sm text-slate-500 dark:text-slate-400">Theme</span>
+            <ThemeToggle />
+          </div>
           <form
             onSubmit={handleSearchSubmit}
-            className="mt-3 flex items-center gap-2 rounded-xl border border-[#e5e0d8] bg-white px-4 py-2.5"
+            className="mt-3 flex items-center gap-2 rounded-xl border border-[#e5e0d8] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5"
           >
             <Search className="h-4 w-4 shrink-0 text-slate-400" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search recipes…"
-              className="flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+              className="flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-400"
             />
           </form>
         </div>
