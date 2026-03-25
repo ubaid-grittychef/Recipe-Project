@@ -40,6 +40,17 @@ export async function POST(
     if (!auth.ok) return auth.response;
     const { project } = auth;
 
+    // Guard: site Supabase must be configured for recipes to reach the live site
+    if (!project.site_supabase_url || !project.site_supabase_service_key) {
+      return NextResponse.json(
+        {
+          error: "Site database not configured",
+          message: "Set your site Supabase URL and service key in Project Settings → Deployment & Database before publishing.",
+        },
+        { status: 400 }
+      );
+    }
+
     const all = await getRecipesByProject(projectId);
     // If specific IDs were provided, only publish those that are still drafts
     let drafts = recipeIds

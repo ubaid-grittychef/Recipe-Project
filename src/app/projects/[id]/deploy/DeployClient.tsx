@@ -154,8 +154,14 @@ export default function DeployClient({ id, initialProject, initialDeployments, h
       await api.post(`/api/projects/${id}/deploy`);
       toast.success("Deployment started — uploading files to Vercel...");
       startPolling();
-    } catch {
-      toast.error("Deployment failed — check server logs");
+    } catch (err: unknown) {
+      const body = (err as { body?: { error?: string; issues?: string[] } }).body;
+      if (body?.issues?.length) {
+        // Show each pre-flight issue as a separate toast
+        body.issues.forEach((issue: string) => toast.error(issue, { duration: 8000 }));
+      } else {
+        toast.error(body?.error || "Deployment failed — check server logs", { duration: 6000 });
+      }
     }
   }
 

@@ -117,8 +117,11 @@ export default function ProjectDashboard({ id, project: initialProject, initialD
       const refreshed = await api.get<Project>(`/api/projects/${id}`);
       setProject(refreshed);
       setDraftCount(refreshed.draft_count ?? 0);
-    } catch {
-      toast.error("Publish failed — check server logs");
+    } catch (err: unknown) {
+      // Surface the specific error from the API response body
+      const body = (err as { body?: { error?: string; message?: string } }).body;
+      const msg = body?.message || body?.error || "Publish failed — check server logs";
+      toast.error(msg, { duration: 6000 });
     } finally {
       setPublishing(false);
     }

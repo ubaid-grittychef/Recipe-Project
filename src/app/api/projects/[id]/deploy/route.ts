@@ -14,6 +14,26 @@ export async function POST(
   if (!auth.ok) return auth.response;
   const { project } = auth;
 
+  // Pre-flight checks
+  const errors: string[] = [];
+
+  if (!process.env.VERCEL_TOKEN) {
+    errors.push("VERCEL_TOKEN is not set in environment variables.");
+  }
+  if (!project.site_supabase_url || !project.site_supabase_service_key) {
+    errors.push("Site database credentials are not configured. Go to Settings → Deployment & Database.");
+  }
+  if (!project.site_supabase_anon_key) {
+    errors.push("Site Supabase anon key is missing. The deployed site won't be able to read recipes.");
+  }
+
+  if (errors.length > 0) {
+    return NextResponse.json(
+      { error: "Pre-flight check failed", issues: errors },
+      { status: 400 }
+    );
+  }
+
   log.info("Deploy requested (async)", { project: project.name, id });
 
   // Fire-and-forget — file uploads + Vercel API calls can exceed 60 s.
