@@ -50,15 +50,15 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: siteConfig.name,
     description: siteConfig.description,
-    ...(siteConfig.ogImage && {
-      images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }],
-    }),
+    images: siteConfig.ogImage
+      ? [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }]
+      : [{ url: "/og", width: 1200, height: 630, alt: siteConfig.name }],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    ...(siteConfig.ogImage && { images: [siteConfig.ogImage] }),
+    images: siteConfig.ogImage ? [siteConfig.ogImage] : ["/og"],
   },
   robots: {
     index: true,
@@ -115,9 +115,15 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:rounded-lg focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none"
+        >
+          Skip to content
+        </a>
         <ThemeProvider>
         <SiteHeader />
-        <main className="min-h-screen">{children}</main>
+        <main id="main-content" role="main" className="min-h-screen">{children}</main>
         <SiteFooter />
         <BackToTop />
 
